@@ -1,0 +1,128 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+ ---
+description: Guidelines for working with reusable components
+globs: ["src/**/*.tsx", "src/**/*.jsx"]
+alwaysApply: true
+---
+
+# Component Usage Rules and Guidelines
+
+## Core Principles
+1. Components are immutable contracts
+2. State management should be local to usage
+3. Components should be treated as black boxes
+
+## Component Modification Rules
+- ✅ DO modify components only when working directly in their source files
+- ❌ DO NOT modify component internals from consuming files
+- ❌ DO NOT copy and paste component code to make local modifications
+
+## State Management
+1. Shared Components:
+   - Should expose clear state interfaces
+   - Should have well-defined default behaviors
+   - Should be predictable and consistent
+
+2. Component Usage:
+   - Manage state changes in the consuming component
+   - Use component's exposed props/methods to trigger state changes
+   - Create local state to control component behavior
+   - Example:
+     ```typescript
+     // ❌ Don't do this:
+     <AnimatedNumber value={1000} /* modifying internal animation *//>
+     
+     // ✅ Do this:
+     const [numberValue, setNumberValue] = useState(0);
+     useEffect(() => {
+       setNumberValue(1000); // control animation externally
+     }, []);
+     <AnimatedNumber value={numberValue} />
+     ```
+
+## Component Integration
+1. Wrapper Pattern:
+   - Create wrapper components for custom behavior
+   - Keep shared components pure and unchanged
+   - Handle complex state management in wrappers
+
+2. Props Usage:
+   - Use provided props as the API contract
+   - Don't assume or depend on internal implementation
+   - Document any required prop combinations
+
+## Best Practices
+1. Component Documentation:
+   - Read the component's documentation first
+   - Understand available props and their effects
+   - Know the component's intended use cases
+
+2. Testing:
+   - Test your usage of the component
+   - Don't test the component's internal behavior
+   - Focus on integration testing
+
+3. Performance:
+   - Respect the component's update cycle
+   - Don't force unnecessary re-renders
+   - Use memoization when needed
+
+## Common Patterns
+1. State Triggers:
+   ```typescript
+   // Control component state externally
+   const [isActive, setIsActive] = useState(false);
+   <SharedComponent active={isActive} />
+   ```
+
+2. Animation Control:
+   ```typescript
+   // Manage animation timing locally
+   const [animationValue, setAnimationValue] = useState(initialValue);
+   useEffect(() => {
+     // Control when animation happens
+     setAnimationValue(targetValue);
+   }, [triggerCondition]);
+   ```
+
+3. Event Handling:
+   ```typescript
+   // Handle component events locally
+   const handleComponentEvent = (event) => {
+     // Local state management
+   };
+   <SharedComponent onEvent={handleComponentEvent} />
+   ```
+
+## Examples of Good Component Usage
+1. Animation Components:
+   ```typescript
+   // Control animation externally
+   const [value, setValue] = useState(0);
+   useEffect(() => {
+     if (shouldAnimate) {
+       setValue(1000);
+     }
+   }, [shouldAnimate]);
+   <AnimatedNumber value={value} />
+   ```
+
+2. Interactive Components:
+   ```typescript
+   // Manage interaction state locally
+   const [isExpanded, setIsExpanded] = useState(false);
+   <ExpandableComponent 
+     expanded={isExpanded}
+     onToggle={() => setIsExpanded(!isExpanded)}
+   />
+   ```
+
+## Remember
+- Components are building blocks, not templates
+- Respect the component's API contract
+- Keep modifications isolated to component source files
+- Use composition over modification 

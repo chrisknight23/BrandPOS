@@ -4,21 +4,9 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000
+    port: 3001  // Different port to avoid conflicts
   },
-  resolve: {
-    alias: {
-      '@components': '/src/components'
-    }
-  },
-  build: {
-    rollupOptions: {
-      input: {
-        main: './index.html',
-        experiments: './src/experiments/index.html',
-      },
-    },
-  },
+  root: './src/experiments',  // Set experiments as the root
   optimizeDeps: {
     include: ['three', '@react-three/fiber', '@react-three/drei'],
   },

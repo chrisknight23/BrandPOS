@@ -2,13 +2,14 @@ import { ReactNode } from 'react';
 
 interface ScreenContainerProps {
   children: ReactNode;
-  className?: string;
 }
 
-export const ScreenContainer = ({ children, className = '' }: ScreenContainerProps) => {
+export const ScreenContainer = ({ children }: ScreenContainerProps) => {
   return (
-    <div className={`relative w-full h-screen overflow-hidden bg-white ${className}`}>
-      {children}
+    <div className="w-screen h-screen bg-black overflow-hidden flex items-center justify-center">
+      <div className="relative w-[800px] h-[500px]">
+        {children}
+      </div>
     </div>
   );
 }; 

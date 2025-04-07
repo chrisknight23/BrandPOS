@@ -1,10 +1,12 @@
+/**
+ * Available screen names in the application
+ */
 export type Screen = 
   | 'Home'
   | 'Cart'
   | 'TapToPay'
   | 'Tipping'
-  | 'CashbackCard'
-  | 'QRMoment'
+  | 'Cashback'
   | 'End';
 
 export interface ScreenProps {

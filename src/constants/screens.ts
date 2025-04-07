@@ -5,6 +5,6 @@ export const SCREEN_ORDER: Screen[] = [
   'Cart',
   'TapToPay',
   'Tipping',
-  'CashbackCard',
-  'End',
+  'Cashback',
+  'End'
 ]; 

@@ -1,1 +1,76 @@
- 
+---
+description: 
+globs: 
+alwaysApply: true
+---
+ ---
+description: 
+globs: 
+alwaysApply: true
+---
+ ---
+description: 
+globs: 
+alwaysApply: false
+---
+
+# Animation Rules and Guidelines
+
+## Timing Constants
+- Standard fade duration: 0.3s
+- Screen transition duration: 0.2s
+- Spring animation config: { stiffness: 300, damping: 30 }
+- Delayed animations start: 0.2s after parent mount
+
+## Layout Transitions
+- Use Framer Motion's `layoutId` for continuous element transitions between screens
+- Maintain aspect ratios and dimensions during transitions
+- Device frame dimensions: 800px x 500px (never animate these)
+
+## Opacity Transitions
+- Enter animations: fade from 0 to 1
+- Exit animations: fade from 1 to 0
+- Background overlays: fade to full opacity (1)
+- Content transitions: 0.3s duration with easing
+
+## Motion Patterns
+- Card expansions: spring animation with { stiffness: 200, damping: 25 }
+- Button interactions: scale to 0.90 on tap
+- Sliding animations: spring with { stiffness: 300, damping: 30 }
+
+## Timing Sequences
+- Lottie animations: respect their natural duration (e.g., 2.47s for CashBack)
+- Coordinated animations: ensure all elements complete together
+- Stagger children animations by 0.1s when in sequence
+
+## Best Practices
+1. Always use `AnimatePresence` for exit animations
+2. Coordinate related animations using consistent delay timings
+3. Use spring animations for natural movement
+4. Avoid nested animation containers that could conflict
+5. Match animation timing to user interaction speed
+6. Use consistent easing: [0.32, 0.72, 0, 1] for standard transitions
+
+## Device Frame Rules
+- Maintain 800x500 dimensions
+- Keep rounded corners (rounded-2xl)
+- Overlays should match frame dimensions
+- Content should never overflow frame
+
+## Performance
+- Use `will-change` sparingly and only for complex animations
+- Prefer opacity/transform animations over layout properties
+- Group related animations to reduce reflows
+- Use `mode="wait"` on AnimatePresence when animations could conflict
+
+## Specific Components
+### ExpandingCard
+- Initial state: centered in container
+- Expanded state: fills device frame (800x500)
+- Content transitions: coordinated with card expansion
+- Background color transition: 0.3s duration
+
+### Screen Transitions
+- Default: slide horizontally with spring animation
+- Instant transitions: no animation for specific flows (Cart → TapToPay)
+- Maintain content position during transitions 

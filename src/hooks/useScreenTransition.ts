@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import { Screen } from '../types/screen';
 
-export const useScreenTransition = (screenOrder: Screen[]) => {
-  const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
+export const useScreenTransition = (screenOrder: Screen[], initialScreen?: Screen) => {
+  const [currentScreenIndex, setCurrentScreenIndex] = useState(() => {
+    if (initialScreen) {
+      const index = screenOrder.indexOf(initialScreen);
+      return index >= 0 ? index : 0;
+    }
+    return 0;
+  });
 
   const handleNext = () => {
     if (currentScreenIndex < screenOrder.length - 1) {

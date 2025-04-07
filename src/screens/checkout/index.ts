@@ -2,7 +2,7 @@ import { Home } from './Home';
 import { Cart } from './Cart';
 import { TapToPay } from './TapToPay';
 import { Tipping } from './Tipping';
-import { CashbackCard } from './CashbackCard';
+import { Cashback } from './Cashback';
 import { End } from './End';
 
 export {
@@ -10,6 +10,6 @@ export {
   Cart,
   TapToPay,
   Tipping,
-  CashbackCard,
+  Cashback,
   End,
 }; 

@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion';
-
 interface DevNavProps {
   onBack: () => void;
   onRefresh: () => void;
@@ -8,33 +6,25 @@ interface DevNavProps {
 
 export const DevNav = ({ onBack, onRefresh, onNext }: DevNavProps) => {
   return (
-    <motion.div 
-      className="fixed top-4 left-4 z-50 flex gap-2"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.5 }}
-    >
+    <div className="fixed top-4 left-4 flex gap-2 z-50">
       <button
+        className="px-4 py-2 rounded-full text-white bg-white/10 hover:bg-white/15 transition-colors"
         onClick={onBack}
-        className="w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-md flex items-center justify-center backdrop-blur-sm transition-colors"
-        aria-label="Go back"
       >
-        ←
+        Back
       </button>
       <button
+        className="px-4 py-2 rounded-full text-white bg-white/10 hover:bg-white/15 transition-colors"
         onClick={onRefresh}
-        className="w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-md flex items-center justify-center backdrop-blur-sm transition-colors"
-        aria-label="Refresh screen"
       >
-        ↻
+        Refresh
       </button>
       <button
+        className="px-4 py-2 rounded-full text-white bg-white/10 hover:bg-white/15 transition-colors"
         onClick={onNext}
-        className="w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-md flex items-center justify-center backdrop-blur-sm transition-colors"
-        aria-label="Go to next screen"
       >
-        →
+        Next
       </button>
-    </motion.div>
+    </div>
   );
 }; 

@@ -1,0 +1,25 @@
+import React, { ReactNode } from 'react';
+
+interface BaseScreenProps {
+  children: ReactNode;
+  onBack?: () => void;
+  onNext?: () => void;
+  title?: string;
+  hideBackButton?: boolean;
+  hideNextButton?: boolean;
+}
+
+export const BaseScreen: React.FC<BaseScreenProps> = ({
+  children,
+  onBack,
+  onNext,
+  title,
+  hideBackButton = false,
+  hideNextButton = false,
+}) => {
+  return (
+    <div className="h-full w-full">
+      {children}
+    </div>
+  );
+}; 
