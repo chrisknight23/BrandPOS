@@ -11,11 +11,12 @@ interface CardFaceProps {
   isExpanded: boolean;
   backgroundColor: string;
   isFlipped?: boolean;
+  animationState: CardState;
 }
 
 // ============= Constants =============
 const CARD_SCALES = {
-  EXPANDED: 2,
+  EXPANDED: 1.8,
   NORMAL: 1,
   COMPACT: 0.8
 } as const;
@@ -36,7 +37,8 @@ const CardFace: React.FC<CardFaceProps> = ({
   children, 
   isExpanded, 
   backgroundColor,
-  isFlipped 
+  isFlipped,
+  animationState
 }) => (
   <motion.div
     className={`w-full h-full ${backgroundColor} rounded-2xl absolute backface-hidden`}
@@ -72,9 +74,11 @@ const CardFace: React.FC<CardFaceProps> = ({
 // ============= Main Component =============
 export const PhysicsCard = () => {
   const controls = useAnimation();
+  const lottieControls = useAnimation(); // Separate controls for the Lottie animation
   const [animationState, setAnimationState] = useState<CardState>('initial');
   const [isFlipped, setIsFlipped] = useState(false);
   const lottieContainer = useRef<HTMLDivElement>(null);
+  const lottieAnimRef = useRef<any>(null);
 
   // Initialize Lottie
   useEffect(() => {
@@ -94,6 +98,8 @@ export const PhysicsCard = () => {
         }
       });
 
+      lottieAnimRef.current = anim;
+
       // Start animation after a delay
       setTimeout(() => {
         anim.play();
@@ -107,48 +113,69 @@ export const PhysicsCard = () => {
     };
   }, []);
 
+  // Calculate the counter-scale for the Lottie animation based on card state
+  const getLottieScale = (state: CardState) => {
+    switch (state) {
+      case 'expanded':
+        return 1 / CARD_SCALES.EXPANDED; // Counter-scale to maintain normal size
+      case 'dropped':
+        return 1; // No counter-scale, let it scale down with card
+      default:
+        return 1; // Normal state, no scaling needed
+    }
+  };
+
+  // Get the button text based on the current state and what the next state will be
+  const getButtonText = () => {
+    switch (animationState) {
+      case 'expanded':
+        return 'Normal'; // When expanded, clicking will return to normal size
+      case 'initial':
+        return 'Compact'; // When at normal size, clicking will make it compact
+      case 'dropped':
+        return 'Expand'; // When compact, clicking will expand it
+      default:
+        return 'Toggle';
+    }
+  };
+
   useEffect(() => {
+    // Animate card scale
     switch (animationState) {
       case 'dropped':
         controls.start({
           scale: CARD_SCALES.COMPACT,
-          transition: {
-            type: "spring",
-            stiffness: 130,
-            damping: 13,
-            mass: 0.6,
-            restSpeed: 0.001,
-            restDelta: 0.001
-          }
+          transition: ANIMATION_CONFIG.spring
+        });
+        // No counter-scale needed for Lottie in compact state
+        lottieControls.start({
+          scale: 1,
+          transition: ANIMATION_CONFIG.spring
         });
         break;
       case 'expanded':
         controls.start({
           scale: CARD_SCALES.EXPANDED,
-          transition: {
-            type: "spring",
-            stiffness: 130,
-            damping: 13,
-            mass: 0.6,
-            restSpeed: 0.001,
-            restDelta: 0.001
-          }
+          transition: ANIMATION_CONFIG.spring
+        });
+        // Counter-scale Lottie to maintain its normal size
+        lottieControls.start({
+          scale: 1 / CARD_SCALES.EXPANDED,
+          transition: ANIMATION_CONFIG.spring
         });
         break;
       default:
         controls.start({
           scale: CARD_SCALES.NORMAL,
-          transition: {
-            type: "spring",
-            stiffness: 130,
-            damping: 13,
-            mass: 0.6,
-            restSpeed: 0.001,
-            restDelta: 0.001
-          }
+          transition: ANIMATION_CONFIG.spring
+        });
+        // Reset Lottie to normal scale
+        lottieControls.start({
+          scale: 1,
+          transition: ANIMATION_CONFIG.spring
         });
     }
-  }, [animationState, controls]);
+  }, [animationState, controls, lottieControls]);
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-[#001707]">
@@ -169,8 +196,7 @@ export const PhysicsCard = () => {
             });
           }}
         >
-          {animationState === 'expanded' ? 'Normal Size' : 
-           animationState === 'initial' ? 'Compact' : 'Expand'}
+          {getButtonText()}
         </button>
       </div>
 
@@ -204,14 +230,18 @@ export const PhysicsCard = () => {
           <CardFace 
             isExpanded={animationState === 'expanded'} 
             backgroundColor="bg-[#00B843]"
+            animationState={animationState}
           >
             <div className="w-full h-full flex items-center justify-center relative">
-              <div 
+              <motion.div 
                 ref={lottieContainer}
                 className="w-[200px] h-[200px]"
+                animate={lottieControls}
+                initial={{ scale: 1 }}
                 style={{
                   imageRendering: 'crisp-edges',
-                  shapeRendering: 'geometricPrecision'
+                  shapeRendering: 'geometricPrecision',
+                  transformOrigin: 'center center'
                 }}
               />
             </div>
@@ -222,6 +252,7 @@ export const PhysicsCard = () => {
             isExpanded={animationState === 'expanded'} 
             backgroundColor="bg-[#004D1C]"
             isFlipped
+            animationState={animationState}
           >
             <div className="w-full h-full flex items-center justify-center relative">
               <div className="text-white/50 text-xl">Back</div>
