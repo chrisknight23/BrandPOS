@@ -96,18 +96,21 @@ export const Tipping = ({ onNext }: TippingProps) => {
           </AnimatePresence>
           
           {/* Tip Amount Buttons Container */}
-          <div className="grid grid-cols-3 gap-3 flex-1 mb-3">
-            {tipAmounts.map((amount) => (
-              <div key={`container-${amount}`} className={`relative ${selectedAmount && selectedAmount !== amount ? 'opacity-0' : ''}`}>
-                <TipButton
-                  amount={amount}
-                  layoutId={`tip-amount-${amount}`}
-                  onClick={() => handleAmountClick(amount)}
-                  isSelected={selectedAmount === amount && !isExiting}
-                />
-              </div>
-            ))}
-          </div>
+<div className="grid grid-cols-3 gap-3 flex-1 mb-3">
+  {tipAmounts.map((amount) => (
+    <div 
+      key={`container-${amount}`} 
+      className={`${selectedAmount && selectedAmount !== amount ? 'opacity-0' : ''}`}
+    >
+      <TipButton
+        amount={amount}
+        layoutId={`tip-amount-${amount}`}
+        onClick={() => handleAmountClick(amount)}
+        isSelected={selectedAmount === amount && !isExiting}
+      />
+    </div>
+  ))}
+</div>
 
           {/* Bottom Buttons - Only show when no tip is selected */}
           <AnimatePresence>

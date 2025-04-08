@@ -14,15 +14,17 @@ export const TipButton = ({ amount, layoutId, onClick, isSelected }: TipButtonPr
       onClick={onClick}
       className={`
         flex items-center justify-center cursor-pointer rounded-2xl bg-[#1189D6]
-        ${isSelected ? 'fixed inset-0 z-50 m-0 p-0 rounded-[4px]' : 'relative h-full w-full'}
+        ${isSelected ? 'z-50' : 'relative h-full w-full'}
       `}
       style={isSelected ? {
         width: '800px',
         height: '500px',
-        left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
-        margin: 0,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 'auto',
         padding: 0
       } : undefined}
       transition={{
@@ -43,4 +45,4 @@ export const TipButton = ({ amount, layoutId, onClick, isSelected }: TipButtonPr
   );
 };
 
-export default TipButton; 
+export default TipButton;
