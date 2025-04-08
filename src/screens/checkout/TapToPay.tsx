@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BaseScreen } from '../../components/common/BaseScreen';
+import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ArrowProps {
@@ -157,7 +157,12 @@ const PaymentNotch = ({ position, text, animationState }: { position: 'top' | 'b
   );
 };
 
-export const TapToPay = ({ onNext }: { onNext: () => void }) => {
+interface TapToPayProps {
+  onNext: (amount?: string) => void;
+  amount?: string;
+}
+
+export const TapToPay = ({ onNext, amount = "10.80" }: TapToPayProps) => {
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
   const [notchesVisible, setNotchesVisible] = useState(false);
 
@@ -174,9 +179,14 @@ export const TapToPay = ({ onNext }: { onNext: () => void }) => {
     return () => clearTimeout(timeout);
   }, []);
 
+  const handleNext = () => {
+    // Pass along the amount to the next screen
+    onNext(amount);
+  };
+
   return (
-    <BaseScreen onNext={onNext}>
-      <div className="w-[800px] h-[500px] bg-[#1189D6] relative overflow-hidden flex items-center justify-center">
+    <BaseScreen onNext={handleNext}>
+      <div className="w-[800px] h-[500px] bg-[#1189D6] relative overflow-hidden flex items-center justify-center rounded-[4px]">
         {/* Price Display */}
         <motion.div 
           className="text-white text-[110px] leading-none font-medium origin-center"
@@ -188,7 +198,7 @@ export const TapToPay = ({ onNext }: { onNext: () => void }) => {
             ease: [0.32, 0.72, 0, 1]
           }}
         >
-          ${(10.80).toFixed(2)}
+          ${parseFloat(amount).toFixed(2)}
         </motion.div>
 
         {/* Arrows */}

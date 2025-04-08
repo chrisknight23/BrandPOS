@@ -1,27 +1,31 @@
-import { BaseScreen } from '../../components/common/BaseScreen';
+import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { motion } from 'framer-motion';
 
 // Mock data - in real app this would come from props or context
 const cartData = {
   items: [
-    { name: 'Item name', price: 0.00, quantity: 1 }
+    { name: 'Item name', price: 10.80, quantity: 1 }
   ],
   taxRate: 0.00
 };
 
-export const Cart = ({ onNext }: { onNext: () => void }) => {
+export const Cart = ({ onNext }: { onNext: (amount?: string) => void }) => {
   const total = cartData.items.reduce((sum, item) => sum + item.price, 0);
   const tax = total * cartData.taxRate;
   const finalTotal = total + tax;
 
+  const handleNext = () => {
+    onNext(finalTotal.toFixed(2));
+  };
+
   return (
-    <BaseScreen onNext={onNext}>
+    <BaseScreen onNext={handleNext}>
       <div 
-        className="w-[800px] h-[500px] bg-black text-white p-8 flex flex-col cursor-pointer"
-        onClick={onNext}
+        className="w-[800px] h-[500px] bg-black text-white p-8 flex flex-col cursor-pointer rounded-[4px] border border-white/20"
+        onClick={handleNext}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && onNext()}
+        onKeyDown={(e) => e.key === 'Enter' && handleNext()}
         aria-label="Review cart and continue to payment"
       >
         {/* Total Header - Fixed */}

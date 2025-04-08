@@ -18,7 +18,7 @@ import { ReactNode, useEffect, useState } from 'react';
  */
 interface LocalPassProps {
   /** Unique ID for Framer Motion layout animations */
-  layoutId: string;
+  layoutId?: string;
   /** Amount to display on the card (e.g. "1", "2", "3") */
   amount: string;
   /** Whether the card is in its expanded state */
@@ -27,6 +27,8 @@ interface LocalPassProps {
   onClick?: () => void;
   /** Optional child elements to render in expanded state */
   children?: ReactNode;
+  /** Disable all animations */
+  noAnimation?: boolean;
 }
 
 export const LocalPass = ({ 
@@ -34,7 +36,8 @@ export const LocalPass = ({
   amount, 
   isExpanded,
   onClick,
-  children 
+  children,
+  noAnimation = false 
 }: LocalPassProps) => {
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -42,6 +45,9 @@ export const LocalPass = ({
   const initialScale = Math.max(800/344, 500/444); // ≈ 2.33
 
   useEffect(() => {
+    // Skip animation timing if animation is disabled
+    if (noAnimation) return;
+    
     if (isExpanded) {
       setIsAnimating(false);
       
@@ -56,14 +62,18 @@ export const LocalPass = ({
     } else {
       setIsAnimating(false);
     }
-  }, [isExpanded]);
+  }, [isExpanded, noAnimation]);
 
+  // Create the motion component with appropriate props
+  const MotionComponent = layoutId ? 
+    (props: any) => <motion.div layoutId={layoutId} {...props} /> :
+    motion.div;
+    
   return (
     <>
       {isExpanded && <div className="h-full" />}
       
-      <motion.div
-        layoutId={layoutId}
+      <MotionComponent
         onClick={onClick}
         className={`
           ${isExpanded 
@@ -78,25 +88,31 @@ export const LocalPass = ({
           transformOrigin: 'center',
           perspective: '1000px'
         }}
-        animate={{
-          scale: isExpanded 
-            ? isAnimating 
-              ? 1
-              : initialScale
-            : 1,
-          rotateX: isExpanded && isAnimating ? [15, 0] : 0,
-          rotateY: isExpanded && isAnimating ? [-10, 0] : 0,
-          y: isExpanded && isAnimating ? [-50, 0] : 0,
-          z: isExpanded && isAnimating ? [100, 0] : 0
-        }}
-        transition={{
-          type: "spring",
-          stiffness: isExpanded && isAnimating ? 250 : 300,
-          damping: isExpanded && isAnimating ? 20 : 30,
-          mass: 1.5,
-          restDelta: 0.001,
-          restSpeed: 0.001
-        }}
+        animate={noAnimation ? 
+          { scale: 1 } : // No animation when noAnimation is true
+          {
+            scale: isExpanded 
+              ? isAnimating 
+                ? 1
+                : initialScale
+              : 1,
+            rotateX: isExpanded && isAnimating ? [15, 0] : 0,
+            rotateY: isExpanded && isAnimating ? [-10, 0] : 0,
+            y: isExpanded && isAnimating ? [-50, 0] : 0,
+            z: isExpanded && isAnimating ? [100, 0] : 0
+          }
+        }
+        transition={noAnimation ? 
+          { duration: 0 } : // Instant transition when noAnimation is true
+          {
+            type: "spring",
+            stiffness: isExpanded && isAnimating ? 250 : 300,
+            damping: isExpanded && isAnimating ? 20 : 30,
+            mass: 1.5,
+            restDelta: 0.001,
+            restSpeed: 0.001
+          }
+        }
       >
         {!isExpanded ? (
           <motion.span
@@ -111,9 +127,17 @@ export const LocalPass = ({
         ) : (
           <motion.div 
             className="flex items-center justify-center w-full relative"
-          />
+          >
+            {/* Show amount in expanded state */}
+            <motion.span
+              className="text-white text-[70px] font-medium font-cash"
+              layout="position"
+            >
+              ${amount}
+            </motion.span>
+          </motion.div>
         )}
-      </motion.div>
+      </MotionComponent>
     </>
   );
 }; 
