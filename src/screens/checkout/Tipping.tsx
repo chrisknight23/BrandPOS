@@ -31,9 +31,84 @@ export const Tipping = ({ onNext }: TippingProps) => {
 
   const tipAmounts = ["1", "2", "3"];
 
+  // ===================== ENTRANCE ANIMATIONS =====================
+  
+  // Parent container animation for all tip buttons
+  // Controls the staggered entrance of child elements
+  const containerVariants = {
+    // Initial hidden state when component mounts
+    hidden: { opacity: 0 },
+    // Animated visible state with staggered children
+    visible: { 
+      opacity: 1,
+      transition: { 
+        // Each child animates with a 0.1s delay after the previous one
+        staggerChildren: 0.03,
+        // Delay all children entrance by 0.2s after parent starts
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  // Individual button entrance animation
+  // Applied to each TipButton wrapper
+  const buttonVariants = {
+    // Initial hidden state: smaller scale, offset position, and transparent
+    hidden: { 
+      scale: 0.9, 
+      y: 0, 
+      opacity: 0 
+    },
+    // Final visible state: natural scale, position, and fully visible
+    visible: { 
+      scale: 1, 
+      y: 0, 
+      opacity: 1,
+      // Spring animation for natural bouncy entrance
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 20
+      }
+    }
+  };
+
+  // Header fade animation - just opacity with same timing as buttons
+  const headerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+        delay: 0.2 // Same delay as the buttons
+      }
+    },
+    exit: { opacity: 0 }
+  };
+
+  // Button-specific entrance animation that can be passed to TipButton
+  const buttonEntranceAnimation = {
+    initial: { scale: 0.9, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 20,
+      scale: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20
+      },
+      opacity: {
+        duration: 0.3
+      }
+    }
+  };
+
   return (
     <BaseScreen onNext={() => {}}>
       <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[4px] border border-white/20">
+        {/* Main screen container with fade-in animation */}
         <motion.div 
           className="w-full h-full bg-black text-white p-6 flex flex-col"
           initial={{ opacity: 0 }}
@@ -46,10 +121,11 @@ export const Tipping = ({ onNext }: TippingProps) => {
             {!selectedAmount && (
               <motion.div 
                 className="flex items-center justify-between mb-6 px-4 mt-2 h-16"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                // Use the same animation timing as the buttons, but only fade
+                variants={headerVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
               >
                 {/* Left side: Avatar and Title */}
                 <div className="flex items-center gap-3">
@@ -61,18 +137,21 @@ export const Tipping = ({ onNext }: TippingProps) => {
 
                 {/* Right side: Local Cash Button */}
                 <div className="relative">
-                  {/* Expandable button container */}
+                  {/* Expandable button container - width animation */}
                   <motion.div 
                     className="flex items-center bg-black border border-white/20 rounded-full overflow-hidden"
+                    // Start as just an icon button width
                     initial={{ width: "56px" }}
+                    // Expand to show text
                     animate={{ width: "auto" }}
+                    // Smooth expansion with delay
                     transition={{
                       duration: 0.5,
                       delay: 0.4,
                       ease: [0.32, 0.72, 0, 1]
                     }}
                   >
-                    {/* "Local Cash" text - slides in from right */}
+                    {/* "Local Cash" text - slides in from right with fade */}
                     <motion.span 
                       className="text-[18px] font-medium font-cash whitespace-nowrap pl-6"
                       initial={{ opacity: 0, x: 24 }}
@@ -95,32 +174,56 @@ export const Tipping = ({ onNext }: TippingProps) => {
             )}
           </AnimatePresence>
           
-          {/* Tip Amount Buttons Container */}
-<div className="grid grid-cols-3 gap-3 flex-1 mb-3">
-  {tipAmounts.map((amount) => (
-    <div 
-      key={`container-${amount}`} 
-      className={`${selectedAmount && selectedAmount !== amount ? 'opacity-0' : ''}`}
-    >
-      <TipButton
-        amount={amount}
-        layoutId={`tip-amount-${amount}`}
-        onClick={() => handleAmountClick(amount)}
-        isSelected={selectedAmount === amount && !isExiting}
-      />
-    </div>
-  ))}
-</div>
+          {/* Tip Amount Buttons Container with staggered entrance animation */}
+          <motion.div 
+            className="grid grid-cols-3 gap-3 flex-1 mb-3"
+            // Apply the container variants to orchestrate child animations
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {tipAmounts.map((amount, index) => (
+              <motion.div 
+                key={`container-${amount}`} 
+                className={`
+                  transition-opacity duration-300
+                  ${selectedAmount && selectedAmount !== amount ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+                `}
+                // Apply button entrance animation from variants
+                // Each button will animate in sequence based on index
+                variants={buttonVariants}
+                custom={index}
+              >
+                <TipButton
+                  amount={amount}
+                  // layoutId enables the shared element transition when selected
+                  layoutId={`tip-amount-${amount}`}
+                  onClick={() => handleAmountClick(amount)}
+                  isSelected={selectedAmount === amount && !isExiting}
+                  // Optional: Apply additional entrance animation directly to the button
+                  // Commented out because we're using the parent's staggered animation
+                  // {...buttonEntranceAnimation}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
 
           {/* Bottom Buttons - Only show when no tip is selected */}
           <AnimatePresence>
             {!selectedAmount && (
               <motion.div 
                 className="grid grid-cols-2 gap-3 mt-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                // Slide up from bottom with fade in
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                // Fade out when exiting
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                // Slightly delayed entrance for sequencing
+                transition={{ 
+                  duration: 0.3,
+                  delay: 0.2,
+                  ease: [0.32, 0.72, 0, 1]
+                }}
               >
                 {['Custom', 'No tip'].map((text) => (
                   <button
