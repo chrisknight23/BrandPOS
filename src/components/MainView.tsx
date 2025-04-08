@@ -132,10 +132,10 @@ export const MainView = () => {
         <button
           key={screen}
           onClick={() => goToScreen(screen)}
-          className={`px-2 py-1 rounded-md text-white text-xs ${
+          className={`px-2 py-1 rounded-md text-xs ${
             currentScreen === screen 
-              ? 'bg-blue-600' 
-              : 'bg-gray-600/50 hover:bg-gray-600/80'
+              ? 'bg-white text-black' 
+              : 'bg-white/20 hover:bg-white/30 text-white'
           }`}
         >
           {screen}

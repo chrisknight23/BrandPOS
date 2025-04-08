@@ -21,22 +21,6 @@ export const Tipping = ({ onNext }: TippingProps) => {
     };
   }, []);
 
-  // Auto-navigate after selection with a delay to show animation
-  useEffect(() => {
-    if (selectedAmount) {
-      const timer = setTimeout(() => {
-        setIsExiting(true);
-        
-        // Small delay to allow animations to properly complete before navigating
-        setTimeout(() => {
-          onNext(selectedAmount);
-        }, 100);
-      }, 1500); // Delay of 1.5s to show the animation
-      
-      return () => clearTimeout(timer);
-    }
-  }, [selectedAmount, onNext]);
-
   const handleAmountClick = (amount: string) => {
     setSelectedAmount(amount);
   };
@@ -112,27 +96,20 @@ export const Tipping = ({ onNext }: TippingProps) => {
           </AnimatePresence>
           
           {/* Tip Amount Buttons Container */}
-          <div className="grid grid-cols-3 gap-3 flex-1 mb-3 relative">
-            <AnimatePresence>
-              {tipAmounts.map((amount) => (
-                <motion.div
-                  key={`container-${amount}`}
-                  className={`relative w-full h-full ${selectedAmount && selectedAmount !== amount ? 'opacity-0' : ''}`}
-                  exit={{ opacity: 0 }}
-                  layout
-                >
-                  <TipButton
-                    amount={amount}
-                    layoutId={`tip-amount-${amount}`}
-                    onClick={() => handleAmountClick(amount)}
-                    isSelected={selectedAmount === amount && !isExiting}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+          <div className="grid grid-cols-3 gap-3 flex-1 mb-3">
+            {tipAmounts.map((amount) => (
+              <div key={`container-${amount}`} className={`relative ${selectedAmount && selectedAmount !== amount ? 'opacity-0' : ''}`}>
+                <TipButton
+                  amount={amount}
+                  layoutId={`tip-amount-${amount}`}
+                  onClick={() => handleAmountClick(amount)}
+                  isSelected={selectedAmount === amount && !isExiting}
+                />
+              </div>
+            ))}
           </div>
 
-          {/* Bottom Buttons - Conditionally hide if a button is selected */}
+          {/* Bottom Buttons - Only show when no tip is selected */}
           <AnimatePresence>
             {!selectedAmount && (
               <motion.div 
