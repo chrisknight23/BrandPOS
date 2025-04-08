@@ -11,6 +11,7 @@ A React component that provides smooth, animated transitions for numerical value
 - 🎯 Special width handling for the number "1"
 - ⚡️ Optimized animations using Framer Motion
 - 🎨 Customizable styling via className prop
+- 0️⃣ Configurable zero formatting with decimals
 
 ## Common Use Cases
 
@@ -29,6 +30,7 @@ A React component that provides smooth, animated transitions for numerical value
 <AnimatedNumber 
   value={price} 
   showDecimals={true}
+  showFormattedZero={true}
 />
 ```
 
@@ -49,6 +51,7 @@ A React component that provides smooth, animated transitions for numerical value
 | value | number | (required) | The numeric value to display and animate |
 | showDollarSign | boolean | true | Controls dollar sign visibility |
 | showDecimals | boolean | true | Controls decimal places visibility |
+| showFormattedZero | boolean | false | Controls whether zero shows with decimals (0.00) |
 | className | string | '' | Additional CSS classes |
 
 ## Animation Patterns
@@ -68,7 +71,11 @@ A React component that provides smooth, animated transitions for numerical value
 // - Product prices
 // - Transaction amounts
 // - Financial data
-<AnimatedNumber value={19.99} showDecimals={true} />
+<AnimatedNumber 
+  value={19.99} 
+  showDecimals={true}
+  showFormattedZero={true} 
+/>
 ```
 
 ### 3. Custom Styling
@@ -85,12 +92,21 @@ A React component that provides smooth, animated transitions for numerical value
 ### Decimal Places
 - When `showDecimals={true}`:
   - Numbers animate with two decimal places
-  - Zero displays as "$0.00"
+  - Zero displays as "$0" by default or "$0.00" with `showFormattedZero={true}`
   - Decimals animate smoothly
 - When `showDecimals={false}`:
   - Numbers animate as whole integers
   - Zero displays as "$0"
   - No decimal animation
+
+### Zero Formatting
+- When `showFormattedZero={true}` and `showDecimals={true}`:
+  - Zero displays as "$0.00" with decimal places
+  - Ensures consistent width and layout when transitioning from zero to other values
+  - Provides proper formatting for monetary values starting at zero
+- When `showFormattedZero={false}`:
+  - Zero displays as "$0" without decimal places
+  - More compact display for non-monetary contexts
 
 ### Dollar Sign
 - When `showDollarSign={true}`:
@@ -135,6 +151,7 @@ The component uses these Tailwind classes:
 
    // For prices and monetary values
    showDecimals={true}
+   showFormattedZero={true} // For consistent decimal display with zero
    ```
 
 2. **Animation Timing**
@@ -146,6 +163,7 @@ The component uses these Tailwind classes:
    - Component maintains consistent width during animations
    - Dollar sign spacing adjusts automatically
    - Numbers "1" and "7" have special spacing rules
+   - Using `showFormattedZero={true}` helps maintain consistent layout when displaying zero values
 
 4. **Performance**
    - Uses Framer Motion's optimized animation system
@@ -159,3 +177,10 @@ Works in all modern browsers that support:
 - CSS Flexbox
 - CSS Transforms
 - Web Animations API 
+
+## Changelog
+
+### v1.1.0
+- Added `showFormattedZero` prop to control how zeros are displayed with decimal places
+- Fixed issue where toggling `showDecimals` didn't update zero values properly
+- Improved layout consistency when transitioning between zero and non-zero values 

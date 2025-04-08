@@ -27,14 +27,18 @@ const ExperimentsRoot = () => {
 
   return (
     <div className="relative w-screen h-screen bg-[#001707]">
-      {/* Top bar with dropdowns */}
-      <div className="fixed top-4 right-4 flex items-center gap-2 z-[100]">
-        {/* Physics Mode selector */}
+      {/* Top bar with simple structure */}
+      <div className="fixed top-4 right-4 flex gap-4 z-50">
+        {/* Physics Mode selector only shown for LocalPass */}
         {currentExperiment === 'local-pass' && (
           <div className="relative">
             <button
               className="px-6 py-3 rounded-full text-[#00D64F] transition-colors bg-white/10 hover:bg-white/15 flex items-center gap-2 cursor-pointer"
-              onClick={() => setIsPhysicsOpen(!isPhysicsOpen)}
+              onClick={() => {
+                setIsPhysicsOpen(!isPhysicsOpen);
+                // Close experiment dropdown if physics is opening
+                if (!isPhysicsOpen) setIsExperimentOpen(false);
+              }}
             >
               {MODES[physicsMode]}
               <svg 
@@ -81,7 +85,11 @@ const ExperimentsRoot = () => {
         <div className="relative">
           <button
             className="px-6 py-3 rounded-full text-[#00D64F] transition-colors bg-white/10 hover:bg-white/15 flex items-center gap-2 cursor-pointer"
-            onClick={() => setIsExperimentOpen(!isExperimentOpen)}
+            onClick={() => {
+              setIsExperimentOpen(!isExperimentOpen);
+              // Close physics dropdown if experiment is opening
+              if (!isExperimentOpen) setIsPhysicsOpen(false);
+            }}
           >
             {EXPERIMENTS[currentExperiment]}
             <svg 
