@@ -28,16 +28,31 @@ interface AnimatedNumberProps {
 }
 
 // Helper function to format numbers and calculate separator positions
-const formatNumber = (num: number, showDecimals: boolean) => {
-  // Special case for zero - no decimal places
+const formatNumber = (num: number, showDecimals: boolean, showFormattedZero: boolean = false) => {
+  // Special case for zero - handle with or without decimal places based on props
   if (num === 0) {
-    return {
-      digits: [0],
-      separatorPositions: {
-        commas: null,
-        decimal: null
-      }
-    };
+    if (showDecimals && showFormattedZero) {
+      // Return formatted zero with decimal places (0.00)
+      const whole = "0";
+      const decimal = "00";
+      
+      return {
+        digits: (whole + decimal).split('').map(Number),
+        separatorPositions: {
+          commas: null,
+          decimal: whole.length
+        }
+      };
+    } else {
+      // Return simple zero without decimal places
+      return {
+        digits: [0],
+        separatorPositions: {
+          commas: null,
+          decimal: null
+        }
+      };
+    }
   }
 
   // Format number with or without decimals
@@ -119,7 +134,7 @@ const DigitRoller: React.FC<{
         {sequence.map((num) => (
           <div
             key={num}
-            className="flex items-center justify-center h-[120px] font-cash font-medium text-[100px]"
+            className="flex items-center justify-center h-[120px] font-cash font-medium text-[100px] text-white"
             style={{
               width: '60px',
               transform: num === 1 
@@ -146,7 +161,7 @@ const Separator = React.forwardRef<HTMLDivElement, { char: string, layoutId: str
     <motion.div
       ref={ref}
       layoutId={layoutId}
-      className="flex items-center h-[120px] mx-[2px] font-cash font-medium text-[100px]"
+      className="flex items-center h-[120px] mx-[2px] font-cash font-medium text-[100px] text-white"
     >
       {char}
     </motion.div>
@@ -163,8 +178,8 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
   showFormattedZero = false
 }) => {
   const [prevValue, setPrevValue] = useState(value);
-  const { digits, separatorPositions } = formatNumber(value, showDecimals);
-  const prevFormatted = formatNumber(prevValue, showDecimals);
+  const { digits, separatorPositions } = formatNumber(value, showDecimals, showFormattedZero);
+  const prevFormatted = formatNumber(prevValue, showDecimals, showFormattedZero);
   
   // Track first digit for dollar sign spacing
   const firstDigitIs7 = digits[0] === 7;
@@ -186,7 +201,8 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
     if (showDollarSign) {
       content.push(
         <motion.span 
-          className="flex items-center h-[120px] font-cash font-medium text-[100px]"
+          key="dollar-sign"
+          className="flex items-center h-[120px] font-cash font-medium text-[100px] text-white"
           layout
           style={{ 
             marginRight: firstDigitIs7 ? 0 : firstTwoAre11 ? -20 : firstDigitIs1 ? -8 : 8,
@@ -198,8 +214,8 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
       );
     }
 
-    // Don't show any separators when transitioning to zero
-    const isTransitioningToZero = value === 0;
+    // Only skip separators when showing a simple zero without formatting
+    const isSimpleZero = value === 0 && (!showDecimals || !showFormattedZero);
 
     // Render all digits with separators in the correct positions
     digits.forEach((digit, index) => {
@@ -258,7 +274,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
       );
 
       // Only add separators if we're not transitioning to zero
-      if (!isTransitioningToZero) {
+      if (!isSimpleZero) {
         // Add comma if needed
         if (separatorPositions.commas !== null && 
             index === separatorPositions.commas - 1) {
@@ -306,7 +322,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
   };
 
   return (
-    <div className={`flex items-center justify-center ${className}`}>
+    <div className={`flex items-center justify-center text-white ${className}`}>
       <motion.div 
         className="flex items-center relative"
         layout

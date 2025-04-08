@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatedNumber } from '../../components/common/AnimatedNumber';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type NumberFormat = 'whole' | 'decimal' | 'hundreds' | 'thousands';
+type NumberFormat = 'whole' | 'hundreds' | 'thousands';
 
 const FORMAT_OPTIONS: Record<NumberFormat, string> = {
   'whole': 'Whole Numbers',
-  'decimal': 'Decimal Points',
   'hundreds': 'Hundreds',
   'thousands': 'Thousands'
 };
@@ -15,11 +14,27 @@ export const AnimatingNumberExperiment = () => {
   const [value, setValue] = useState(0);
   const [format, setFormat] = useState<NumberFormat>('whole');
   const [isOpen, setIsOpen] = useState(false);
+  const [showDecimals, setShowDecimals] = useState(false);
+
+  // Ensure initial state reflects the showDecimals toggle
+  useEffect(() => {
+    // Force a re-render when the showDecimals value changes
+    // This ensures the AnimatedNumber updates properly
+    setValue(prev => {
+      // If the value is exactly 0, we want to "nudge" it to trigger a re-render
+      return prev === 0 ? 0.00001 : prev;
+    });
+    
+    // Reset to 0 after a small delay to allow the animation to show
+    const timer = setTimeout(() => {
+      setValue(0);
+    }, 50);
+    
+    return () => clearTimeout(timer);
+  }, [showDecimals]);
 
   const getDisplayValue = (val: number) => {
     switch (format) {
-      case 'decimal':
-        return val / 100;
       case 'hundreds':
         return val * 100;
       case 'thousands':
@@ -29,14 +44,38 @@ export const AnimatingNumberExperiment = () => {
     }
   };
 
+  // Generate a random number that respects the current format
+  const generateRandomNumberForFormat = () => {
+    let randomValue: number;
+    
+    switch (format) {
+      case 'whole':
+        // Generate a whole number between 0 and 99
+        randomValue = Math.floor(Math.random() * 100);
+        break;
+      case 'hundreds':
+        // Generate a multiple of 100 between 100 and 900
+        randomValue = Math.floor(Math.random() * 9) + 1;
+        break;
+      case 'thousands':
+        // Generate a multiple of 1000 between 1000 and 9000
+        randomValue = Math.floor(Math.random() * 9) + 1;
+        break;
+      default:
+        randomValue = Math.floor(Math.random() * 100);
+    }
+    
+    return randomValue;
+  };
+
   return (
     <div className="w-screen h-screen bg-[#001707] flex items-center justify-center">
-      {/* Controls */}
+      {/* Left controls */}
       <div className="fixed top-4 left-4 flex gap-2 z-50">
         {/* Random/Refresh button */}
         <button
           className="w-12 h-12 rounded-full text-white transition-colors bg-[#00D64F] hover:bg-[#00C048] flex items-center justify-center"
-          onClick={() => setValue(Math.floor(Math.random() * 10000))}
+          onClick={() => setValue(generateRandomNumberForFormat())}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
@@ -79,8 +118,9 @@ export const AnimatingNumberExperiment = () => {
         </button>
       </div>
 
-      {/* Format selector dropdown */}
-      <div className="fixed top-4 right-[228px] z-40">
+      {/* Top navigation container with just the format selector - moved away from the right edge */}
+      <div className="fixed top-4 right-12">
+        {/* Format selector dropdown */}
         <div className="relative">
           <button
             className="px-6 py-3 rounded-full text-[#00D64F] transition-colors bg-white/10 hover:bg-white/15 flex items-center gap-2"
@@ -127,12 +167,27 @@ export const AnimatingNumberExperiment = () => {
         </div>
       </div>
 
+      {/* Show Decimals Checkbox - at bottom right as requested */}
+      <div className="fixed bottom-4 right-4 z-40">
+        <label className="flex items-center gap-2 px-6 py-3 rounded-full text-[#00D64F] transition-colors bg-white/10 hover:bg-white/15 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={showDecimals}
+            onChange={() => setShowDecimals(!showDecimals)}
+            className="w-4 h-4 accent-[#00D64F]"
+          />
+          Show Decimals
+        </label>
+      </div>
+
       {/* AnimatedNumber display */}
       <div className="text-white text-8xl">
         <AnimatedNumber 
           value={getDisplayValue(value)} 
           showDollarSign 
-          showDecimals={format === 'decimal'}
+          showDecimals={showDecimals}
+          showFormattedZero={true}  // Always use formatted zero to ensure 0.00 displays properly
+          className="text-[100px]"
         />
       </div>
     </div>

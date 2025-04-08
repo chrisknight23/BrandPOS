@@ -2,6 +2,7 @@ import { motion, useAnimation } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import lottie from 'lottie-web';
 import cashBackAnimation from '../../assets/CashBackLogo.json';
+import { AnimatedNumber } from '../../components/common/AnimatedNumber';
 
 // ============= Types =============
 type CardState = 'expanded' | 'initial' | 'dropped';
@@ -16,7 +17,7 @@ interface CardFaceProps {
 
 // ============= Constants =============
 const CARD_SCALES = {
-  EXPANDED: 1.8,
+  EXPANDED: 2.4,
   NORMAL: 1,
   COMPACT: 0.8
 } as const;
@@ -30,6 +31,14 @@ const ANIMATION_CONFIG = {
     restSpeed: 0.001,
     restDelta: 0.001
   }
+} as const;
+
+// Animation timing constants
+const DELAYS = {
+  INITIAL_ANIMATION: 1000,   // Initial animation delay on component mount
+  EXPANDED_ANIMATION: 650,   // Delay before playing animation in expanded state
+  REPLAY_BUTTON_ANIMATION: 200,  // Delay when manually replaying animation
+  NUMBER_ANIMATION: 1500,     // Delay before showing the animated number
 } as const;
 
 // ============= Components =============
@@ -74,11 +83,16 @@ const CardFace: React.FC<CardFaceProps> = ({
 // ============= Main Component =============
 export const PhysicsCard = () => {
   const controls = useAnimation();
-  const lottieControls = useAnimation(); // Separate controls for the Lottie animation
+  const lottieControls = useAnimation();
   const [animationState, setAnimationState] = useState<CardState>('initial');
   const [isFlipped, setIsFlipped] = useState(false);
   const lottieContainer = useRef<HTMLDivElement>(null);
   const lottieAnimRef = useRef<any>(null);
+  const prevAnimationState = useRef<CardState>(animationState);
+  
+  // Simple number state
+  const [showNumber, setShowNumber] = useState(false);
+  const [cashbackAmount, setCashbackAmount] = useState(0);
 
   // Initialize Lottie
   useEffect(() => {
@@ -103,7 +117,7 @@ export const PhysicsCard = () => {
       // Start animation after a delay
       setTimeout(() => {
         anim.play();
-      }, 1000);
+      }, DELAYS.INITIAL_ANIMATION);
     }
 
     return () => {
@@ -113,43 +127,76 @@ export const PhysicsCard = () => {
     };
   }, []);
 
-  // Calculate the counter-scale for the Lottie animation based on card state
+  // Handle animation when card state changes
+  useEffect(() => {
+    if (animationState === 'expanded' && prevAnimationState.current !== 'expanded') {
+      if (lottieAnimRef.current) {
+        // Reset animation
+        lottieAnimRef.current.goToAndStop(0, true);
+        setShowNumber(false);
+        
+        // Play lottie animation after card expansion
+        setTimeout(() => {
+          lottieAnimRef.current.play();
+          
+          // Show the number after the lottie animation
+          setTimeout(() => {
+            // First show 0.00
+            setShowNumber(true);
+            setCashbackAmount(0);
+            
+            // Then after a short delay, update to the final amount to trigger animation
+            setTimeout(() => {
+              setCashbackAmount(28.45);
+            }, 100); // Short delay to ensure the zero renders first
+          }, DELAYS.NUMBER_ANIMATION);
+        }, DELAYS.EXPANDED_ANIMATION);
+      }
+    } else if (animationState !== 'expanded') {
+      // Hide number when not expanded
+      setShowNumber(false);
+    }
+    
+    // Update previous state
+    prevAnimationState.current = animationState;
+  }, [animationState]);
+
+  // Calculate counter-scale
   const getLottieScale = (state: CardState) => {
     switch (state) {
       case 'expanded':
-        return 1 / CARD_SCALES.EXPANDED; // Counter-scale to maintain normal size
+        return 1 / CARD_SCALES.EXPANDED;
       case 'dropped':
-        return 1; // No counter-scale, let it scale down with card
+        return 1 / CARD_SCALES.COMPACT;
       default:
-        return 1; // Normal state, no scaling needed
+        return 1;
     }
   };
 
-  // Get the button text based on the current state and what the next state will be
+  // Get button text
   const getButtonText = () => {
     switch (animationState) {
       case 'expanded':
-        return 'Normal'; // When expanded, clicking will return to normal size
+        return 'Normal';
       case 'initial':
-        return 'Compact'; // When at normal size, clicking will make it compact
+        return 'Compact';
       case 'dropped':
-        return 'Expand'; // When compact, clicking will expand it
+        return 'Expand';
       default:
         return 'Toggle';
     }
   };
 
+  // Handle card scale animations
   useEffect(() => {
-    // Animate card scale
     switch (animationState) {
       case 'dropped':
         controls.start({
           scale: CARD_SCALES.COMPACT,
           transition: ANIMATION_CONFIG.spring
         });
-        // No counter-scale needed for Lottie in compact state
         lottieControls.start({
-          scale: 1,
+          scale: 1 / CARD_SCALES.COMPACT,
           transition: ANIMATION_CONFIG.spring
         });
         break;
@@ -158,7 +205,6 @@ export const PhysicsCard = () => {
           scale: CARD_SCALES.EXPANDED,
           transition: ANIMATION_CONFIG.spring
         });
-        // Counter-scale Lottie to maintain its normal size
         lottieControls.start({
           scale: 1 / CARD_SCALES.EXPANDED,
           transition: ANIMATION_CONFIG.spring
@@ -169,13 +215,38 @@ export const PhysicsCard = () => {
           scale: CARD_SCALES.NORMAL,
           transition: ANIMATION_CONFIG.spring
         });
-        // Reset Lottie to normal scale
         lottieControls.start({
           scale: 1,
           transition: ANIMATION_CONFIG.spring
         });
     }
   }, [animationState, controls, lottieControls]);
+
+  // Play lottie animation manually
+  const playLottieAnimation = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    
+    if (lottieAnimRef.current) {
+      lottieAnimRef.current.goToAndStop(0, true);
+      setShowNumber(false);
+      
+      setTimeout(() => {
+        lottieAnimRef.current.play();
+        
+        // Show the number after animation
+        setTimeout(() => {
+          // First show 0.00
+          setShowNumber(true);
+          setCashbackAmount(0);
+          
+          // Then after a short delay, update to the final amount to trigger animation
+          setTimeout(() => {
+            setCashbackAmount(28.45);
+          }, 100); // Short delay to ensure the zero renders first
+        }, DELAYS.NUMBER_ANIMATION);
+      }, DELAYS.REPLAY_BUTTON_ANIMATION);
+    }
+  };
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-[#001707]">
@@ -199,6 +270,18 @@ export const PhysicsCard = () => {
           {getButtonText()}
         </button>
       </div>
+
+      {/* Replay button - Only show in expanded state */}
+      {animationState === 'expanded' && (
+        <div className="fixed top-4 left-40">
+          <button
+            className="px-6 py-3 rounded-full text-white transition-colors bg-[#00B843] hover:bg-[#00A03B]"
+            onClick={playLottieAnimation}
+          >
+            Replay Animation
+          </button>
+        </div>
+      )}
 
       <motion.div
         animate={controls}
@@ -232,18 +315,46 @@ export const PhysicsCard = () => {
             backgroundColor="bg-[#00B843]"
             animationState={animationState}
           >
-            <div className="w-full h-full flex items-center justify-center relative">
-              <motion.div 
-                ref={lottieContainer}
-                className="w-[200px] h-[200px]"
-                animate={lottieControls}
-                initial={{ scale: 1 }}
-                style={{
-                  imageRendering: 'crisp-edges',
-                  shapeRendering: 'geometricPrecision',
-                  transformOrigin: 'center center'
-                }}
-              />
+            <div className="w-full h-full flex flex-col items-center justify-center relative">
+              {/* Positioning container */}
+              <div className="flex flex-col items-center justify-center relative">
+                {/* Lottie Animation */}
+                <motion.div 
+                  ref={lottieContainer}
+                  className="w-[200px] h-[200px]"
+                  animate={lottieControls}
+                  initial={{ scale: 1 }}
+                  style={{
+                    imageRendering: 'crisp-edges',
+                    shapeRendering: 'geometricPrecision',
+                    transformOrigin: 'center center'
+                  }}
+                />
+                
+                {/* AnimatedNumber - Simple implementation */}
+                {showNumber && (
+                  <motion.div
+                    className="flex flex-col items-center mt-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    style={{
+                      transformOrigin: 'center center',
+                      scale: 1 / (animationState === 'expanded' ? CARD_SCALES.EXPANDED : 1)
+                    }}
+                  >
+                    <AnimatedNumber 
+                      value={cashbackAmount}
+                      showDecimals={true}
+                      showFormattedZero={true}
+                      className="text-[60px]"
+                    />
+                  </motion.div>
+                )}
+                
+                {/* Remove the standalone "Cash Back" text when number is not showing */}
+                {!showNumber && null}
+              </div>
             </div>
           </CardFace>
 
