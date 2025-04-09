@@ -102,13 +102,14 @@ const DigitRoller: React.FC<{
     } else if (value === 0) {
       setPrevValue(0);
       setHasAnimated(false);
-    } else if (isNew || isDecimalDigit) {
-      // Keep it at 0 initially
-      setPrevValue(0);
-    } else {
+    } else if ((isNew || isDecimalDigit) && prevValue === 0) {
+      // Only update if we're in the initial state (prevValue is 0)
+      // Otherwise, the animation completion handler will take care of it
+    } else if (value !== prevValue) {
+      // Only update prevValue if it's actually different to avoid loops
       setPrevValue(value);
     }
-  }, [value, isNew, isDecimalDigit, hasAnimated]);
+  }, [value, isNew, isDecimalDigit, hasAnimated, prevValue]);
 
   return (
     <div className="relative h-[120px] overflow-hidden w-[60px]">
@@ -187,12 +188,15 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
   const firstTwoAre11 = firstDigitIs1 && digits[1] === 1;
   
   React.useEffect(() => {
-    if (value === 0) {
-      setPrevValue(0);
-    } else {
-      setPrevValue(value);
+    // Only update prevValue if it's actually different to avoid loops
+    if (prevValue !== value) {
+      if (value === 0) {
+        setPrevValue(0);
+      } else {
+        setPrevValue(value);
+      }
     }
-  }, [value]);
+  }, [value, prevValue]);
 
   const renderContent = () => {
     let content: JSX.Element[] = [];
