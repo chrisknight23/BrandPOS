@@ -316,45 +316,40 @@ export const PhysicsCard = () => {
             animationState={animationState}
           >
             <div className="w-full h-full flex flex-col items-center justify-center relative">
-              {/* Positioning container */}
-              <div className="flex flex-col items-center justify-center relative">
-                {/* Lottie Animation */}
-                <motion.div 
-                  ref={lottieContainer}
-                  className="w-[200px] h-[200px]"
-                  animate={lottieControls}
-                  initial={{ scale: 1 }}
+              {/* Lottie Animation - always render but conditionally hide */}
+              <motion.div 
+                ref={lottieContainer}
+                className="w-[200px] h-[200px]"
+                animate={lottieControls}
+                initial={{ scale: 1 }}
+                style={{
+                  imageRendering: 'crisp-edges',
+                  shapeRendering: 'geometricPrecision',
+                  transformOrigin: 'center center',
+                  opacity: showNumber && animationState === 'expanded' ? 0 : 1
+                }}
+              />
+              
+              {/* AnimatedNumber - Absolutely positioned to center */}
+              {showNumber && (
+                <motion.div
+                  className="absolute inset-0 flex items-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
                   style={{
-                    imageRendering: 'crisp-edges',
-                    shapeRendering: 'geometricPrecision',
-                    transformOrigin: 'center center'
+                    transformOrigin: 'center center',
+                    scale: 1 / CARD_SCALES.EXPANDED
                   }}
-                />
-                
-                {/* AnimatedNumber - Simple implementation */}
-                {showNumber && (
-                  <motion.div
-                    className="flex flex-col items-center mt-4"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    style={{
-                      transformOrigin: 'center center',
-                      scale: 1 / (animationState === 'expanded' ? CARD_SCALES.EXPANDED : 1)
-                    }}
-                  >
-                    <AnimatedNumber 
-                      value={cashbackAmount}
-                      showDecimals={true}
-                      showFormattedZero={true}
-                      className="text-[60px]"
-                    />
-                  </motion.div>
-                )}
-                
-                {/* Remove the standalone "Cash Back" text when number is not showing */}
-                {!showNumber && null}
-              </div>
+                >
+                  <AnimatedNumber 
+                    value={cashbackAmount}
+                    showDecimals={true}
+                    showFormattedZero={true}
+                    className="text-[60px]"
+                  />
+                </motion.div>
+              )}
             </div>
           </CardFace>
 
