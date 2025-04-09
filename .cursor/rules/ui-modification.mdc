@@ -1,0 +1,55 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+ ---
+description: Rules for UI and visual modifications
+globs: ["src/**/*.tsx", "src/**/*.jsx", "src/**/*.css"]
+alwaysApply: true
+---
+
+# UI Modification Rules
+
+## Core Principle
+**No visual changes should be made without explicit user approval.**
+
+## Specific Guidelines
+
+1. **No Unauthorized UI Changes**:
+   - Do not make any visual or UI changes without explicit direction
+   - This includes colors, sizes, spacing, animations, text, labels, or any visual element
+   - Respect the existing design system and visual language
+
+2. **Suggestion Protocol**:
+   - You may suggest UI improvements when relevant
+   - All suggestions must be presented as options, not implementations
+   - Wait for explicit approval before implementing any UI change
+
+3. **Functional Focus**:
+   - When fixing functionality issues, preserve existing UI design
+   - Modify UI-related code only when required for functional fixes
+   - Maintain visual consistency with surrounding components
+
+4. **Explicit Approval Required For**:
+   - Adding or removing UI elements
+   - Changing animation timing or behavior
+   - Modifying color schemes or typography
+   - Altering component sizes or layouts
+   - Changing text content or labels
+   - Adding any new visual elements
+
+5. **Animation-Specific Rules**:
+   - Do not modify animation timing without approval
+   - Preserve existing animation sequences
+   - Respect animation duration constants
+   - Do not add new animations without direction
+
+6. **Exception**: Bug fixes that restore intended UI behavior may be implemented, but must be clearly noted.
+
+## Implementation Workflow
+1. Identify UI-related code
+2. Analyze existing patterns and styles
+3. If UI modification is required, request explicit approval
+4. After approval, implement minimally invasive changes
+5. Document all visual changes made

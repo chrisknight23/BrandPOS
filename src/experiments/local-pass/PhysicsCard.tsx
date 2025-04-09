@@ -30,6 +30,12 @@ const ANIMATION_CONFIG = {
     mass: 0.6,
     restSpeed: 0.001,
     restDelta: 0.001
+  },
+  smooth: {
+    type: "spring" as const,
+    stiffness: 100,
+    damping: 15,
+    mass: 0.5
   }
 } as const;
 
@@ -85,6 +91,7 @@ const CardFace: React.FC<CardFaceProps> = ({
 export const PhysicsCard = () => {
   const controls = useAnimation();
   const lottieControls = useAnimation();
+  const numberControls = useAnimation(); // Animation controller for the number
   const [animationState, setAnimationState] = useState<CardState>('initial');
   const [isFlipped, setIsFlipped] = useState(false);
   const lottieContainer = useRef<HTMLDivElement>(null);
@@ -94,6 +101,11 @@ export const PhysicsCard = () => {
   // Simple number state
   const [showNumber, setShowNumber] = useState(false);
   const [cashbackAmount, setCashbackAmount] = useState(0);
+  
+  // Generate a random amount between $10-$50 (replace with actual logic based on user)
+  const generateRandomAmount = () => {
+    return Math.floor(Math.random() * 41) + 10; // Random between 10-50
+  };
 
   // Initialize Lottie
   useEffect(() => {
@@ -123,7 +135,7 @@ export const PhysicsCard = () => {
           
           // Then after a delay, update to the final amount to trigger animation
           setTimeout(() => {
-            setCashbackAmount(3.00); // Animate to exactly $3.00
+            setCashbackAmount(generateRandomAmount()); // Animate to a random amount
           }, DELAYS.ZERO_DISPLAY_DURATION);
         }
       });
@@ -161,6 +173,12 @@ export const PhysicsCard = () => {
     } else if (prevAnimationState.current === 'expanded' && animationState !== 'expanded') {
       // Keep number visible when leaving expanded state, but don't show it if it wasn't showing before
       // Don't reset the number state when transitioning to normal/compact
+    } else if (animationState === 'dropped' || animationState === 'initial') {
+      // Ensure number remains visible when switching between normal and compact states
+      if (showNumber && cashbackAmount > 0) {
+        // Number should stay visible with proper scaling
+        // No changes to showNumber or cashbackAmount
+      }
     }
     
     // Update previous state
@@ -197,13 +215,14 @@ export const PhysicsCard = () => {
   // We need to maintain the same visual size regardless of card scale
   const getNumberScale = (state: CardState) => {
     // For all states, we want to apply the inverse of the card scale
-    // This maintains the same apparent size regardless of card state
+    // This ensures the number appears to be "attached" to the card during transitions
     switch (state) {
       case 'expanded':
         return 1 / CARD_SCALES.EXPANDED; // Counter the expanded scale
       case 'dropped':
         return 1 / CARD_SCALES.COMPACT; // Counter the compact scale
       case 'initial':
+      default:
         return 1; // No scaling needed for normal state
     }
   };
@@ -220,6 +239,10 @@ export const PhysicsCard = () => {
           scale: 1 / CARD_SCALES.COMPACT,
           transition: ANIMATION_CONFIG.spring
         });
+        numberControls.start({
+          scale: 1 / CARD_SCALES.COMPACT,
+          transition: ANIMATION_CONFIG.smooth
+        });
         break;
       case 'expanded':
         controls.start({
@@ -229,6 +252,10 @@ export const PhysicsCard = () => {
         lottieControls.start({
           scale: 1 / CARD_SCALES.EXPANDED,
           transition: ANIMATION_CONFIG.spring
+        });
+        numberControls.start({
+          scale: 1 / CARD_SCALES.EXPANDED,
+          transition: ANIMATION_CONFIG.smooth
         });
         break;
       default:
@@ -240,8 +267,15 @@ export const PhysicsCard = () => {
           scale: 1,
           transition: ANIMATION_CONFIG.spring
         });
+        numberControls.start({
+          scale: 1,
+          transition: ANIMATION_CONFIG.smooth
+        });
     }
-  }, [animationState, controls, lottieControls]);
+    
+    // The number should be directly linked to the card movement
+    // This ensures it moves and scales with the card during state transitions
+  }, [animationState, controls, lottieControls, numberControls]);
 
   // Play lottie animation manually
   const playLottieAnimation = (e?: React.MouseEvent) => {
@@ -292,7 +326,7 @@ export const PhysicsCard = () => {
           </button>
         </div>
       )}
-
+      
       <motion.div
         animate={controls}
         initial={{ scale: CARD_SCALES.NORMAL }}
@@ -302,6 +336,7 @@ export const PhysicsCard = () => {
           perspective: '1200px'
         }}
         onClick={() => setIsFlipped(!isFlipped)}
+        layoutId="physics-card"
       >
         <motion.div
           className="w-full h-full relative"
@@ -350,28 +385,29 @@ export const PhysicsCard = () => {
                   className="absolute inset-0 flex items-center justify-center"
                   initial={{ opacity: 0 }}
                   animate={{ 
-                    opacity: 1,
-                    scale: getNumberScale(animationState)
+                    opacity: 1
                   }}
                   transition={{ 
-                    duration: 0.5,
-                    scale: {
-                      duration: 0.6,
-                      type: "spring",
-                      stiffness: 200,
-                      damping: 20
-                    }
+                    duration: 0.5
                   }}
                   style={{
-                    transformOrigin: 'center center'
+                    transformOrigin: 'center center',
+                    willChange: 'transform'
                   }}
+                  layoutId="animated-number-container"
                 >
-                  <AnimatedNumber 
-                    value={cashbackAmount}
-                    showDecimals={animationState === 'expanded'}
-                    showFormattedZero={animationState === 'expanded'}
-                    className="text-[60px]"
-                  />
+                  <motion.div 
+                    animate={numberControls}
+                    initial={{ scale: getNumberScale(animationState) }}
+                    style={{ transformOrigin: 'center center' }}
+                  >
+                    <AnimatedNumber 
+                      value={cashbackAmount}
+                      showDecimals={animationState === 'expanded'}
+                      showFormattedZero={animationState === 'expanded'}
+                      className="text-[50px]"
+                    />
+                  </motion.div>
                 </motion.div>
               )}
             </div>
