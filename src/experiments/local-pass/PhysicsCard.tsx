@@ -241,7 +241,7 @@ export const PhysicsCard = () => {
         });
         numberControls.start({
           scale: 1 / CARD_SCALES.COMPACT,
-          transition: ANIMATION_CONFIG.smooth
+          transition: ANIMATION_CONFIG.spring
         });
         break;
       case 'expanded':
@@ -255,7 +255,7 @@ export const PhysicsCard = () => {
         });
         numberControls.start({
           scale: 1 / CARD_SCALES.EXPANDED,
-          transition: ANIMATION_CONFIG.smooth
+          transition: ANIMATION_CONFIG.spring
         });
         break;
       default:
@@ -269,7 +269,7 @@ export const PhysicsCard = () => {
         });
         numberControls.start({
           scale: 1,
-          transition: ANIMATION_CONFIG.smooth
+          transition: ANIMATION_CONFIG.spring
         });
     }
     
@@ -360,55 +360,116 @@ export const PhysicsCard = () => {
             backgroundColor="bg-[#00B843]"
             animationState={animationState}
           >
-            <div className="w-full h-full flex items-center justify-center">
-              {/* Lottie Animation - only visible in expanded state */}
-              <motion.div 
-                ref={lottieContainer}
-                className="absolute inset-0 flex items-center justify-center"
-                animate={lottieControls}
-                initial={{ scale: 1 }}
-                style={{
-                  transformOrigin: 'center center',
-                  opacity: showNumber && animationState === 'expanded' ? 0 : animationState === 'expanded' ? 1 : 0
-                }}
-              >
-                {/* Lottie container with fixed dimensions */}
-                <div className="w-[200px] h-[200px]" style={{
-                  imageRendering: 'crisp-edges',
-                  shapeRendering: 'geometricPrecision'
-                }}/>
-              </motion.div>
-              
-              {/* AnimatedNumber - Absolutely positioned to center and visible in all states when showNumber is true */}
-              {showNumber && (
-                <motion.div
-                  className="absolute inset-0 flex items-center justify-center"
-                  initial={{ opacity: 0 }}
+            <div className="w-full h-full flex flex-col items-center justify-between p-5">
+              {/* Header with "Local Cash" text and $ icon */}
+              {animationState !== 'expanded' && (
+                <motion.div 
+                  className="w-full flex justify-between items-center"
                   animate={{ 
-                    opacity: 1
+                    opacity: animationState === 'dropped' ? 0 : 1 
                   }}
-                  transition={{ 
-                    duration: 0.5
-                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="text-white text-lg font-medium antialiased" style={{
+                    textRendering: 'optimizeLegibility',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale'
+                  }}>Local Cash</div>
+                  <div className="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                    <span className="text-white text-xl antialiased" style={{
+                      textRendering: 'optimizeLegibility',
+                      WebkitFontSmoothing: 'antialiased',
+                      MozOsxFontSmoothing: 'grayscale'
+                    }}>$</span>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Middle section with Lottie and AnimatedNumber */}
+              <div className="flex-1 w-full flex items-center justify-center relative">
+                {/* Lottie Animation - only visible in expanded state */}
+                <motion.div 
+                  ref={lottieContainer}
+                  className="absolute inset-0 flex items-center justify-center"
+                  animate={lottieControls}
+                  initial={{ scale: 1 }}
                   style={{
                     transformOrigin: 'center center',
-                    willChange: 'transform'
+                    opacity: showNumber && animationState === 'expanded' ? 0 : animationState === 'expanded' ? 1 : 0
                   }}
-                  layoutId="animated-number-container"
                 >
-                  <motion.div 
-                    animate={numberControls}
-                    initial={{ scale: getNumberScale(animationState) }}
-                    style={{ transformOrigin: 'center center' }}
-                  >
-                    <AnimatedNumber 
-                      value={cashbackAmount}
-                      showDecimals={animationState === 'expanded'}
-                      showFormattedZero={animationState === 'expanded'}
-                      className="text-[50px]"
-                    />
-                  </motion.div>
+                  {/* Lottie container with fixed dimensions */}
+                  <div className="w-[200px] h-[200px]" style={{
+                    imageRendering: 'crisp-edges',
+                    shapeRendering: 'geometricPrecision'
+                  }}/>
                 </motion.div>
+                
+                {/* AnimatedNumber - Absolutely positioned to center and visible in all states when showNumber is true */}
+                {showNumber && (
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ 
+                      opacity: 1
+                    }}
+                    transition={{ 
+                      duration: 0.5
+                    }}
+                    style={{
+                      transformOrigin: 'center center',
+                      willChange: 'transform'
+                    }}
+                    layoutId="animated-number-container"
+                  >
+                    <motion.div 
+                      animate={numberControls}
+                      initial={{ scale: getNumberScale(animationState) }}
+                      style={{ 
+                        transformOrigin: 'center center',
+                        willChange: 'transform, opacity'
+                      }}
+                    >
+                      <div className="flex items-center">
+                        <AnimatedNumber 
+                          value={cashbackAmount}
+                          showDecimals={animationState === 'expanded'}
+                          showFormattedZero={animationState === 'expanded'}
+                          className="text-[50px] text-white antialiased"
+                        />
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Footer with info text and button - hidden in expanded state */}
+              {animationState !== 'expanded' && (
+                <div className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]">
+                  {/* Temporarily hiding the informational text 
+                  <p className="text-white text-sm text-left antialiased" style={{
+                    textRendering: 'optimizeLegibility',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale'
+                  }}>
+                    You earn Local Cash back from tipping at local business. Spend it in Cash App.
+                  </p>
+                  */}
+                  <motion.button 
+                    className="w-full h-20 py-3 rounded-full bg-black bg-opacity-10 hover:bg-opacity-15 transition-colors text-white font-medium"
+                    onClick={(e) => e.stopPropagation()} // Prevent card flipping when clicking button
+                    animate={{ 
+                      opacity: animationState === 'dropped' ? 0 : 1 
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <span className="text-2xl font-cash-sans-medium antialiased" style={{
+                      textRendering: 'optimizeLegibility',
+                      WebkitFontSmoothing: 'antialiased',
+                      MozOsxFontSmoothing: 'grayscale'
+                    }}>Withdraw</span>
+                  </motion.button>
+                </div>
               )}
             </div>
           </CardFace>
