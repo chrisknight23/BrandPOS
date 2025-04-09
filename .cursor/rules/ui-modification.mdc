@@ -1,9 +1,4 @@
 ---
-description: 
-globs: 
-alwaysApply: true
----
- ---
 description: Rules for UI and visual modifications
 globs: ["src/**/*.tsx", "src/**/*.jsx", "src/**/*.css"]
 alwaysApply: true
@@ -52,4 +47,4 @@ alwaysApply: true
 2. Analyze existing patterns and styles
 3. If UI modification is required, request explicit approval
 4. After approval, implement minimally invasive changes
-5. Document all visual changes made
+5. Document all visual changes made 
