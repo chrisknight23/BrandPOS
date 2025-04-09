@@ -39,6 +39,7 @@ const DELAYS = {
   EXPANDED_ANIMATION: 650,   // Delay before playing animation in expanded state
   REPLAY_BUTTON_ANIMATION: 200,  // Delay when manually replaying animation
   NUMBER_ANIMATION: 1500,     // Delay before showing the animated number
+  ZERO_DISPLAY_DURATION: 1200, // How long to display 0.00 before animating
 } as const;
 
 // ============= Components =============
@@ -145,10 +146,10 @@ export const PhysicsCard = () => {
             setShowNumber(true);
             setCashbackAmount(0);
             
-            // Then after a short delay, update to the final amount to trigger animation
+            // Then after a longer delay, update to the final amount to trigger animation
             setTimeout(() => {
-              setCashbackAmount(28.45);
-            }, 100); // Short delay to ensure the zero renders first
+              setCashbackAmount(3.00); // Animate to exactly $3.00
+            }, DELAYS.ZERO_DISPLAY_DURATION); // Longer delay to show 0.00 for a while
           }, DELAYS.NUMBER_ANIMATION);
         }, DELAYS.EXPANDED_ANIMATION);
       }
@@ -239,10 +240,10 @@ export const PhysicsCard = () => {
           setShowNumber(true);
           setCashbackAmount(0);
           
-          // Then after a short delay, update to the final amount to trigger animation
+          // Then after a longer delay, update to the final amount to trigger animation
           setTimeout(() => {
-            setCashbackAmount(28.45);
-          }, 100); // Short delay to ensure the zero renders first
+            setCashbackAmount(3.00); // Animate to exactly $3.00
+          }, DELAYS.ZERO_DISPLAY_DURATION); // Longer delay to show 0.00 for a while
         }, DELAYS.NUMBER_ANIMATION);
       }, DELAYS.REPLAY_BUTTON_ANIMATION);
     }
