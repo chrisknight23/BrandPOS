@@ -157,7 +157,9 @@ export const MainView = () => {
         ...baseProps,
         amount: calculateTotalAmount(),
         baseAmount: baseAmount || undefined,
-        tipAmount: tipAmount || undefined
+        tipAmount: tipAmount || undefined,
+        goToScreen: goToScreen,  // Pass direct navigation function to End
+        resetToHome: handleReset  // Also pass reset function as an alternative
       };
     } else if (currentScreen === 'Cart' || currentScreen === 'TapToPay') {
       return {
