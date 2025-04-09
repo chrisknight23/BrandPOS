@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LocalCashIcon from '../../assets/images/Local-Cash-32px.svg';
 import TipButton from '../../components/common/TipButton';
 import { useState, useEffect } from 'react';
+import { Screen } from '../../types/screen';
 
 interface TippingProps {
   onNext: (amount: string) => void;
+  goToScreen?: (screen: Screen) => void; // Add optional prop for direct navigation
 }
 
-export const Tipping = ({ onNext }: TippingProps) => {
+export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
   const [selectedAmount, setSelectedAmount] = useState<string | null>(null);
   const [isExiting, setIsExiting] = useState(false);
 
@@ -27,6 +29,17 @@ export const Tipping = ({ onNext }: TippingProps) => {
 
   const handleCustomOrNoTip = () => {
     setSelectedAmount('0');
+  };
+  
+  // New handler specifically for "No tip" button
+  const handleNoTip = () => {
+    if (goToScreen) {
+      // If goToScreen is provided, navigate directly to End
+      goToScreen('End');
+    } else {
+      // Fallback to regular navigation with a tip amount of 0
+      onNext('0');
+    }
   };
 
   const tipAmounts = ["1", "2", "3"];
@@ -56,19 +69,22 @@ export const Tipping = ({ onNext }: TippingProps) => {
     // Initial hidden state: smaller scale, offset position, and transparent
     hidden: { 
       scale: 0.9, 
-      y: 0, 
-      opacity: 0 
+      opacity: 0,
+      // Ensure stable position during animation
+      y: 0
     },
     // Final visible state: natural scale, position, and fully visible
     visible: { 
       scale: 1, 
-      y: 0, 
       opacity: 1,
+      y: 0,
       // Spring animation for natural bouncy entrance
       transition: {
         type: "spring",
         stiffness: 200,
-        damping: 20
+        damping: 20,
+        // Make sure opacity completes with the scaling to avoid flickering
+        opacity: { duration: 0.3 }
       }
     }
   };
@@ -88,20 +104,18 @@ export const Tipping = ({ onNext }: TippingProps) => {
 
   // Button-specific entrance animation that can be passed to TipButton
   const buttonEntranceAnimation = {
-    initial: { scale: 0.9, opacity: 0 },
-    animate: { scale: 1, opacity: 1 },
+    initial: { backgroundColor: '#1189D6', scale: 0.97, opacity: 0 },
+    animate: { backgroundColor: '#1189D6', scale: 1, opacity: 1 },
     transition: {
       type: "spring",
       stiffness: 300,
-      damping: 20,
-      scale: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20
-      },
-      opacity: {
-        duration: 0.3
-      }
+      damping: 25,
+      mass: 1,
+      // Ensure consistent timing for layout and content
+      layout: true,
+      duration: 0.35,
+      // Make opacity match the scaling animation
+      opacity: { duration: 0.3 }
     }
   };
 
@@ -200,9 +214,9 @@ export const Tipping = ({ onNext }: TippingProps) => {
                   layoutId={`tip-amount-${amount}`}
                   onClick={() => handleAmountClick(amount)}
                   isSelected={selectedAmount === amount && !isExiting}
-                  // Optional: Apply additional entrance animation directly to the button
-                  // Commented out because we're using the parent's staggered animation
-                  // {...buttonEntranceAnimation}
+                  // Apply additional entrance animation directly to the button
+                  // This helps create a more stable animation
+                  {...buttonEntranceAnimation}
                 />
               </motion.div>
             ))}
@@ -228,7 +242,7 @@ export const Tipping = ({ onNext }: TippingProps) => {
                 {['Custom', 'No tip'].map((text) => (
                   <button
                     key={text}
-                    onClick={handleCustomOrNoTip}
+                    onClick={text === 'No tip' ? handleNoTip : handleCustomOrNoTip}
                     className="py-6 bg-white/15 rounded-[12px] text-[32px] font-medium font-cash active:bg-white/20 transition-colors"
                   >
                     {text}

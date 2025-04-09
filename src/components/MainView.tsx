@@ -164,6 +164,11 @@ export const MainView = () => {
         ...baseProps,
         amount: baseAmount || undefined
       };
+    } else if (currentScreen === 'Tipping') {
+      return {
+        ...baseProps,
+        goToScreen: goToScreen  // Pass direct navigation function to Tipping
+      };
     } else {
       return baseProps;
     }
