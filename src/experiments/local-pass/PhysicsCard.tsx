@@ -113,6 +113,21 @@ export const PhysicsCard = () => {
         }
       });
 
+      // Add completion listener to know when animation finishes
+      anim.addEventListener('complete', () => {
+        // Only handle completion in expanded state
+        if (animationState === 'expanded') {
+          // Show the number after the lottie animation completes
+          setShowNumber(true);
+          setCashbackAmount(0);
+          
+          // Then after a delay, update to the final amount to trigger animation
+          setTimeout(() => {
+            setCashbackAmount(3.00); // Animate to exactly $3.00
+          }, DELAYS.ZERO_DISPLAY_DURATION);
+        }
+      });
+
       lottieAnimRef.current = anim;
 
       // Start animation after a delay
@@ -123,10 +138,11 @@ export const PhysicsCard = () => {
 
     return () => {
       if (anim) {
+        anim.removeEventListener('complete');
         anim.destroy();
       }
     };
-  }, []);
+  }, [animationState]);
 
   // Handle animation when card state changes
   useEffect(() => {
@@ -139,18 +155,7 @@ export const PhysicsCard = () => {
         // Play lottie animation after card expansion
         setTimeout(() => {
           lottieAnimRef.current.play();
-          
-          // Show the number after the lottie animation
-          setTimeout(() => {
-            // First show 0.00
-            setShowNumber(true);
-            setCashbackAmount(0);
-            
-            // Then after a longer delay, update to the final amount to trigger animation
-            setTimeout(() => {
-              setCashbackAmount(3.00); // Animate to exactly $3.00
-            }, DELAYS.ZERO_DISPLAY_DURATION); // Longer delay to show 0.00 for a while
-          }, DELAYS.NUMBER_ANIMATION);
+          // Number will be shown via the 'complete' event listener now
         }, DELAYS.EXPANDED_ANIMATION);
       }
     } else if (animationState !== 'expanded') {
@@ -233,18 +238,7 @@ export const PhysicsCard = () => {
       
       setTimeout(() => {
         lottieAnimRef.current.play();
-        
-        // Show the number after animation
-        setTimeout(() => {
-          // First show 0.00
-          setShowNumber(true);
-          setCashbackAmount(0);
-          
-          // Then after a longer delay, update to the final amount to trigger animation
-          setTimeout(() => {
-            setCashbackAmount(3.00); // Animate to exactly $3.00
-          }, DELAYS.ZERO_DISPLAY_DURATION); // Longer delay to show 0.00 for a while
-        }, DELAYS.NUMBER_ANIMATION);
+        // Number will be shown via the 'complete' event listener
       }, DELAYS.REPLAY_BUTTON_ANIMATION);
     }
   };
