@@ -311,7 +311,7 @@ export const PhysicsCard = () => {
             animationState={animationState}
           >
             <div className="w-full h-full flex items-center justify-center">
-              {/* Lottie Animation - absolutely positioned for perfect centering */}
+              {/* Lottie Animation - only visible in expanded state */}
               <motion.div 
                 ref={lottieContainer}
                 className="absolute inset-0 flex items-center justify-center"
@@ -319,7 +319,7 @@ export const PhysicsCard = () => {
                 initial={{ scale: 1 }}
                 style={{
                   transformOrigin: 'center center',
-                  opacity: showNumber && animationState === 'expanded' ? 0 : 1
+                  opacity: showNumber && animationState === 'expanded' ? 0 : animationState === 'expanded' ? 1 : 0
                 }}
               >
                 {/* Lottie container with fixed dimensions */}
