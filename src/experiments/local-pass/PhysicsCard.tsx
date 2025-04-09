@@ -193,6 +193,21 @@ export const PhysicsCard = () => {
     }
   };
 
+  // Calculate appropriate scale for the AnimatedNumber based on card state
+  // We need to maintain the same visual size regardless of card scale
+  const getNumberScale = (state: CardState) => {
+    // For all states, we want to apply the inverse of the card scale
+    // This maintains the same apparent size regardless of card state
+    switch (state) {
+      case 'expanded':
+        return 1 / CARD_SCALES.EXPANDED; // Counter the expanded scale
+      case 'dropped':
+        return 1 / CARD_SCALES.COMPACT; // Counter the compact scale
+      case 'initial':
+        return 1; // No scaling needed for normal state
+    }
+  };
+
   // Handle card scale animations
   useEffect(() => {
     switch (animationState) {
@@ -240,18 +255,6 @@ export const PhysicsCard = () => {
         lottieAnimRef.current.play();
         // Number will be shown via the 'complete' event listener
       }, DELAYS.REPLAY_BUTTON_ANIMATION);
-    }
-  };
-
-  // Calculate appropriate scale for the AnimatedNumber based on card state
-  const getNumberScale = (state: CardState) => {
-    switch (state) {
-      case 'expanded':
-        return 1 / CARD_SCALES.EXPANDED;
-      case 'dropped':
-        return 1 / CARD_SCALES.COMPACT;
-      default:
-        return 1; // Normal state doesn't need counter-scaling
     }
   };
 
@@ -346,11 +349,21 @@ export const PhysicsCard = () => {
                 <motion.div
                   className="absolute inset-0 flex items-center justify-center"
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  style={{
-                    transformOrigin: 'center center',
+                  animate={{ 
+                    opacity: 1,
                     scale: getNumberScale(animationState)
+                  }}
+                  transition={{ 
+                    duration: 0.5,
+                    scale: {
+                      duration: 0.6,
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 20
+                    }
+                  }}
+                  style={{
+                    transformOrigin: 'center center'
                   }}
                 >
                   <AnimatedNumber 
