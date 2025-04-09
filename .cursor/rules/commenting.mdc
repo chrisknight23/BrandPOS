@@ -1,10 +1,74 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: true
 ---
+# Commenting Standards
 
-# Your rule content
+## Component Documentation
+Each component file should include clear, descriptive comments that outline its structure and behavior.
 
-- You can @ files here
-- You can use markdown but dont have to
+### Section Blocks
+Use descriptive block comments to separate major sections:
+```tsx
+{/* Header Container */}
+{/* Left side: Avatar and Title */}
+{/* Right side: Interactive Elements */}
+```
+
+### Animation Documentation
+Document animation sequences with timing and behavior:
+```tsx
+{/* Button animation:
+  - Initial: Scale 0.7, opacity 0
+  - Animate to: Scale 1.0, opacity 1
+  - Duration: 0.5s, delay 0.2s
+  - Ease: [0.32, 0.72, 0, 1]
+*/}
+```
+
+### Layout Structure
+Document complex layouts and their relationships:
+```tsx
+{/* Grid layout: 3 columns
+  - Equal width columns
+  - 12px gap between items
+  - Full height of container
+*/}
+```
+
+### Interactive Elements
+Document user interaction patterns:
+```tsx
+{/* Local Cash Button:
+  - Expands from icon-only (56px) to full width
+  - Text slides in from right
+  - Icon remains fixed in position
+  - 8px gap between text and icon
+*/}
+```
+
+## Comment Guidelines
+Comments should:
+- Be concise but descriptive
+- Explain the "why" when not obvious
+- Group related elements
+- Highlight important animation or interaction details
+- Use consistent formatting and indentation
+- Focus on complex logic or non-obvious implementations
+
+## Formatting
+- Use consistent indentation for nested comments
+- Keep related comments close to their code
+- Use blank lines to separate major sections
+- Maintain a hierarchy of information (major sections → subsections → details)
+
+## When to Comment
+Add comments for:
+- Complex animations or transitions
+- Non-obvious layout decisions
+- State management logic
+- Conditional rendering
+- Custom hooks or utilities
+- Accessibility implementations
+- Performance optimizations 
