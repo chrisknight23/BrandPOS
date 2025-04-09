@@ -158,9 +158,9 @@ export const PhysicsCard = () => {
           // Number will be shown via the 'complete' event listener now
         }, DELAYS.EXPANDED_ANIMATION);
       }
-    } else if (animationState !== 'expanded') {
-      // Hide number when not expanded
-      setShowNumber(false);
+    } else if (prevAnimationState.current === 'expanded' && animationState !== 'expanded') {
+      // Keep number visible when leaving expanded state, but don't show it if it wasn't showing before
+      // Don't reset the number state when transitioning to normal/compact
     }
     
     // Update previous state
@@ -240,6 +240,18 @@ export const PhysicsCard = () => {
         lottieAnimRef.current.play();
         // Number will be shown via the 'complete' event listener
       }, DELAYS.REPLAY_BUTTON_ANIMATION);
+    }
+  };
+
+  // Calculate appropriate scale for the AnimatedNumber based on card state
+  const getNumberScale = (state: CardState) => {
+    switch (state) {
+      case 'expanded':
+        return 1 / CARD_SCALES.EXPANDED;
+      case 'dropped':
+        return 1 / CARD_SCALES.COMPACT;
+      default:
+        return 1; // Normal state doesn't need counter-scaling
     }
   };
 
@@ -329,7 +341,7 @@ export const PhysicsCard = () => {
                 }}/>
               </motion.div>
               
-              {/* AnimatedNumber - Absolutely positioned to center */}
+              {/* AnimatedNumber - Absolutely positioned to center and visible in all states when showNumber is true */}
               {showNumber && (
                 <motion.div
                   className="absolute inset-0 flex items-center justify-center"
@@ -338,7 +350,7 @@ export const PhysicsCard = () => {
                   transition={{ duration: 0.5 }}
                   style={{
                     transformOrigin: 'center center',
-                    scale: 1 / CARD_SCALES.EXPANDED
+                    scale: getNumberScale(animationState)
                   }}
                 >
                   <AnimatedNumber 
