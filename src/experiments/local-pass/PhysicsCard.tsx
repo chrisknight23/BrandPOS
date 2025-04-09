@@ -315,20 +315,24 @@ export const PhysicsCard = () => {
             backgroundColor="bg-[#00B843]"
             animationState={animationState}
           >
-            <div className="w-full h-full flex flex-col items-center justify-center relative">
-              {/* Lottie Animation - always render but conditionally hide */}
+            <div className="w-full h-full flex items-center justify-center">
+              {/* Lottie Animation - absolutely positioned for perfect centering */}
               <motion.div 
                 ref={lottieContainer}
-                className="w-[200px] h-[200px]"
+                className="absolute inset-0 flex items-center justify-center"
                 animate={lottieControls}
                 initial={{ scale: 1 }}
                 style={{
-                  imageRendering: 'crisp-edges',
-                  shapeRendering: 'geometricPrecision',
                   transformOrigin: 'center center',
                   opacity: showNumber && animationState === 'expanded' ? 0 : 1
                 }}
-              />
+              >
+                {/* Lottie container with fixed dimensions */}
+                <div className="w-[200px] h-[200px]" style={{
+                  imageRendering: 'crisp-edges',
+                  shapeRendering: 'geometricPrecision'
+                }}/>
+              </motion.div>
               
               {/* AnimatedNumber - Absolutely positioned to center */}
               {showNumber && (
