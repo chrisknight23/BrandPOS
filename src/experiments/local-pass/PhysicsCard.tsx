@@ -368,8 +368,8 @@ export const PhysicsCard = () => {
                 >
                   <AnimatedNumber 
                     value={cashbackAmount}
-                    showDecimals={true}
-                    showFormattedZero={true}
+                    showDecimals={animationState === 'expanded'}
+                    showFormattedZero={animationState === 'expanded'}
                     className="text-[60px]"
                   />
                 </motion.div>
