@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { AnimatedNumber } from '../../components/common/AnimatedNumber';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type NumberFormat = 'whole' | 'hundreds' | 'thousands';
+type NumberFormat = 'whole' | 'hundreds' | 'thousands' | 'no-numbers';
 
 const FORMAT_OPTIONS: Record<NumberFormat, string> = {
   'whole': 'Whole Numbers',
   'hundreds': 'Hundreds',
-  'thousands': 'Thousands'
+  'thousands': 'Thousands',
+  'no-numbers': 'No Numbers'
 };
 
 export const AnimatingNumberExperiment = () => {
@@ -60,6 +61,10 @@ export const AnimatingNumberExperiment = () => {
       case 'thousands':
         // Generate a multiple of 1000 between 1000 and 9000
         randomValue = Math.floor(Math.random() * 9) + 1;
+        break;
+      case 'no-numbers':
+        // Set to 0 for showOnlyDollarSign mode
+        randomValue = 0;
         break;
       default:
         randomValue = Math.floor(Math.random() * 100);
@@ -187,6 +192,7 @@ export const AnimatingNumberExperiment = () => {
           showDollarSign 
           showDecimals={showDecimals}
           showFormattedZero={true}  // Always use formatted zero to ensure 0.00 displays properly
+          showOnlyDollarSign={format === 'no-numbers'}
           className="text-[100px]"
         />
       </div>

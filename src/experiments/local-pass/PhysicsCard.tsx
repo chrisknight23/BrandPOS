@@ -125,11 +125,26 @@ export const PhysicsCard = () => {
         }
       });
 
+      // Reset any previous styles first
+      lottieContainer.current.style.cssText = '';
+      
+      // Center positioning without transforms
+      lottieContainer.current.style.position = 'absolute';
+      lottieContainer.current.style.width = '158px';
+      lottieContainer.current.style.height = '158px';
+      lottieContainer.current.style.top = '50%';
+      lottieContainer.current.style.left = '50%';
+      lottieContainer.current.style.marginLeft = '-79px'; // Half the width
+      lottieContainer.current.style.marginTop = '-79px'; // Half the height
+      
+      // Add a debug border to see the container boundaries
+      // lottieContainer.current.style.border = '1px solid white';
+
       // Add completion listener to know when animation finishes
       anim.addEventListener('complete', () => {
         // Only handle completion in expanded state
         if (animationState === 'expanded') {
-          // Show the number after the lottie animation completes
+          // Show the number after the lottie animation completes - initially only the $ sign
           setShowNumber(true);
           setCashbackAmount(0);
           
@@ -189,7 +204,7 @@ export const PhysicsCard = () => {
   const getLottieScale = (state: CardState) => {
     switch (state) {
       case 'expanded':
-        return 1 / CARD_SCALES.EXPANDED;
+        return 1 / CARD_SCALES.EXPANDED; // Counter the expanded scale
       case 'dropped':
         return 1 / CARD_SCALES.COMPACT;
       default:
@@ -250,7 +265,7 @@ export const PhysicsCard = () => {
           transition: ANIMATION_CONFIG.spring
         });
         lottieControls.start({
-          scale: 1 / CARD_SCALES.EXPANDED,
+          scale: 1 / CARD_SCALES.EXPANDED, // Counter-scale to maintain size
           transition: ANIMATION_CONFIG.spring
         });
         numberControls.start({
@@ -387,38 +402,31 @@ export const PhysicsCard = () => {
 
               {/* Middle section with Lottie and AnimatedNumber */}
               <div className="flex-1 w-full flex items-center justify-center relative">
-                {/* Lottie Animation - only visible in expanded state */}
-                <motion.div 
-                  ref={lottieContainer}
-                  className="absolute inset-0 flex items-center justify-center"
-                  animate={lottieControls}
-                  initial={{ scale: 1 }}
-                  style={{
-                    transformOrigin: 'center center',
-                    opacity: showNumber && animationState === 'expanded' ? 0 : animationState === 'expanded' ? 1 : 0
-                  }}
-                >
-                  {/* Lottie container with fixed dimensions */}
-                  <div className="w-[200px] h-[200px]" style={{
-                    imageRendering: 'crisp-edges',
-                    shapeRendering: 'geometricPrecision'
-                  }}/>
-                </motion.div>
+              
+                {/* Create a centered container for the Lottie animation - only visible in expanded state */}
+                {animationState === 'expanded' && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {/* Lottie Animation */}
+                    <motion.div 
+                      ref={lottieContainer}
+                      animate={lottieControls}
+                      initial={{ scale: 1 }}
+                      style={{
+                        transformOrigin: 'center center',
+                        opacity: showNumber ? 0 : 1
+                      }}
+                    />
+                  </div>
+                )}
                 
                 {/* AnimatedNumber - Absolutely positioned to center and visible in all states when showNumber is true */}
                 {showNumber && (
                   <motion.div
                     className="absolute inset-0 flex items-center justify-center"
-                    initial={{ opacity: 0 }}
-                    animate={{ 
-                      opacity: 1
-                    }}
-                    transition={{ 
-                      duration: 0.5
-                    }}
                     style={{
                       transformOrigin: 'center center',
-                      willChange: 'transform'
+                      willChange: 'transform',
+                      opacity: 1
                     }}
                     layoutId="animated-number-container"
                   >
@@ -433,8 +441,9 @@ export const PhysicsCard = () => {
                       <div className="flex items-center">
                         <AnimatedNumber 
                           value={cashbackAmount}
-                          showDecimals={animationState === 'expanded'}
-                          showFormattedZero={animationState === 'expanded'}
+                          showDecimals={animationState === 'expanded' && cashbackAmount > 0}
+                          showFormattedZero={false}
+                          showOnlyDollarSign={animationState === 'dropped' || cashbackAmount === 0}
                           className="text-[50px] text-white antialiased"
                         />
                       </div>

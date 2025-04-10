@@ -25,6 +25,11 @@ interface AnimatedNumberProps {
    * @default false
    */
   showFormattedZero?: boolean;
+  /**
+   * Whether to show only the dollar sign without any digits
+   * @default false
+   */
+  showOnlyDollarSign?: boolean;
 }
 
 // Helper function to format numbers and calculate separator positions
@@ -59,6 +64,9 @@ const formatNumber = (num: number, showDecimals: boolean, showFormattedZero: boo
   const str = showDecimals ? num.toFixed(2) : Math.round(num).toString();
   const [whole, decimal] = str.split('.');
   
+  // Add commas to whole number part
+  const withCommas = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
   // Split into digits and find separator positions
   const digits = showDecimals 
     ? (whole + decimal).split('').map(Number)
@@ -80,7 +88,6 @@ const DigitRoller: React.FC<{
   isBeforeDecimal?: boolean,
   isAfterDollarSign?: boolean,
   nextIsOne?: boolean,
-  isDecimalPart?: boolean,
   onAnimationComplete?: () => void
 }> = ({ 
   value, 
@@ -89,51 +96,34 @@ const DigitRoller: React.FC<{
   isBeforeDecimal,
   isAfterDollarSign,
   nextIsOne,
-  isDecimalPart,
   onAnimationComplete
 }) => {
-  // Use useRef instead of useState to avoid triggering re-renders
+  // Track previous value and animation state with refs to avoid re-renders
   const prevValueRef = useRef(isNew || isDecimalDigit ? 0 : value);
   const hasAnimatedRef = useRef(false);
-  const [animatedValue, setAnimatedValue] = useState(prevValueRef.current);
+  const [prevValue, setPrevValue] = useState(prevValueRef.current);
   const sequence = Array.from({ length: 10 }, (_, i) => i);
   const height = 120;
   
-  // This effect runs once on mount to setup initial value
+  // Fix infinite update loop by using refs to track state changes
   useEffect(() => {
-    if (isNew || isDecimalDigit) {
-      prevValueRef.current = 0;
-    } else {
-      prevValueRef.current = value;
-    }
-    setAnimatedValue(prevValueRef.current);
-  }, []); // Empty dependency array means this runs once on mount
-  
-  // This effect handles value changes
-  useEffect(() => {
-    // Skip if value hasn't changed from what we're already showing
-    if (value === animatedValue) return;
-    
-    // If the digit is new or a decimal digit and we haven't animated yet
-    if ((isNew || isDecimalDigit) && !hasAnimatedRef.current) {
-      // Important: Always start new/decimal digits from 0, then animate to final value
+    if (!hasAnimatedRef.current) {
+      prevValueRef.current = isNew || isDecimalDigit ? 0 : value;
+      setPrevValue(prevValueRef.current);
       hasAnimatedRef.current = true;
-      // For new digits, make sure we always start from 0
-      setAnimatedValue(0);
-      // The onAnimationComplete handler will trigger the animation to the actual value
-    } 
-    // Reset for zero
-    else if (value === 0) {
+    } else if (value === 0) {
       prevValueRef.current = 0;
       hasAnimatedRef.current = false;
-      setAnimatedValue(0);
-    }
-    // Normal value change
-    else if (value !== prevValueRef.current) {
+      setPrevValue(0);
+    } else if (isNew || isDecimalDigit) {
+      // Keep it at 0 initially
+      setPrevValue(0);
+    } else if (value !== prevValueRef.current) {
+      // Only update if value has changed
       prevValueRef.current = value;
-      setAnimatedValue(value);
+      setPrevValue(value);
     }
-  }, [value, isNew, isDecimalDigit, animatedValue]);
+  }, [value, isNew, isDecimalDigit]); // Remove hasAnimated from dependencies
 
   return (
     <div className="relative h-[120px] overflow-hidden w-[60px]">
@@ -141,31 +131,26 @@ const DigitRoller: React.FC<{
         className="absolute inset-0"
         initial={false}
         animate={{ 
-          y: -animatedValue * height 
+          y: -prevValue * height 
         }}
         onAnimationComplete={() => {
           // After the slide-in animation completes, start rolling up from 0
-          if ((isNew || isDecimalDigit) && animatedValue === 0 && value !== 0) {
+          if ((isNew || isDecimalDigit) && prevValue === 0) {
             prevValueRef.current = value;
-            setAnimatedValue(value);
+            setPrevValue(value);
           }
           onAnimationComplete?.();
         }}
         transition={{ 
-          duration: isDecimalPart ? 0 : 0.75, // Zero duration for decimal digits
+          duration: 0.75,
           ease: [0.32, 0.72, 0, 1],
-          type: "tween",
-          // For new digits, use a slightly different timing to emphasize the roll-up effect
-          ...(isNew && {
-            duration: 0.95,
-            ease: [0.25, 0.1, 0.25, 1.0],
-          })
+          type: "tween"
         }}
       >
         {sequence.map((num) => (
           <div
             key={num}
-            className="flex items-center justify-center h-[120px] font-cash font-medium text-[100px] text-white"
+            className="flex items-center justify-center h-[120px] font-cash font-medium text-[100px]"
             style={{
               width: '60px',
               transform: num === 1 
@@ -192,7 +177,7 @@ const Separator = React.forwardRef<HTMLDivElement, { char: string, layoutId: str
     <motion.div
       ref={ref}
       layoutId={layoutId}
-      className="flex items-center h-[120px] mx-[2px] font-cash font-medium text-[100px] text-white"
+      className="flex items-center h-[120px] mx-[2px] font-cash font-medium text-[100px]"
     >
       {char}
     </motion.div>
@@ -206,38 +191,35 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
   showDollarSign = true,
   showDecimals = true,
   className = '',
-  showFormattedZero = false
+  showFormattedZero = false,
+  showOnlyDollarSign = false
 }) => {
-  // Use a ref for prev value to avoid triggering re-renders
-  const prevValueRef = useRef(value);
-  const [formattedValue, setFormattedValue] = useState(value);
-  const { digits, separatorPositions } = formatNumber(formattedValue, showDecimals, showFormattedZero);
-  const prevFormatted = formatNumber(prevValueRef.current, showDecimals, showFormattedZero);
+  const [prevValue, setPrevValue] = useState(value);
+  const { digits, separatorPositions } = formatNumber(value, showDecimals, showFormattedZero);
+  const prevFormatted = formatNumber(prevValue, showDecimals, showFormattedZero);
   
   // Track first digit for dollar sign spacing
   const firstDigitIs7 = digits[0] === 7;
   const firstDigitIs1 = digits[0] === 1;
   const firstTwoAre11 = firstDigitIs1 && digits[1] === 1;
   
-  // Update on value changes
-  useEffect(() => {
-    // Only update if the value has actually changed
-    if (value !== formattedValue) {
-      prevValueRef.current = formattedValue;
-      setFormattedValue(value);
+  React.useEffect(() => {
+    if (value === 0) {
+      setPrevValue(0);
+    } else {
+      setPrevValue(value);
     }
-  }, [value, formattedValue]);
+  }, [value]);
 
   const renderContent = () => {
-    let wholeNumberContent: JSX.Element[] = [];
-    let decimalContent: JSX.Element[] = [];
-    
+    let content: JSX.Element[] = [];
+
     // Add dollar sign if needed
     if (showDollarSign) {
-      wholeNumberContent.push(
+      content.push(
         <motion.span 
           key="dollar-sign"
-          className="flex items-center h-[120px] font-cash font-medium text-[100px] text-white"
+          className="flex items-center h-[120px] font-cash font-medium text-[100px]"
           layout
           style={{ 
             marginRight: firstDigitIs7 ? 0 : firstTwoAre11 ? -20 : firstDigitIs1 ? -8 : 8,
@@ -249,54 +231,38 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
       );
     }
 
-    // Only skip separators when showing a simple zero without formatting
-    const isSimpleZero = formattedValue === 0 && (!showDecimals || !showFormattedZero);
-    
-    // Calculate where the decimal starts for the current value
-    const decimalStartsAt = separatorPositions.decimal !== null ? separatorPositions.decimal : digits.length;
+    // If we're showing only the dollar sign, return early
+    if (showOnlyDollarSign) {
+      return content;
+    }
+
+    // Don't show any separators when transitioning to zero (unless showing formatted zero)
+    const isTransitioningToZero = value === 0 && !showFormattedZero;
 
     // Render all digits with separators in the correct positions
     digits.forEach((digit, index) => {
-      const isAfterDecimal = showDecimals && separatorPositions.decimal !== null && index > separatorPositions.decimal;
+      // Check if this digit is new or a decimal digit
+      const isAfterDecimal = separatorPositions.decimal !== null && index >= separatorPositions.decimal;
       const wasAfterDecimal = prevFormatted.separatorPositions.decimal !== null && 
-                             index > prevFormatted.separatorPositions.decimal;
+                             index >= prevFormatted.separatorPositions.decimal;
       
-      // Improved detection of new digits - a digit is new if:
-      // 1. It didn't exist in the previous number (e.g., going from 1 to 12, the '2' is new)
-      // 2. Or if this position existed but had a different value
-      const isNewlyAdded = index >= prevFormatted.digits.length;
-      const didNumberLengthChange = digits.length !== prevFormatted.digits.length;
-      
-      // A digit is considered new in several cases:
-      // - It's a newly added position (1->12, the 2 is new)
-      // - Number of digits changed (9->10, both 1 and 0 are "new" positions)
-      // - For the most significant positions when the length changes (9->10, the 1 is definitely new)
-      const isNewDigit = !showFormattedZero && (
-        isNewlyAdded || 
-        (digit !== prevFormatted.digits[index] && (
-          // Position previously didn't exist or number length changed
-          isNewlyAdded || didNumberLengthChange || 
-          // Special case for most significant digit when length changes
-          (didNumberLengthChange && index === 0)
-        ))
-      );
-      
-      const isDecimalDigit = !showFormattedZero && isAfterDecimal && !wasAfterDecimal;
+      const isNewDigit = index >= prevFormatted.digits.length || 
+                        digit !== prevFormatted.digits[index];
+      const isDecimalDigit = isAfterDecimal && !prevFormatted.separatorPositions.decimal;
       const isFirstDigit = index === 0;
 
-      // Create digit element
-      const digitElement = (
+      // Add digit
+      content.push(
         <motion.div 
           key={`digit-${index}`}
           layout
           className="w-[60px]"
           style={{
-            transform: digit === 1 && index < digits.length - 1 && digits[index + 1] === 1 ? 'translateX(-10px)' : 'none',
-            opacity: 1
+            transform: digit === 1 && index < digits.length - 1 && digits[index + 1] === 1 ? 'translateX(-10px)' : 'none'
           }}
-          initial={isNewDigit ? { 
+          initial={isNewDigit || isDecimalDigit ? { 
             x: 20,
-            opacity: isAfterDecimal ? 1 : 0
+            opacity: 0
           } : undefined}
           animate={{ 
             x: 0,
@@ -304,7 +270,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
           }}
           exit={{
             x: -20,
-            opacity: isAfterDecimal ? 1 : 0
+            opacity: 0
           }}
           transition={{
             duration: 0.75,
@@ -322,7 +288,6 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
             isBeforeDecimal={separatorPositions.decimal !== null && index === separatorPositions.decimal - 1}
             isAfterDollarSign={isFirstDigit}
             nextIsOne={index < digits.length - 1 && digits[index + 1] === 1}
-            isDecimalPart={index >= decimalStartsAt}
             onAnimationComplete={() => {
               // Animation completion handler if needed
             }}
@@ -330,19 +295,12 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
         </motion.div>
       );
 
-      // Add to the appropriate array based on position
-      if (index < decimalStartsAt) {
-        wholeNumberContent.push(digitElement);
-      } else if (showDecimals) {
-        decimalContent.push(digitElement);
-      }
-
       // Only add separators if we're not transitioning to zero
-      if (!isSimpleZero) {
+      if (!isTransitioningToZero) {
         // Add comma if needed
         if (separatorPositions.commas !== null && 
             index === separatorPositions.commas - 1) {
-          wholeNumberContent.push(
+          content.push(
             <motion.div
               key="comma"
               initial={{ opacity: 0 }}
@@ -360,26 +318,33 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
 
         // Add decimal point after whole number
         if (separatorPositions.decimal !== null && 
-            index === separatorPositions.decimal - 1 && 
-            showDecimals) {
-          decimalContent.unshift(
-            <div
+            index === separatorPositions.decimal - 1) {
+          content.push(
+            <motion.div
               key="decimal"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{ 
+                marginLeft: digit === 7 ? -12 : 0
+              }}
+              transition={{
+                duration: 0.75,
+                ease: [0.32, 0.72, 0, 1]
+              }}
             >
               <Separator layoutId="decimal" char="." />
-            </div>
+            </motion.div>
           );
         }
       }
     });
 
-    return { wholeNumberContent, decimalContent };
+    return content;
   };
 
-  const { wholeNumberContent, decimalContent } = renderContent();
-
   return (
-    <div className={`flex items-center justify-center text-white ${className}`}>
+    <div className={`flex items-center justify-center ${className}`}>
       <motion.div 
         className="flex items-center relative"
         layout
@@ -389,13 +354,9 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
         }}
       >
         <div className="flex">
-          {/* Always render whole number part with animations */}
           <AnimatePresence mode="popLayout" initial={false}>
-            {wholeNumberContent}
+            {renderContent()}
           </AnimatePresence>
-          
-          {/* Only render decimal part when showDecimals is true */}
-          {showDecimals && decimalContent}
         </div>
       </motion.div>
     </div>

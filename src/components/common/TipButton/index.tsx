@@ -36,15 +36,14 @@ export const TipButton = ({
 
   // Default transition settings if not provided by parent
   const defaultTransition = {
-    layout: {
-      type: "spring",
-      stiffness: 300,
-      damping: 30
-    },
+    // Use layout: true for smoother layout transitions
+    layout: true,
     backgroundColor: {
       type: "tween",
       duration: 0.3
-    }
+    },
+    // Add default duration to ensure consistent timing
+    duration: 0.3
   };
 
   // Merge default transitions with any custom ones from parent
@@ -62,7 +61,7 @@ export const TipButton = ({
         ...(animate || {}) // Allow parent to provide additional animations
       }}
       // Allow parent to provide initial state
-      initial={initial}
+      initial={initial || { backgroundColor: '#1189D6' }}
       className={`
         flex items-center justify-center cursor-pointer rounded-2xl
         ${isSelected ? 'z-50' : 'relative h-full w-full'}
@@ -84,22 +83,34 @@ export const TipButton = ({
       // Apply tap animation for non-selected state
       {...buttonTapAnimation}
     >
-      {/* Text content with its own animation configuration */}
-      <motion.span 
-        className={`text-white font-medium font-cash ${isSelected ? 'text-[120px]' : 'text-[70px]'}`}
-        // This ensures text size and position animates smoothly with parent
-        layoutId={`${layoutId}-text`}
-        // Coordinated layout transition for text size changes
-        transition={{
-          layout: {
-            type: "spring",
-            stiffness: 300,
-            damping: 30
-          }
-        }}
+      {/* Content wrapper to stabilize position */}
+      <motion.div
+        className="flex items-center justify-center"
+        // This ensures the position stays consistent during animations
+        layout
+        layoutId={`${layoutId}-content-wrapper`}
+        // Match parent transition timing
+        transition={transition}
       >
-        ${amount}
-      </motion.span>
+        {/* Text content with its own animation configuration */}
+        <motion.span 
+          className="text-white font-medium font-cash"
+          // Use consistent text sizing with the same font metrics
+          style={{
+            fontSize: isSelected ? '120px' : '70px',
+            lineHeight: 1,
+            // Prevent text from shifting during animation
+            display: 'block',
+            transform: 'translateZ(0)'
+          }}
+          // This ensures text size and position animates smoothly with parent
+          layoutId={`${layoutId}-text`}
+          // Coordinated layout transition for text size changes
+          transition={transition}
+        >
+          ${amount}
+        </motion.span>
+      </motion.div>
     </motion.div>
   );
 };

@@ -52,6 +52,7 @@ A React component that provides smooth, animated transitions for numerical value
 | showDollarSign | boolean | true | Controls dollar sign visibility |
 | showDecimals | boolean | true | Controls decimal places visibility |
 | showFormattedZero | boolean | false | Controls whether zero shows with decimals (0.00) |
+| showOnlyDollarSign | boolean | false | Shows only the dollar sign without any digits |
 | className | string | '' | Additional CSS classes |
 
 ## Animation Patterns
@@ -78,7 +79,19 @@ A React component that provides smooth, animated transitions for numerical value
 />
 ```
 
-### 3. Custom Styling
+### 3. Dollar Sign Only
+```tsx
+// Best for:
+// - Initial states before a value is determined
+// - Placeholder for monetary values
+// - Minimal currency indicators
+<AnimatedNumber 
+  value={0}
+  showOnlyDollarSign={true}
+/>
+```
+
+### 4. Custom Styling
 ```tsx
 // Example with custom size and color
 <AnimatedNumber 
@@ -115,6 +128,10 @@ A React component that provides smooth, animated transitions for numerical value
 - When `showDollarSign={false}`:
   - No currency symbol
   - Numbers align naturally
+- When `showOnlyDollarSign={true}`:
+  - Only the dollar sign is shown, without any digits
+  - Useful for indicating currency context before revealing the amount
+  - Overrides other formatting options for digits
 
 ### Animation Sequence
 1. Initial mount: Value appears with proper formatting

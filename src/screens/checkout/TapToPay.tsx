@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { motion, AnimatePresence } from 'framer-motion';
+import CreditCardCursor from '../../components/common/CreditCardCursor';
 
 interface ArrowProps {
   direction: 'up' | 'down';
@@ -165,6 +166,7 @@ interface TapToPayProps {
 export const TapToPay = ({ onNext, amount = "10.80" }: TapToPayProps) => {
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
   const [notchesVisible, setNotchesVisible] = useState(false);
+  const [showCardCursor, setShowCardCursor] = useState(true);
 
   useEffect(() => {
     // Start all animations immediately
@@ -182,6 +184,14 @@ export const TapToPay = ({ onNext, amount = "10.80" }: TapToPayProps) => {
   const handleNext = () => {
     // Pass along the amount to the next screen
     onNext(amount);
+  };
+  
+  const handleTapComplete = () => {
+    // When tap animation completes, proceed to next screen
+    setShowCardCursor(false);
+    setTimeout(() => {
+      handleNext();
+    }, 800); // Give some time to see the card animation complete
   };
 
   return (
@@ -214,6 +224,9 @@ export const TapToPay = ({ onNext, amount = "10.80" }: TapToPayProps) => {
             </>
           )}
         </AnimatePresence>
+        
+        {/* Credit card cursor */}
+        <CreditCardCursor active={showCardCursor} onTapComplete={handleTapComplete} />
       </div>
     </BaseScreen>
   );
