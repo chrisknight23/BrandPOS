@@ -45,7 +45,7 @@ const DELAYS = {
   EXPANDED_ANIMATION: 650,   // Delay before playing animation in expanded state
   REPLAY_BUTTON_ANIMATION: 200,  // Delay when manually replaying animation
   NUMBER_ANIMATION: 1500,     // Delay before showing the animated number
-  ZERO_DISPLAY_DURATION: 1200, // How long to display 0.00 before animating
+  ZERO_DISPLAY_DURATION: 0, // Reduced from 1200 to 0 - No delay before animating from $0.00 to actual amount
 } as const;
 
 // ============= Components =============

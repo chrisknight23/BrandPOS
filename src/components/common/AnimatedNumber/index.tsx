@@ -236,6 +236,9 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
       return content;
     }
 
+    // Create a separate array for decimal part to manage transitions together
+    let decimalContent: JSX.Element[] = [];
+    
     // Don't show any separators when transitioning to zero (unless showing formatted zero)
     const isTransitioningToZero = value === 0 && !showFormattedZero;
 
@@ -251,8 +254,8 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
       const isDecimalDigit = isAfterDecimal && !prevFormatted.separatorPositions.decimal;
       const isFirstDigit = index === 0;
 
-      // Add digit
-      content.push(
+      // Add digit to appropriate array
+      const digitElement = (
         <motion.div 
           key={`digit-${index}`}
           layout
@@ -295,6 +298,13 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
         </motion.div>
       );
 
+      // Add digit to content or decimalContent based on position
+      if (isAfterDecimal) {
+        decimalContent.push(digitElement);
+      } else {
+        content.push(digitElement);
+      }
+
       // Only add separators if we're not transitioning to zero
       if (!isTransitioningToZero) {
         // Add comma if needed
@@ -319,7 +329,8 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
         // Add decimal point after whole number
         if (separatorPositions.decimal !== null && 
             index === separatorPositions.decimal - 1) {
-          content.push(
+          // Create decimal point element to prepend to decimal content
+          const decimalPointElement = (
             <motion.div
               key="decimal"
               initial={{ opacity: 0 }}
@@ -336,9 +347,32 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
               <Separator layoutId="decimal" char="." />
             </motion.div>
           );
+          
+          // Add the decimal point to the decimal content
+          decimalContent.unshift(decimalPointElement);
         }
       }
     });
+
+    // Wrap the decimal part in a single motion.div for coordinated transitions
+    if (decimalContent.length > 0) {
+      // Create a coordinated exit for the entire decimal section
+      content.push(
+        <motion.div
+          key="decimal-wrapper"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            duration: 0.4, // Faster exit animation for decimal parts
+            ease: [0.32, 0.72, 0, 1]
+          }}
+          className="flex items-center"
+        >
+          {decimalContent}
+        </motion.div>
+      );
+    }
 
     return content;
   };
