@@ -14,6 +14,12 @@ interface TipButtonProps {
   transition?: any;
 }
 
+// Define scaling constants similar to other components
+const BUTTON_SCALES = {
+  SELECTED: 2.4,  // Similar to CARD_SCALES.EXPANDED in other components
+  NORMAL: 1
+};
+
 export const TipButton = ({ 
   amount, 
   layoutId, 
@@ -56,7 +62,7 @@ export const TipButton = ({
       lottieContainer.current.style.height = '158px';
       lottieContainer.current.style.top = '50%';
       lottieContainer.current.style.left = '50%';
-      lottieContainer.current.style.transform = 'translate(-50%, -50%)';
+      lottieContainer.current.style.transform = `translate(-50%, -50%) scale(${1 / BUTTON_SCALES.SELECTED})`;
 
       // Stop on the first frame - don't play the animation
       anim.goToAndStop(0, true);
