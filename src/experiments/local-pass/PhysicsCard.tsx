@@ -104,7 +104,8 @@ export const PhysicsCard = () => {
   
   // Generate a random amount between $10-$50 (replace with actual logic based on user)
   const generateRandomAmount = () => {
-    return Math.floor(Math.random() * 41) + 10; // Random between 10-50
+    // Random between 10-50 with two decimal places (e.g. 12.34, 45.67)
+    return Math.round((Math.random() * 40 + 10) * 100) / 100;
   };
 
   // Initialize Lottie
@@ -379,24 +380,38 @@ export const PhysicsCard = () => {
               {/* Header with "Local Cash" text and $ icon */}
               {animationState !== 'expanded' && (
                 <motion.div 
-                  className="w-full flex justify-between items-center"
+                  className="w-full flex flex-col items-start"
                   animate={{ 
                     opacity: animationState === 'dropped' ? 0 : 1 
                   }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="text-white text-lg font-medium antialiased" style={{
-                    textRendering: 'optimizeLegibility',
-                    WebkitFontSmoothing: 'antialiased',
-                    MozOsxFontSmoothing: 'grayscale'
-                  }}>Local Cash</div>
-                  <div className="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                    <span className="text-white text-xl antialiased" style={{
+                  <div className="w-full flex justify-between items-center">
+                    <div className="text-white text-lg font-medium antialiased" style={{
                       textRendering: 'optimizeLegibility',
                       WebkitFontSmoothing: 'antialiased',
                       MozOsxFontSmoothing: 'grayscale'
-                    }}>$</span>
+                    }}>Local Cash</div>
+                    <div className="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                      <span className="text-white text-xl antialiased" style={{
+                        textRendering: 'optimizeLegibility',
+                        WebkitFontSmoothing: 'antialiased',
+                        MozOsxFontSmoothing: 'grayscale'
+                      }}>$</span>
+                    </div>
                   </div>
+                  
+                  {/* Small text under header - only visible in normal state */}
+                  {animationState === 'initial' && (
+                    <div className="text-white text-xs opacity-80 mt-0.5 antialiased" style={{
+                      fontSize: '12px',
+                      textRendering: 'optimizeLegibility',
+                      WebkitFontSmoothing: 'antialiased',
+                      MozOsxFontSmoothing: 'grayscale'
+                    }}>
+                      Earned on tips
+                    </div>
+                  )}
                 </motion.div>
               )}
 
@@ -476,7 +491,7 @@ export const PhysicsCard = () => {
                       textRendering: 'optimizeLegibility',
                       WebkitFontSmoothing: 'antialiased',
                       MozOsxFontSmoothing: 'grayscale'
-                    }}>Withdraw</span>
+                    }}>Collect</span>
                   </motion.button>
                 </div>
               )}

@@ -30,6 +30,30 @@ interface AnimatedNumberProps {
    * @default false
    */
   showOnlyDollarSign?: boolean;
+  /**
+   * Custom offsets (in pixels) for specific digits
+   * Key is the digit, value is the horizontal offset to apply
+   * @example { 1: 6, 2: -2 } // Offset digit 1 by 6px right, digit 2 by 2px left
+   */
+  digitOffsets?: Record<number, number>;
+  /**
+   * Special offsets for combinations of digits
+   * Key format is 'currentDigit-nextDigit', value is the offset
+   * @example { '1-1': 18, '2-3': -5 } // Offset digit 1 followed by 1 by 18px, 2 followed by 3 by -5px
+   */
+  combinationOffsets?: Record<string, number>;
+  /**
+   * Special offset when digit follows dollar sign
+   * Key is the digit, value is the horizontal offset
+   * @example { 1: 18 } // Offset digit 1 by 18px when it follows $
+   */
+  afterDollarSignOffsets?: Record<number, number>;
+  /**
+   * Whether to use automatic kerning instead of manual offsets
+   * When true, digits will be automatically spaced based on their visual width
+   * @default false
+   */
+  useAutoKerning?: boolean;
 }
 
 // Helper function to format numbers and calculate separator positions
@@ -87,7 +111,11 @@ const DigitRoller: React.FC<{
   isDecimalDigit?: boolean,
   isBeforeDecimal?: boolean,
   isAfterDollarSign?: boolean,
-  nextIsOne?: boolean,
+  nextDigit?: number | null,
+  digitOffsets?: Record<number, number>,
+  combinationOffsets?: Record<string, number>,
+  afterDollarSignOffsets?: Record<number, number>,
+  useAutoKerning?: boolean,
   onAnimationComplete?: () => void
 }> = ({ 
   value, 
@@ -95,7 +123,11 @@ const DigitRoller: React.FC<{
   isDecimalDigit,
   isBeforeDecimal,
   isAfterDollarSign,
-  nextIsOne,
+  nextDigit,
+  digitOffsets = {},
+  combinationOffsets = {},
+  afterDollarSignOffsets = {},
+  useAutoKerning = false,
   onAnimationComplete
 }) => {
   // Track previous value and animation state with refs to avoid re-renders
@@ -104,6 +136,16 @@ const DigitRoller: React.FC<{
   const [prevValue, setPrevValue] = useState(prevValueRef.current);
   const sequence = Array.from({ length: 10 }, (_, i) => i);
   const height = 120;
+  
+  // Get container width based on digit value
+  const getContainerWidth = (digit: number) => {
+    if (useAutoKerning) {
+      // Use a much narrower container for digit '1'
+      return digit === 1 ? 20 : 60;
+    }
+    // Default width for manual kerning
+    return 60;
+  };
   
   // Fix infinite update loop by using refs to track state changes
   useEffect(() => {
@@ -125,8 +167,61 @@ const DigitRoller: React.FC<{
     }
   }, [value, isNew, isDecimalDigit]); // Remove hasAnimated from dependencies
 
+  // Helper to calculate transform for different digits
+  const getDigitTransform = (num: number) => {
+    // When auto-kerning is enabled, use simplified positioning
+    if (useAutoKerning) {
+      if (num === 1) {
+        // Center digit '1' in its narrower container
+        return 'translateX(0)';
+      }
+      return 'none';
+    }
+    
+    // Rest of the manual offset system remains unchanged
+    // Default offsets
+    const DEFAULT_OFFSETS: Record<number, number> = {
+      1: 6  // Default offset for digit '1'
+    };
+    
+    // 1. Check for special combination offset (current-next digit pair)
+    if (nextDigit !== null && nextDigit !== undefined) {
+      const combinationKey = `${num}-${nextDigit}`;
+      if (combinationOffsets[combinationKey] !== undefined) {
+        return `translateX(${combinationOffsets[combinationKey]}px)`;
+      }
+    }
+    
+    // 2. Check if digit is after dollar sign and has special offset
+    if (isAfterDollarSign && afterDollarSignOffsets[num] !== undefined) {
+      return `translateX(${afterDollarSignOffsets[num]}px)`;
+    }
+    
+    // 3. Check for individual digit offset
+    if (digitOffsets[num] !== undefined) {
+      return `translateX(${digitOffsets[num]}px)`;
+    }
+    
+    // 4. Fall back to default offset if exists
+    if (DEFAULT_OFFSETS[num] !== undefined) {
+      return `translateX(${DEFAULT_OFFSETS[num]}px)`;
+    }
+    
+    // 5. No offset
+    return 'none';
+  };
+
+  // The container width changes based on the current value
+  const containerWidth = getContainerWidth(value);
+
   return (
-    <div className="relative h-[120px] overflow-hidden w-[60px]">
+    <div 
+      className="relative h-[120px] overflow-hidden" 
+      style={{ 
+        width: `${containerWidth}px`, 
+        transition: 'width 0.75s cubic-bezier(0.32, 0.72, 0, 1)'
+      }}
+    >
       <motion.div
         className="absolute inset-0"
         initial={false}
@@ -152,15 +247,9 @@ const DigitRoller: React.FC<{
             key={num}
             className="flex items-center justify-center h-[120px] font-cash font-medium text-[100px]"
             style={{
-              width: '60px',
-              transform: num === 1 
-                ? nextIsOne 
-                  ? isAfterDollarSign
-                    ? 'translateX(18px)'
-                    : 'translateX(18px)'
-                  : 'translateX(6px)'
-                : 'none',
-              transition: 'transform 0.75s cubic-bezier(0.32, 0.72, 0, 1)'
+              width: `${getContainerWidth(num)}px`,
+              transform: getDigitTransform(num),
+              transition: 'transform 0.75s cubic-bezier(0.32, 0.72, 0, 1), width 0.75s cubic-bezier(0.32, 0.72, 0, 1)'
             }}
           >
             {num}
@@ -192,11 +281,31 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
   showDecimals = true,
   className = '',
   showFormattedZero = false,
-  showOnlyDollarSign = false
+  showOnlyDollarSign = false,
+  digitOffsets = {},
+  combinationOffsets = {},
+  afterDollarSignOffsets = {},
+  useAutoKerning = false
 }) => {
   const [prevValue, setPrevValue] = useState(value);
   const { digits, separatorPositions } = formatNumber(value, showDecimals, showFormattedZero);
   const prevFormatted = formatNumber(prevValue, showDecimals, showFormattedZero);
+  
+  // Default offsets if not provided
+  const defaultDigitOffsets = {
+    1: 6,  // Offset digit '1' by 6px to the right
+    ...digitOffsets
+  };
+  
+  const defaultCombinationOffsets = {
+    '1-1': 18, // When '1' is followed by '1'
+    ...combinationOffsets
+  };
+  
+  const defaultAfterDollarSignOffsets = {
+    1: 18, // Offset digit '1' by 18px when after dollar sign
+    ...afterDollarSignOffsets
+  };
   
   // Track first digit for dollar sign spacing
   const firstDigitIs7 = digits[0] === 7;
@@ -222,7 +331,9 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
           className="flex items-center h-[120px] font-cash font-medium text-[100px]"
           layout
           style={{ 
-            marginRight: firstDigitIs7 ? 0 : firstTwoAre11 ? -20 : firstDigitIs1 ? -8 : 8,
+            marginRight: useAutoKerning 
+              ? (firstDigitIs1 ? -12 : 0)  // Pull digit '1' much closer to dollar sign
+              : (firstDigitIs7 ? 0 : firstTwoAre11 ? -20 : firstDigitIs1 ? -8 : 8),
             transition: 'margin-right 0.75s cubic-bezier(0.32, 0.72, 0, 1)'
           }}
         >
@@ -253,15 +364,19 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
                         digit !== prevFormatted.digits[index];
       const isDecimalDigit = isAfterDecimal && !prevFormatted.separatorPositions.decimal;
       const isFirstDigit = index === 0;
+      
+      // Check if next digit is 1 or 2 for special spacing
+      const nextDigit = index < digits.length - 1 ? digits[index + 1] : null;
 
       // Add digit to appropriate array
       const digitElement = (
         <motion.div 
           key={`digit-${index}`}
           layout
-          className="w-[60px]"
+          className="flex"
           style={{
-            transform: digit === 1 && index < digits.length - 1 && digits[index + 1] === 1 ? 'translateX(-10px)' : 'none'
+            marginLeft: useAutoKerning && digit === 1 ? '-10px' : undefined,
+            transform: useAutoKerning ? 'none' : (digit === 1 && index < digits.length - 1 && digits[index + 1] === 1 ? 'translateX(-10px)' : 'none')
           }}
           initial={isNewDigit || isDecimalDigit ? { 
             x: 20,
@@ -276,10 +391,10 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
             opacity: 0
           }}
           transition={{
-            duration: 0.75,
+            duration: 0.1,
             ease: [0.32, 0.72, 0, 1],
             layout: {
-              duration: 0.75,
+              duration: 0.1,
               ease: [0.32, 0.72, 0, 1]
             }
           }}
@@ -290,7 +405,11 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
             isDecimalDigit={isDecimalDigit}
             isBeforeDecimal={separatorPositions.decimal !== null && index === separatorPositions.decimal - 1}
             isAfterDollarSign={isFirstDigit}
-            nextIsOne={index < digits.length - 1 && digits[index + 1] === 1}
+            nextDigit={nextDigit}
+            digitOffsets={defaultDigitOffsets}
+            combinationOffsets={defaultCombinationOffsets}
+            afterDollarSignOffsets={defaultAfterDollarSignOffsets}
+            useAutoKerning={useAutoKerning}
             onAnimationComplete={() => {
               // Animation completion handler if needed
             }}
@@ -364,7 +483,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{
-            duration: 0.4, // Faster exit animation for decimal parts
+            duration: 0.1, // Faster exit animation for decimal parts
             ease: [0.32, 0.72, 0, 1]
           }}
           className="flex items-center"
@@ -386,6 +505,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
           duration: 0.75,
           ease: [0.32, 0.72, 0, 1]
         }}
+        style={useAutoKerning ? { marginLeft: '-2px' } : {}}
       >
         <div className="flex">
           <AnimatePresence mode="popLayout" initial={false}>

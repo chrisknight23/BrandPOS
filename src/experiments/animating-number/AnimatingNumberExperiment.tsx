@@ -51,23 +51,23 @@ export const AnimatingNumberExperiment = () => {
     
     switch (format) {
       case 'whole':
-        // Generate a whole number between 0 and 99
-        randomValue = Math.floor(Math.random() * 100);
+        // Generate a number between 0 and 99 with two decimal places
+        randomValue = Math.round((Math.random() * 99) * 100) / 100;
         break;
       case 'hundreds':
-        // Generate a multiple of 100 between 100 and 900
-        randomValue = Math.floor(Math.random() * 9) + 1;
+        // Generate a multiple of 100 between 100 and 900 with two decimal places
+        randomValue = Math.round(((Math.floor(Math.random() * 9) + 1) + Math.random()) * 100) / 100;
         break;
       case 'thousands':
-        // Generate a multiple of 1000 between 1000 and 9000
-        randomValue = Math.floor(Math.random() * 9) + 1;
+        // Generate a multiple of 1000 between 1000 and 9000 with two decimal places
+        randomValue = Math.round(((Math.floor(Math.random() * 9) + 1) + Math.random()) * 100) / 100;
         break;
       case 'no-numbers':
         // Set to 0 for showOnlyDollarSign mode
         randomValue = 0;
         break;
       default:
-        randomValue = Math.floor(Math.random() * 100);
+        randomValue = Math.round((Math.random() * 99) * 100) / 100;
     }
     
     return randomValue;
