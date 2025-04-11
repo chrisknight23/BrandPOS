@@ -566,7 +566,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                     {/* Small text under header - only visible in normal state */}
                     {animationState === 'initial' && (
                       <div className="text-white text-xs opacity-80 mt-0.5 antialiased" style={{
-                        fontSize: '12px',
+                        fontSize: '14px',
                         textRendering: 'optimizeLegibility',
                         WebkitFontSmoothing: 'antialiased',
                         MozOsxFontSmoothing: 'grayscale'
