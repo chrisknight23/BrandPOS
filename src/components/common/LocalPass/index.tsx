@@ -1,9 +1,11 @@
-import { motion } from 'framer-motion';
-import { ReactNode, useEffect, useState } from 'react';
+import { motion, useAnimation } from 'framer-motion';
+import { useState, useEffect, useRef, ReactNode } from 'react';
+import lottie from 'lottie-web';
+import { AnimatedNumber } from '../AnimatedNumber';
 
 /**
- * A card component that can expand to show additional content with a Lottie animation.
- * Features smooth layout animations using Framer Motion's layoutId for continuous transitions.
+ * A card component that can expand to show additional content with animations.
+ * Enhanced version with physics-based animations and additional customization options.
  * 
  * @component
  * @example
@@ -16,128 +18,660 @@ import { ReactNode, useEffect, useState } from 'react';
  * />
  * ```
  */
-interface LocalPassProps {
+
+// ============= Types =============
+/**
+ * The states a LocalPass card can be in
+ */
+export type CardState = 'expanded' | 'initial' | 'dropped';
+
+/**
+ * Props for internal CardFace component
+ */
+interface CardFaceProps {
+  /** Content to render inside the card face */
+  children: ReactNode;
+  /** Whether the card is in expanded state */
+  isExpanded: boolean;
+  /** Background color for the card face */
+  backgroundColor: string;
+  /** Whether this is the back face of the card */
+  isFlipped?: boolean;
+  /** The current animation state of the card */
+  animationState: CardState;
+}
+
+/**
+ * Props for the LocalPass component
+ */
+export interface LocalPassProps {
+  /** Initial card state */
+  initialState?: CardState;
+  /** Background color for the card (CSS color string) */
+  backgroundColor?: string;
+  /** Background color for the back of the card (CSS color string) */
+  backfaceColor?: string;
+  /** Animation data for Lottie (JSON) */
+  lottieAnimation?: any;
+  /** Initial numeric value to display */
+  initialValue?: number;
+  /** Whether to generate random values when animations complete */
+  useRandomValues?: boolean;
+  /** Min value for random generation */
+  randomMin?: number;
+  /** Max value for random generation */
+  randomMax?: number;
+  /** Custom header text */
+  headerText?: string;
+  /** Custom subheader text */
+  subheaderText?: string;
+  /** Custom button text */
+  buttonText?: string;
+  /** Handler for button click */
+  onButtonClick?: (e: React.MouseEvent) => void;
+  /** Handler for when the animation state changes */
+  onStateChange?: (newState: CardState) => void;
+  /** Handler for when the card is flipped */
+  onFlip?: (isFlipped: boolean) => void;
+  /** Handler for when the animation completes */
+  onAnimationComplete?: () => void;
+  /** Custom content for card front */
+  frontContent?: ReactNode;
+  /** Custom content for card back */
+  backContent?: ReactNode;
+  /** Whether animations should play automatically on mount */
+  autoPlay?: boolean;
+  /** Custom class name for the card container */
+  className?: string;
+  
+  // Original LocalPass props for backward compatibility
   /** Unique ID for Framer Motion layout animations */
   layoutId?: string;
-  /** Amount to display on the card (e.g. "1", "2", "3") */
-  amount: string;
-  /** Whether the card is in its expanded state */
-  isExpanded: boolean;
-  /** Handler for click events */
+  /** Amount to display as a string (for backward compatibility) */
+  amount?: string;
+  /** Whether the card is in expanded state (for backward compatibility) */
+  isExpanded?: boolean;
+  /** Handler for click events (for backward compatibility) */
   onClick?: () => void;
-  /** Optional child elements to render in expanded state */
+  /** Optional child elements to render in expanded state (for backward compatibility) */
   children?: ReactNode;
-  /** Disable all animations */
+  /** Disable all animations (for backward compatibility) */
   noAnimation?: boolean;
 }
 
-export const LocalPass = ({ 
-  layoutId, 
-  amount, 
+// ============= Constants =============
+const CARD_SCALES = {
+  EXPANDED: 2.4,
+  NORMAL: 1,
+  COMPACT: 0.8
+} as const;
+
+const ANIMATION_CONFIG = {
+  spring: {
+    type: "spring" as const,
+    stiffness: 130,
+    damping: 13,
+    mass: 0.6,
+    restSpeed: 0.001,
+    restDelta: 0.001
+  },
+  smooth: {
+    type: "spring" as const,
+    stiffness: 100,
+    damping: 15,
+    mass: 0.5
+  }
+} as const;
+
+// Animation timing constants
+const DELAYS = {
+  INITIAL_ANIMATION: 0,   // Initial animation delay on component mount
+  EXPANDED_ANIMATION: 100,   // Delay before playing animation in expanded state
+  REPLAY_BUTTON_ANIMATION: 200,  // Delay when manually replaying animation
+  NUMBER_ANIMATION: 1500,     // Delay before showing the animated number
+  ZERO_DISPLAY_DURATION: 0,  // Delay before animating from 0 to actual amount
+} as const;
+
+// ============= Components =============
+/**
+ * Internal component that renders one face of the card
+ */
+const CardFace: React.FC<CardFaceProps> = ({ 
+  children, 
+  isExpanded, 
+  backgroundColor,
+  isFlipped,
+  animationState
+}) => (
+  <motion.div
+    className={`w-full h-full ${backgroundColor} rounded-2xl absolute backface-hidden`}
+    style={{
+      boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+      willChange: 'transform',
+      backfaceVisibility: 'hidden',
+      transform: isFlipped ? 'rotateY(180deg)' : undefined,
+      transformStyle: 'preserve-3d'
+    }}
+  >
+    {/* Lighting gradient overlay */}
+    <div 
+      className="absolute inset-0 rounded-2xl"
+      style={{
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 100%)',
+        pointerEvents: 'none'
+      }}
+    />
+    
+    {children}
+
+    {/* Edge highlight */}
+    <div 
+      className="absolute inset-0 rounded-2xl"
+      style={{
+        boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.3), inset -1px -1px 1px rgba(0,0,0,0.2)'
+      }}
+    />
+  </motion.div>
+);
+
+/**
+ * LocalPass component with animations, state transitions, and interactive elements.
+ * Enhanced version with physics-based animations and additional customization options.
+ * 
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage (backward compatible)
+ * <LocalPass
+ *   amount="25.50"
+ *   isExpanded={false}
+ *   onClick={() => handleClick()}
+ * />
+ * 
+ * // Enhanced usage
+ * <LocalPass 
+ *   initialValue={25.75}
+ *   initialState="initial"
+ *   backgroundColor="bg-[#00B843]"
+ *   headerText="Local Cash"
+ *   onButtonClick={() => console.log('Button clicked')}
+ * />
+ * ```
+ */
+export const LocalPass: React.FC<LocalPassProps> = ({
+  // Handle both new and legacy props
+  initialState,
+  backgroundColor = 'bg-[#00B843]',
+  backfaceColor = 'bg-[#004D1C]',
+  lottieAnimation,
+  initialValue,
+  useRandomValues = true,
+  randomMin = 10,
+  randomMax = 50,
+  headerText = 'Local Cash',
+  subheaderText = 'Local Cash earned on tips',
+  buttonText = 'Collect',
+  onButtonClick,
+  onStateChange,
+  onFlip,
+  onAnimationComplete,
+  frontContent,
+  backContent,
+  autoPlay = true,
+  className = '',
+  
+  // Original LocalPass props
+  layoutId,
+  amount,
   isExpanded,
   onClick,
   children,
-  noAnimation = false 
-}: LocalPassProps) => {
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  // Calculate scale to cover viewport (800x500) from natural size (344x444)
-  const initialScale = Math.max(800/344, 500/444); // ≈ 2.33
-
+  noAnimation = false
+}) => {
+  const controls = useAnimation();
+  const lottieControls = useAnimation();
+  const numberControls = useAnimation();
+  
+  // Determine initial state based on either new or legacy props
+  const derivedInitialState = initialState || (isExpanded ? 'expanded' : 'initial');
+  const [animationState, setAnimationState] = useState<CardState>(derivedInitialState);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const lottieContainer = useRef<HTMLDivElement>(null);
+  const lottieAnimRef = useRef<any>(null);
+  const prevAnimationState = useRef<CardState>(animationState);
+  
+  // Update animation state when initialState prop changes
   useEffect(() => {
-    // Skip animation timing if animation is disabled
-    if (noAnimation) return;
-    
-    if (isExpanded) {
-      setIsAnimating(false);
-      
-      // Start scale down animation after 2s
-      const timer = setTimeout(() => {
-        setIsAnimating(true);
-      }, 2000);
-
-      return () => {
-        clearTimeout(timer);
-      };
-    } else {
-      setIsAnimating(false);
+    console.log(`LocalPass: initialState prop changed to ${initialState}`);
+    if (initialState) {
+      console.log(`LocalPass: Updating internal animationState to ${initialState}`);
+      setAnimationState(initialState);
     }
-  }, [isExpanded, noAnimation]);
-
-  // Create the motion component with appropriate props
-  const MotionComponent = layoutId ? 
-    (props: any) => <motion.div layoutId={layoutId} {...props} /> :
-    motion.div;
+  }, [initialState]);
+  
+  // Number display state
+  const [showNumber, setShowNumber] = useState(false);
+  
+  // Determine initial amount from either new or legacy props
+  const derivedInitialAmount = initialValue !== undefined ? 
+    initialValue : 
+    (amount ? parseFloat(amount) : 0);
+  
+  const [cashbackAmount, setCashbackAmount] = useState(derivedInitialAmount);
+  
+  // Generate a random amount between min and max with two decimal places
+  const generateRandomAmount = () => {
+    // Random between randomMin-randomMax with two decimal places
+    return Math.round((Math.random() * (randomMax - randomMin) + randomMin) * 100) / 100;
+  };
+  
+  // Handle animation state changes and notify via appropriate callback
+  useEffect(() => {
+    if (onStateChange) {
+      onStateChange(animationState);
+    }
     
-  return (
-    <>
-      {isExpanded && <div className="h-full" />}
+    // Support legacy onClick when state changes to expanded
+    if (animationState === 'expanded' && onClick && prevAnimationState.current !== 'expanded') {
+          onClick();
+    }
+    
+    prevAnimationState.current = animationState;
+  }, [animationState, onClick, onStateChange]);
+  
+  // Initialize Lottie
+  useEffect(() => {
+    // Skip animation if disabled
+    if (noAnimation || !autoPlay) return;
+    
+    let anim: any = null;
+    
+    if (lottieContainer.current && lottieAnimation) {
+      anim = lottie.loadAnimation({
+        container: lottieContainer.current,
+        renderer: 'svg',
+        loop: false,
+        autoplay: true,
+        animationData: lottieAnimation,
+        rendererSettings: {
+          progressiveLoad: false,
+          preserveAspectRatio: 'xMidYMid meet',
+          className: 'lottie-svg'
+        }
+      });
+
+      // Reset any previous styles first
+      lottieContainer.current.style.cssText = '';
       
-      <MotionComponent
-        onClick={onClick}
-        className={`
-          ${isExpanded 
-            ? 'fixed inset-0 m-auto rounded-2xl shadow-xl z-50 flex items-center justify-center' 
-            : 'h-full rounded-2xl flex items-center justify-center cursor-pointer'}
-          transition-colors duration-300
-        `}
+      // Center positioning without transforms
+      lottieContainer.current.style.position = 'absolute';
+      lottieContainer.current.style.width = '158px';
+      lottieContainer.current.style.height = '158px';
+      lottieContainer.current.style.top = '50%';
+      lottieContainer.current.style.left = '50%';
+      lottieContainer.current.style.marginLeft = '-79px'; // Half the width
+      lottieContainer.current.style.marginTop = '-79px'; // Half the height
+
+      // Add completion listener to know when animation finishes
+      anim.addEventListener('complete', () => {
+        // Only handle completion in expanded state
+        if (animationState === 'expanded') {
+          // Show the number after the lottie animation completes - initially only the $ sign
+          setShowNumber(true);
+          setCashbackAmount(0);
+          
+          // Then after a delay, update to the final amount to trigger animation
+          setTimeout(() => {
+            if (useRandomValues) {
+              setCashbackAmount(generateRandomAmount());
+            } else {
+              setCashbackAmount(derivedInitialAmount);
+            }
+            
+            // Wait a bit more, then call the animation complete callback
+            setTimeout(() => {
+              console.log('LocalPass: Animation sequence complete, calling onAnimationComplete');
+              if (onAnimationComplete) {
+                onAnimationComplete();
+              }
+            }, 1000); // Wait 1 second after amount is shown
+          }, DELAYS.ZERO_DISPLAY_DURATION);
+        }
+      });
+
+      lottieAnimRef.current = anim;
+    } else {
+      // If no lottie animation, just show the number
+      setShowNumber(true);
+    }
+
+    return () => {
+      if (anim) {
+        anim.removeEventListener('complete');
+        anim.destroy();
+      }
+    };
+  }, [animationState, lottieAnimation, autoPlay, noAnimation, useRandomValues, derivedInitialAmount]);
+
+  // Handle animation when card state changes
+  useEffect(() => {
+    if (animationState === 'expanded' && prevAnimationState.current !== 'expanded') {
+      if (lottieAnimRef.current) {
+        // Reset animation
+        lottieAnimRef.current.goToAndStop(0, true);
+        setShowNumber(false);
+        
+        // Play lottie animation after card expansion
+        setTimeout(() => {
+          lottieAnimRef.current.play();
+          // Number will be shown via the 'complete' event listener now
+        }, DELAYS.EXPANDED_ANIMATION);
+      } else {
+        // If no lottie animation, just show the number
+        setShowNumber(true);
+      }
+    } else if (prevAnimationState.current === 'expanded' && animationState !== 'expanded') {
+      // Keep number visible when leaving expanded state
+    } else if (animationState === 'dropped' || animationState === 'initial') {
+      // Ensure number remains visible when switching between normal and compact states
+      if (showNumber && cashbackAmount > 0) {
+        // Number should stay visible with proper scaling
+      }
+    }
+    
+    // Update previous state
+    prevAnimationState.current = animationState;
+  }, [animationState]);
+
+  // Calculate appropriate scale for the AnimatedNumber based on card state
+  const getNumberScale = (state: CardState) => {
+    switch (state) {
+      case 'expanded':
+        return 1 / CARD_SCALES.EXPANDED;
+      case 'dropped':
+        return 1 / CARD_SCALES.COMPACT;
+      case 'initial':
+      default:
+        return 1;
+    }
+  };
+
+  // Handle card scale animations
+  useEffect(() => {
+    switch (animationState) {
+      case 'dropped':
+        controls.start({
+          scale: CARD_SCALES.COMPACT,
+          transition: ANIMATION_CONFIG.spring
+        });
+        lottieControls.start({
+          scale: 1 / CARD_SCALES.COMPACT,
+          transition: ANIMATION_CONFIG.spring
+        });
+        numberControls.start({
+          scale: 1 / CARD_SCALES.COMPACT,
+          transition: ANIMATION_CONFIG.spring
+        });
+        break;
+      case 'expanded':
+        controls.start({
+          scale: CARD_SCALES.EXPANDED,
+          transition: ANIMATION_CONFIG.spring
+        });
+        lottieControls.start({
+          scale: 1 / CARD_SCALES.EXPANDED,
+          transition: ANIMATION_CONFIG.spring
+        });
+        numberControls.start({
+          scale: 1 / CARD_SCALES.EXPANDED,
+          transition: ANIMATION_CONFIG.spring
+        });
+        break;
+      default:
+        controls.start({
+          scale: CARD_SCALES.NORMAL,
+          transition: ANIMATION_CONFIG.spring
+        });
+        lottieControls.start({
+          scale: 1,
+          transition: ANIMATION_CONFIG.spring
+        });
+        numberControls.start({
+          scale: 1,
+          transition: ANIMATION_CONFIG.spring
+        });
+    }
+  }, [animationState, controls, lottieControls, numberControls]);
+
+  // Play lottie animation manually
+  const playLottieAnimation = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    
+    if (lottieAnimRef.current) {
+      lottieAnimRef.current.goToAndStop(0, true);
+      setShowNumber(false);
+      
+      setTimeout(() => {
+        lottieAnimRef.current.play();
+      }, DELAYS.REPLAY_BUTTON_ANIMATION);
+    }
+  };
+
+  // Cycle through card states
+  const cycleCardState = () => {
+    setAnimationState(current => {
+      switch (current) {
+        case 'expanded':
+          return 'initial';
+        case 'initial':
+          return 'dropped';
+        default:
+          return 'expanded';
+      }
+    });
+  };
+
+  // Handle button click, call the provided handler or use default behavior
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card flipping
+    if (onButtonClick) {
+      onButtonClick(e);
+    } else {
+      cycleCardState();
+    }
+  };
+
+  // Get button text
+  const getButtonText = () => {
+    // Use custom text if provided
+    if (buttonText) return buttonText;
+    
+    // Otherwise use default based on state
+    switch (animationState) {
+      case 'expanded':
+        return 'Normal';
+      case 'initial':
+        return 'Compact';
+      case 'dropped':
+        return 'Expand';
+      default:
+        return 'Toggle';
+    }
+  };
+
+  return (
+    <div className={`w-full h-full flex items-center justify-center ${className}`}>
+      <motion.div
+        layoutId={layoutId}
+        animate={controls}
+        initial={{ scale: animationState === 'expanded' ? CARD_SCALES.EXPANDED : CARD_SCALES.NORMAL }}
+        className="w-[344px] h-[444px] relative cursor-pointer"
         style={{
-          backgroundColor: isExpanded ? '#00B843' : '#00B843',
-          width: isExpanded ? '344px' : '100%',
-          height: isExpanded ? '444px' : '100%',
-          transformOrigin: 'center',
-          perspective: '1000px'
+          transformOrigin: 'center center',
+          perspective: '1200px'
         }}
-        animate={noAnimation ? 
-          { scale: 1 } : // No animation when noAnimation is true
-          {
-            scale: isExpanded 
-              ? isAnimating 
-                ? 1
-                : initialScale
-              : 1,
-            rotateX: isExpanded && isAnimating ? [15, 0] : 0,
-            rotateY: isExpanded && isAnimating ? [-10, 0] : 0,
-            y: isExpanded && isAnimating ? [-50, 0] : 0,
-            z: isExpanded && isAnimating ? [100, 0] : 0
-          }
-        }
-        transition={noAnimation ? 
-          { duration: 0 } : // Instant transition when noAnimation is true
-          {
-            type: "spring",
-            stiffness: isExpanded && isAnimating ? 250 : 300,
-            damping: isExpanded && isAnimating ? 20 : 30,
-            mass: 1.5,
-            restDelta: 0.001,
-            restSpeed: 0.001
-          }
-        }
+        onClick={() => {
+          setIsFlipped(!isFlipped);
+          if (onFlip) onFlip(!isFlipped);
+        }}
       >
-        {!isExpanded ? (
-          <motion.span
-            className="text-white text-[70px] font-medium font-cash"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+        <motion.div
+          className="w-full h-full relative"
+          style={{ transformStyle: 'preserve-3d' }}
+          animate={{ 
+            rotateY: isFlipped ? 180 : 0,
+            z: isFlipped ? 50 : 0
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 50,
+            damping: 5,
+            mass: 0.45,
+            restSpeed: 0.001,
+            velocity: 2
+          }}
+        >
+          {/* Front of card */}
+          <CardFace 
+            isExpanded={animationState === 'expanded'} 
+            backgroundColor={backgroundColor}
+            animationState={animationState}
           >
-            ${amount}
-          </motion.span>
-        ) : (
-          <motion.div 
-            className="flex items-center justify-center w-full relative"
+            {frontContent ? frontContent : (
+              <div className="w-full h-full flex flex-col items-center justify-between p-5">
+                {/* Header with text and $ icon */}
+                {animationState !== 'expanded' && (
+                  <motion.div 
+                    className="w-full flex flex-col items-start"
+                    animate={{ 
+                      opacity: animationState === 'dropped' ? 0 : 1 
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="w-full flex justify-between items-center">
+                      <div className="text-white text-lg font-medium antialiased" style={{
+                        textRendering: 'optimizeLegibility',
+                        WebkitFontSmoothing: 'antialiased',
+                        MozOsxFontSmoothing: 'grayscale'
+                      }}>{headerText}</div>
+                      <div className="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                        <span className="text-white text-xl antialiased" style={{
+                          textRendering: 'optimizeLegibility',
+                          WebkitFontSmoothing: 'antialiased',
+                          MozOsxFontSmoothing: 'grayscale'
+                        }}>$</span>
+                      </div>
+                    </div>
+                    
+                    {/* Small text under header - only visible in normal state */}
+                    {animationState === 'initial' && (
+                      <div className="text-white text-xs opacity-80 mt-0.5 antialiased" style={{
+                        fontSize: '12px',
+                        textRendering: 'optimizeLegibility',
+                        WebkitFontSmoothing: 'antialiased',
+                        MozOsxFontSmoothing: 'grayscale'
+                      }}>
+                        {subheaderText}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Middle section with Lottie and AnimatedNumber */}
+                <div className="flex-1 w-full flex items-center justify-center relative">
+                  {/* Create a centered container for the Lottie animation */}
+                  {animationState === 'expanded' && lottieAnimation && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.div 
+                        ref={lottieContainer}
+                        animate={lottieControls}
+                        initial={{ scale: 1 / CARD_SCALES.EXPANDED }}
+                        style={{
+                          transformOrigin: 'center center',
+                          opacity: showNumber ? 0 : 1
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* AnimatedNumber - visible in all states when showNumber is true */}
+                  {showNumber && (
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{
+                        transformOrigin: 'center center',
+                        willChange: 'transform',
+                        opacity: 1
+                      }}
+                      layoutId="animated-number-container"
+                    >
+                      <motion.div 
+                        animate={numberControls}
+                        initial={{ scale: getNumberScale(animationState) }}
+                        style={{ 
+                          transformOrigin: 'center center',
+                          willChange: 'transform, opacity'
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <AnimatedNumber 
+                            value={cashbackAmount}
+                            showDecimals={animationState === 'expanded' && cashbackAmount > 0}
+                            showFormattedZero={false}
+                            showOnlyDollarSign={animationState === 'dropped' || cashbackAmount === 0}
+                            className="text-[50px] text-white antialiased"
+                          />
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                  
+                  {/* Render children if provided (for backward compatibility) */}
+                  {children && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {children}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer with button - hidden in expanded state */}
+                {animationState !== 'expanded' && (
+                  <div className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]">
+                    <motion.button 
+                      className="w-full h-20 py-3 rounded-full bg-black bg-opacity-10 hover:bg-opacity-15 transition-colors text-white font-medium"
+                      onClick={handleButtonClick}
+                      animate={{ 
+                        opacity: animationState === 'dropped' ? 0 : 1 
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <span className="text-2xl font-cash-sans-medium antialiased" style={{
+                        textRendering: 'optimizeLegibility',
+                        WebkitFontSmoothing: 'antialiased',
+                        MozOsxFontSmoothing: 'grayscale'
+                      }}>{getButtonText()}</span>
+                    </motion.button>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardFace>
+
+          {/* Back of card */}
+          <CardFace 
+            isExpanded={animationState === 'expanded'} 
+            backgroundColor={backfaceColor}
+            isFlipped
+            animationState={animationState}
           >
-            {/* Show amount in expanded state */}
-            <motion.span
-              className="text-white text-[70px] font-medium font-cash"
-              layout="position"
-            >
-              ${amount}
-            </motion.span>
-          </motion.div>
-        )}
-      </MotionComponent>
-    </>
+            {backContent ? backContent : (
+              <div className="w-full h-full flex items-center justify-center relative">
+                <div className="text-white/50 text-xl">Back</div>
+              </div>
+            )}
+          </CardFace>
+        </motion.div>
+      </motion.div>
+    </div>
   );
 }; 

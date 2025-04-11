@@ -7,7 +7,7 @@ import { Screen } from '../types/screen';
 import * as screens from '../screens/checkout';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Cart', 'TapToPay', 'Tipping'];
+const INSTANT_SCREENS = ['Home', 'Cart', 'TapToPay', 'Tipping', 'Cashback', 'End'];
 
 /**
  * Main application view that manages screen transitions and state.
@@ -180,27 +180,28 @@ export const MainView = () => {
     <div className="flex flex-col w-screen h-screen bg-black">
       {/* Main content area that centers all screens */}
       <div className="flex-1 flex items-center justify-center relative overflow-hidden">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={`${currentScreen}-${refreshKey}`}
             className="absolute flex items-center justify-center w-full h-full"
             initial={{ 
-              x: isInstantTransition ? 0 : 300, 
-              opacity: isInstantTransition ? 1 : 0 
+              x: isInstantTransition ? 0 : 200, 
+              opacity: isInstantTransition ? 1 : 0.8
             }}
             animate={{ 
               x: 0, 
               opacity: 1 
             }}
             exit={{ 
-              x: isInstantTransition ? 0 : -300, 
-              opacity: isInstantTransition ? 1 : 0 
+              x: isInstantTransition ? 0 : -200, 
+              opacity: isInstantTransition ? 1 : 0.8,
+              transition: { duration: 0.15 }
             }}
             transition={{
               type: "spring",
-              stiffness: 300,
-              damping: 30,
-              duration: isInstantTransition ? 0 : 0.3
+              stiffness: 400,
+              damping: 35,
+              duration: isInstantTransition ? 0 : 0.2
             }}
           >
             {/* Apply key directly to component, not through spread */}

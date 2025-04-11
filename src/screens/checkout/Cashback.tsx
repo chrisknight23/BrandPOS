@@ -1,6 +1,8 @@
-import { LocalPass } from '../../components/common/LocalPass';
-import { useEffect } from 'react';
+import { LocalPass, CardState } from '../../components/common/LocalPass';
+import { useEffect, useState, useCallback } from 'react';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
+import cashBackAnimation from '../../assets/CashBackLogo.json';
+import { motion } from 'framer-motion';
 
 interface CashbackProps {
   onNext: (amount?: string) => void;
@@ -8,6 +10,8 @@ interface CashbackProps {
 }
 
 export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
+  const [cardState, setCardState] = useState<CardState>('expanded');
+  
   useEffect(() => {
     console.log(`Cashback: Component mounted with amount ${amount}`);
     
@@ -20,20 +24,55 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
     console.log('Cashback: Next clicked, navigating to next screen');
     onNext();
   };
+  
+  // Handle state changes from the card animation
+  const handleStateChange = (newState: CardState) => {
+    console.log(`Cashback: Card state changed to ${newState}`);
+  };
+  
+  // Handle animation completion and state changes
+  const handleAnimationComplete = useCallback(() => {
+    console.log('Cashback: Animation completed, transitioning to initial state');
+    // Explicitly set to initial state
+    setCardState('initial');
+  }, []);
+  
+  // For debugging
+  useEffect(() => {
+    console.log(`Current card state: ${cardState}`);
+  }, [cardState]);
 
   return (
     <BaseScreen onNext={onNext}>
       {/* Main container for the device frame - everything must stay within this boundary */}
-      <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[4px] border border-white/20">
-        <div className="w-full h-full bg-black relative overflow-hidden flex items-center justify-center">
+      <motion.div 
+        className="w-[800px] h-[500px] relative overflow-hidden rounded-[4px] border border-white/20"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 1 }}
+      >
+        <motion.div 
+          className="w-full h-full bg-black relative overflow-hidden flex items-center justify-center"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+        >
           <LocalPass
             amount={amount}
-            isExpanded={true}
+            initialState={cardState}
+            isExpanded={cardState === 'expanded'}
             onClick={handleNextClick}
-            noAnimation={true}
+            onStateChange={handleStateChange}
+            lottieAnimation={cashBackAnimation}
+            noAnimation={false}
+            useRandomValues={false}
+            headerText="Cash Back"
+            subheaderText="Earned for tipping"
+            buttonText="Accept Cash"
+            onAnimationComplete={handleAnimationComplete}
+            autoPlay={true}
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </BaseScreen>
   );
 }; 
