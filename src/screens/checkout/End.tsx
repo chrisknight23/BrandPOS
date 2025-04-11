@@ -21,6 +21,9 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
   const timerInterval = 50; // Update every 50ms for smooth animation
   const initialDelay = 1500; // 1.5 second delay before timer starts
 
+  // Check if a tip was actually given
+  const hasTip = tipAmount && parseFloat(tipAmount) > 0;
+
   // Calculate the total with tip when props change
   useEffect(() => {
     // If amount is provided directly, use it
@@ -88,7 +91,7 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
           transition={{ duration: 0.3 }}
         >
           <h2 className="text-2xl font-cash font-medium">
-            Paid ${total} <span className="font-normal text-white/60">with tip</span>
+            Paid ${total} {hasTip && <span className="font-normal text-white/60">with tip</span>}
           </h2>
           
           <h1 className="text-[56px] font-cash font-semibold leading-[48px] tracking-[-0.04em]">
