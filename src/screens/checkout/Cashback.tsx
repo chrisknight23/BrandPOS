@@ -65,7 +65,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
             lottieAnimation={cashBackAnimation}
             noAnimation={false}
             useRandomValues={false}
-            headerText="Cash Back"
+            headerText="Local Balance"
             subheaderText="Earned for tipping"
             buttonText="Accept Cash"
             onAnimationComplete={handleAnimationComplete}
