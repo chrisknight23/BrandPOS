@@ -171,6 +171,11 @@ export const MainView = () => {
         ...baseProps,
         goToScreen: goToScreen  // Pass direct navigation function to Tipping
       };
+    } else if (currentScreen === 'Cashback') {
+      return {
+        ...baseProps,
+        amount: tipAmount || "1" // Pass the tip amount to Cashback screen
+      };
     } else {
       return baseProps;
     }

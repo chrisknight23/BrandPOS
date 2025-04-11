@@ -63,7 +63,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
     <BaseScreen onNext={onNext}>
       {/* Main container for the device frame - everything must stay within this boundary */}
       <motion.div 
-        className="w-[800px] h-[500px] relative overflow-hidden rounded-[4px]"
+        className="w-[800px] h-[500px] relative overflow-hidden rounded-[4px] border border-white/20"
         initial={{ opacity: 1 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 1 }}
