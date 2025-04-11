@@ -15,20 +15,20 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
   const [total, setTotal] = useState(amount || baseAmount);
   const [progress, setProgress] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
+  const [hasTip, setHasTip] = useState(false);
   
   // Timer constants
   const timerDuration = 12000; // 12 seconds total (increased from 10 seconds)
   const timerInterval = 50; // Update every 50ms for smooth animation
   const initialDelay = 1500; // 1.5 second delay before timer starts
 
-  // Check if a tip was actually given
-  const hasTip = tipAmount && parseFloat(tipAmount) > 0;
-
   // Calculate the total with tip when props change
   useEffect(() => {
     // If amount is provided directly, use it
     if (amount) {
       setTotal(amount);
+      // Determine if there's a tip by checking tipAmount
+      setHasTip(tipAmount !== undefined && tipAmount !== null && parseFloat(tipAmount) > 0);
       return;
     }
     
@@ -38,6 +38,8 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
       const tip = tipAmount ? parseFloat(tipAmount) : 0;
       const totalWithTip = base + tip;
       setTotal(totalWithTip.toFixed(2));
+      // Set hasTip based on whether tip is greater than 0
+      setHasTip(tip > 0);
     }
   }, [amount, baseAmount, tipAmount]);
   
