@@ -111,7 +111,7 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
   // Button-specific entrance animation that can be passed to TipButton
   const buttonEntranceAnimation = {
     initial: { backgroundColor: '#1189D6', scale: 0.97, opacity: 0 },
-    animate: { backgroundColor: '#1189D6', scale: 1, opacity: 1 },
+    animate: { scale: 1, opacity: 1 }, // Remove backgroundColor to let TipButton handle it
     transition: {
       type: "spring",
       stiffness: 300,

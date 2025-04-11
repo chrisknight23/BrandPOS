@@ -91,7 +91,8 @@ export const TipButton = ({
     layout: true,
     backgroundColor: {
       type: "tween",
-      duration: 0.3
+      duration: 0.3,
+      ease: [0.32, 0.72, 0, 1]
     },
     // Add default duration to ensure consistent timing
     duration: 0.3
