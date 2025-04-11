@@ -16,7 +16,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
   
   // Force an explicit reset when entering the screen
   useEffect(() => {
-    console.log(`Cashback: Component mounted with amount ${amount}`);
+    console.log(`Cashback: Component mounted with tip amount ${amount}`);
     
     // Reset to expanded state on mount
     setCardState('expanded');
@@ -63,7 +63,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
     <BaseScreen onNext={onNext}>
       {/* Main container for the device frame - everything must stay within this boundary */}
       <motion.div 
-        className="w-[800px] h-[500px] relative overflow-hidden rounded-[4px] border border-white/20"
+        className="w-[800px] h-[500px] relative overflow-hidden rounded-[4px]"
         initial={{ opacity: 1 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 1 }}
