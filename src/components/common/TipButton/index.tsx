@@ -52,8 +52,8 @@ export const TipButton = ({
 
       // Set up styles for the container
       lottieContainer.current.style.position = 'absolute';
-      lottieContainer.current.style.width = '250px';
-      lottieContainer.current.style.height = '250px';
+      lottieContainer.current.style.width = '158px';
+      lottieContainer.current.style.height = '158px';
       lottieContainer.current.style.top = '50%';
       lottieContainer.current.style.left = '50%';
       lottieContainer.current.style.transform = 'translate(-50%, -50%)';
