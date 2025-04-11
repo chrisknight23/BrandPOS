@@ -1,4 +1,7 @@
 import { motion } from 'framer-motion';
+import { useRef, useEffect } from 'react';
+import lottie from 'lottie-web';
+import cashBackAnimation from '../../../assets/CashBackLogo.json';
 
 interface TipButtonProps {
   amount: string;
@@ -21,6 +24,54 @@ export const TipButton = ({
   initial,
   transition: customTransition,
 }: TipButtonProps) => {
+  // Ref for the Lottie animation container
+  const lottieContainer = useRef<HTMLDivElement>(null);
+  const lottieAnimRef = useRef<any>(null);
+
+  // Initialize Lottie animation when the button is selected
+  useEffect(() => {
+    if (isSelected && lottieContainer.current) {
+      // Clean up any existing animation
+      if (lottieAnimRef.current) {
+        lottieAnimRef.current.destroy();
+      }
+
+      // Create new animation
+      const anim = lottie.loadAnimation({
+        container: lottieContainer.current,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        animationData: cashBackAnimation,
+        rendererSettings: {
+          progressiveLoad: false,
+          preserveAspectRatio: 'xMidYMid meet',
+          className: 'lottie-svg'
+        }
+      });
+
+      // Set up styles for the container
+      lottieContainer.current.style.position = 'absolute';
+      lottieContainer.current.style.width = '250px';
+      lottieContainer.current.style.height = '250px';
+      lottieContainer.current.style.top = '50%';
+      lottieContainer.current.style.left = '50%';
+      lottieContainer.current.style.transform = 'translate(-50%, -50%)';
+
+      // Stop on the first frame - don't play the animation
+      anim.goToAndStop(0, true);
+
+      lottieAnimRef.current = anim;
+    }
+
+    return () => {
+      if (lottieAnimRef.current) {
+        lottieAnimRef.current.destroy();
+        lottieAnimRef.current = null;
+      }
+    };
+  }, [isSelected]);
+
   // Button tap animation only applies to non-selected state
   const buttonTapAnimation = !isSelected ? {
     whileTap: { scale: 0.90 },
@@ -92,24 +143,29 @@ export const TipButton = ({
         // Match parent transition timing
         transition={transition}
       >
-        {/* Text content with its own animation configuration */}
-        <motion.span 
-          className="text-white font-medium font-cash"
-          // Use consistent text sizing with the same font metrics
-          style={{
-            fontSize: isSelected ? '120px' : '70px',
-            lineHeight: 1,
-            // Prevent text from shifting during animation
-            display: 'block',
-            transform: 'translateZ(0)'
-          }}
-          // This ensures text size and position animates smoothly with parent
-          layoutId={`${layoutId}-text`}
-          // Coordinated layout transition for text size changes
-          transition={transition}
-        >
-          ${amount}
-        </motion.span>
+        {isSelected ? (
+          // Show the first frame of Lottie animation when selected
+          <div ref={lottieContainer} className="lottie-container" />
+        ) : (
+          // Text content with its own animation configuration - only shown when not selected
+          <motion.span 
+            className="text-white font-medium font-cash"
+            // Use consistent text sizing with the same font metrics
+            style={{
+              fontSize: '70px',
+              lineHeight: 1,
+              // Prevent text from shifting during animation
+              display: 'block',
+              transform: 'translateZ(0)'
+            }}
+            // This ensures text size and position animates smoothly with parent
+            layoutId={`${layoutId}-text`}
+            // Coordinated layout transition for text size changes
+            transition={transition}
+          >
+            ${amount}
+          </motion.span>
+        )}
       </motion.div>
     </motion.div>
   );

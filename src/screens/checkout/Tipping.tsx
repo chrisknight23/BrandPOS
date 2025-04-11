@@ -25,6 +25,12 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
 
   const handleAmountClick = (amount: string) => {
     setSelectedAmount(amount);
+    
+    // Add a slight delay before navigating to the next screen
+    // This gives the Lottie animation time to display its first frame
+    setTimeout(() => {
+      onNext(amount);
+    }, 500);
   };
 
   const handleCustomOrNoTip = () => {
