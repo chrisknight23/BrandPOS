@@ -62,7 +62,7 @@ export const TipButton = ({
       lottieContainer.current.style.height = '158px';
       lottieContainer.current.style.top = '50%';
       lottieContainer.current.style.left = '50%';
-      lottieContainer.current.style.transform = `translate(-50%, -50%) scale(${1 / BUTTON_SCALES.SELECTED})`;
+      lottieContainer.current.style.transform = 'translate(-50%, -50%)';
 
       // Stop on the first frame - don't play the animation
       anim.goToAndStop(0, true);
