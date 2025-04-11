@@ -1,5 +1,5 @@
 import { LocalPass, CardState } from '../../components/common/LocalPass';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import cashBackAnimation from '../../assets/CashBackLogo.json';
 import { motion } from 'framer-motion';
@@ -11,9 +11,16 @@ interface CashbackProps {
 
 export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
   const [cardState, setCardState] = useState<CardState>('expanded');
+  // Add a mount counter ref to use as a key for the LocalPass component
+  const mountCount = useRef(0);
   
   useEffect(() => {
-    console.log(`Cashback: Component mounted with amount ${amount}`);
+    // Increment mount counter on each mount to force re-mounting of LocalPass
+    mountCount.current += 1;
+    console.log(`Cashback: Component mounted with amount ${amount}, mount count: ${mountCount.current}`);
+    
+    // Reset card state to expanded on mount
+    setCardState('expanded');
     
     return () => {
       console.log('Cashback: Component unmounting');
@@ -57,6 +64,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
           animate={{ opacity: 1 }}
         >
           <LocalPass
+            key={`cashback-${mountCount.current}`} // Add key to force remount
             amount={amount}
             initialState={cardState}
             isExpanded={cardState === 'expanded'}
@@ -65,8 +73,8 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
             lottieAnimation={cashBackAnimation}
             noAnimation={false}
             useRandomValues={false}
-            headerText="Local Balance"
-            subheaderText="Earned for tipping"
+            headerText="Local Cash"
+            subheaderText="Earned for tipping at local businesses"
             buttonText="Accept Cash"
             onAnimationComplete={handleAnimationComplete}
             autoPlay={true}

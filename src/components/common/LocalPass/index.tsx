@@ -284,14 +284,36 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     // Skip animation if disabled
     if (noAnimation || !autoPlay) return;
     
+    console.log('LocalPass: Initializing Lottie animation');
     let anim: any = null;
     
     if (lottieContainer.current && lottieAnimation) {
+      // Reset any previous animations first
+      if (lottieAnimRef.current) {
+        lottieAnimRef.current.destroy();
+        lottieAnimRef.current = null;
+      }
+      
+      // Reset any previous styles first
+      if (lottieContainer.current) {
+        lottieContainer.current.style.cssText = '';
+        
+        // Center positioning without transforms
+        lottieContainer.current.style.position = 'absolute';
+        lottieContainer.current.style.width = '158px';
+        lottieContainer.current.style.height = '158px';
+        lottieContainer.current.style.top = '50%';
+        lottieContainer.current.style.left = '50%';
+        lottieContainer.current.style.marginLeft = '-79px'; // Half the width
+        lottieContainer.current.style.marginTop = '-79px'; // Half the height
+      }
+      
+      // Create a new animation instance
       anim = lottie.loadAnimation({
         container: lottieContainer.current,
         renderer: 'svg',
         loop: false,
-        autoplay: true,
+        autoplay: false, // Start manually to ensure proper timing
         animationData: lottieAnimation,
         rendererSettings: {
           progressiveLoad: false,
@@ -299,18 +321,6 @@ export const LocalPass: React.FC<LocalPassProps> = ({
           className: 'lottie-svg'
         }
       });
-
-      // Reset any previous styles first
-      lottieContainer.current.style.cssText = '';
-      
-      // Center positioning without transforms
-      lottieContainer.current.style.position = 'absolute';
-      lottieContainer.current.style.width = '158px';
-      lottieContainer.current.style.height = '158px';
-      lottieContainer.current.style.top = '50%';
-      lottieContainer.current.style.left = '50%';
-      lottieContainer.current.style.marginLeft = '-79px'; // Half the width
-      lottieContainer.current.style.marginTop = '-79px'; // Half the height
 
       // Add completion listener to know when animation finishes
       anim.addEventListener('complete', () => {
@@ -340,21 +350,36 @@ export const LocalPass: React.FC<LocalPassProps> = ({
       });
 
       lottieAnimRef.current = anim;
+      
+      // Always ensure animation starts from the first frame
+      anim.goToAndStop(0, true);
+      
+      // Start the animation with a slight delay to ensure it's fully loaded and initialized
+      if (animationState === 'expanded') {
+        setTimeout(() => {
+          console.log('LocalPass: Starting Lottie animation');
+          if (lottieAnimRef.current) {
+            lottieAnimRef.current.play();
+          }
+        }, 50); // Very small delay to ensure proper initialization
+      }
     } else {
       // If no lottie animation, just show the number
       setShowNumber(true);
     }
 
     return () => {
+      console.log('LocalPass: Cleaning up Lottie animation');
       if (anim) {
         anim.removeEventListener('complete');
         anim.destroy();
       }
     };
-  }, [animationState, lottieAnimation, autoPlay, noAnimation, useRandomValues, derivedInitialAmount]);
+  }, [animationState, lottieAnimation, noAnimation, autoPlay]); // Include only essential dependencies
 
   // Handle animation when card state changes
   useEffect(() => {
+    console.log(`LocalPass: Card state changed to ${animationState} from ${prevAnimationState.current}`);
     if (animationState === 'expanded' && prevAnimationState.current !== 'expanded') {
       if (lottieAnimRef.current) {
         // Reset animation
@@ -363,6 +388,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
         
         // Play lottie animation after card expansion
         setTimeout(() => {
+          console.log('LocalPass: Playing Lottie animation after state change');
           lottieAnimRef.current.play();
           // Number will be shown via the 'complete' event listener now
         }, DELAYS.EXPANDED_ANIMATION);
@@ -382,19 +408,6 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     // Update previous state
     prevAnimationState.current = animationState;
   }, [animationState]);
-
-  // Calculate appropriate scale for the AnimatedNumber based on card state
-  const getNumberScale = (state: CardState) => {
-    switch (state) {
-      case 'expanded':
-        return 1 / CARD_SCALES.EXPANDED;
-      case 'dropped':
-        return 1 / CARD_SCALES.COMPACT;
-      case 'initial':
-      default:
-        return 1;
-    }
-  };
 
   // Handle card scale animations
   useEffect(() => {
@@ -442,6 +455,19 @@ export const LocalPass: React.FC<LocalPassProps> = ({
         });
     }
   }, [animationState, controls, lottieControls, numberControls]);
+
+  // Calculate appropriate scale for the AnimatedNumber based on card state
+  const getNumberScale = (state: CardState) => {
+    switch (state) {
+      case 'expanded':
+        return 1 / CARD_SCALES.EXPANDED;
+      case 'dropped':
+        return 1 / CARD_SCALES.COMPACT;
+      case 'initial':
+      default:
+        return 1;
+    }
+  };
 
   // Play lottie animation manually
   const playLottieAnimation = (e?: React.MouseEvent) => {
