@@ -11,16 +11,16 @@ interface CashbackProps {
 
 export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
   const [cardState, setCardState] = useState<CardState>('expanded');
-  // Add a mount counter ref to use as a key for the LocalPass component
-  const mountCount = useRef(0);
+  // Track whether we're currently transitioning states
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
+  // Force an explicit reset when entering the screen
   useEffect(() => {
-    // Increment mount counter on each mount to force re-mounting of LocalPass
-    mountCount.current += 1;
-    console.log(`Cashback: Component mounted with amount ${amount}, mount count: ${mountCount.current}`);
+    console.log(`Cashback: Component mounted with amount ${amount}`);
     
-    // Reset card state to expanded on mount
+    // Reset to expanded state on mount
     setCardState('expanded');
+    setIsTransitioning(false);
     
     return () => {
       console.log('Cashback: Component unmounting');
@@ -35,19 +35,29 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
   // Handle state changes from the card animation
   const handleStateChange = (newState: CardState) => {
     console.log(`Cashback: Card state changed to ${newState}`);
+    
+    if (newState !== cardState) {
+      setIsTransitioning(true);
+    }
   };
   
   // Handle animation completion and state changes
   const handleAnimationComplete = useCallback(() => {
     console.log('Cashback: Animation completed, transitioning to initial state');
-    // Explicitly set to initial state
-    setCardState('initial');
+    
+    // Allow a short delay to ensure animations complete properly
+    setTimeout(() => {
+      // Set to initial state
+      setCardState('initial');
+      // Mark transition as complete
+      setIsTransitioning(false);
+    }, 50);
   }, []);
   
   // For debugging
   useEffect(() => {
-    console.log(`Current card state: ${cardState}`);
-  }, [cardState]);
+    console.log(`Current card state: ${cardState}, transitioning: ${isTransitioning}`);
+  }, [cardState, isTransitioning]);
 
   return (
     <BaseScreen onNext={onNext}>
@@ -64,7 +74,6 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
           animate={{ opacity: 1 }}
         >
           <LocalPass
-            key={`cashback-${mountCount.current}`} // Add key to force remount
             amount={amount}
             initialState={cardState}
             isExpanded={cardState === 'expanded'}

@@ -245,7 +245,26 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     console.log(`LocalPass: initialState prop changed to ${initialState}`);
     if (initialState) {
       console.log(`LocalPass: Updating internal animationState to ${initialState}`);
-      setAnimationState(initialState);
+      
+      // Only update state if it's different from current state
+      if (initialState !== animationState) {
+        setAnimationState(initialState);
+        
+        // Reset Lottie animation if needed
+        if (initialState === 'expanded' && lottieAnimRef.current) {
+          // Reset animation to first frame
+          lottieAnimRef.current.goToAndStop(0, true);
+          setShowNumber(false);
+          
+          // Start animation with a slight delay
+          setTimeout(() => {
+            if (lottieAnimRef.current) {
+              console.log('LocalPass: Playing animation after initialState change to expanded');
+              lottieAnimRef.current.play();
+            }
+          }, DELAYS.EXPANDED_ANIMATION);
+        }
+      }
     }
   }, [initialState]);
   
@@ -375,7 +394,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
         anim.destroy();
       }
     };
-  }, [animationState, lottieAnimation, noAnimation, autoPlay]); // Include only essential dependencies
+  }, [animationState, lottieAnimation, noAnimation, autoPlay, initialState]); // Add initialState to dependencies
 
   // Handle animation when card state changes
   useEffect(() => {
