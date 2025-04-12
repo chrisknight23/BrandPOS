@@ -298,12 +298,17 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
   };
   
   const defaultCombinationOffsets = {
-    '1-1': 18, // When '1' is followed by '1'
+    '1-1': 14, // Reduce spacing when '1' is followed by '1'
+    '1-0': 10, // Add spacing for '1' followed by '0'
+    '1-2': 12, // Add spacing for '1' followed by '2'
+    '1-3': 12, // Add spacing for '1' followed by '3'
     ...combinationOffsets
   };
   
   const defaultAfterDollarSignOffsets = {
-    1: 18, // Offset digit '1' by 18px when after dollar sign
+    1: 14, // Reduce spacing between dollar sign and digit '1'
+    2: 4,  // Slight adjustment for digit '2'
+    3: 4,  // Slight adjustment for digit '3'
     ...afterDollarSignOffsets
   };
   
@@ -332,8 +337,8 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
           layout
           style={{ 
             marginRight: useAutoKerning 
-              ? (firstDigitIs1 ? -12 : 0)  // Pull digit '1' much closer to dollar sign
-              : (firstDigitIs7 ? 0 : firstTwoAre11 ? -20 : firstDigitIs1 ? -8 : 8),
+              ? (firstDigitIs1 ? -18 : -6)  // Pull all numbers closer to dollar sign, especially 1
+              : (firstDigitIs7 ? -6 : firstTwoAre11 ? -24 : firstDigitIs1 ? -14 : 2), // Reduce spacing for all cases
             transition: 'margin-right 0.75s cubic-bezier(0.32, 0.72, 0, 1)'
           }}
         >
