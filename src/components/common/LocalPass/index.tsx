@@ -749,7 +749,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                         className="w-full h-full flex items-center justify-center relative z-10"
                         onClick={handleButtonClick}
                       >
-                        <span className="text-2xl font-cash-sans-medium text-white antialiased" style={{
+                        <span className="text-2xl font-medium text-white antialiased" style={{
                           textRendering: 'optimizeLegibility',
                           WebkitFontSmoothing: 'antialiased',
                           MozOsxFontSmoothing: 'grayscale'
