@@ -156,24 +156,7 @@ const CardFace: React.FC<CardFaceProps> = ({
       transformStyle: 'preserve-3d'
     }}
   >
-    {/* Lighting gradient overlay */}
-    <div 
-      className="absolute inset-0 rounded-[32px]"
-      style={{
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 100%)',
-        pointerEvents: 'none'
-      }}
-    />
-    
     {children}
-
-    {/* Edge highlight */}
-    <div 
-      className="absolute inset-0 rounded-[32px]"
-      style={{
-        boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.3), inset -1px -1px 1px rgba(0,0,0,0.2)'
-      }}
-    />
   </motion.div>
 );
 
