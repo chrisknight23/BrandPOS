@@ -146,7 +146,7 @@ const CardFace: React.FC<CardFaceProps> = ({
   animationState
 }) => (
   <motion.div
-    className={`w-full h-full ${backgroundColor} rounded-2xl absolute backface-hidden`}
+    className={`w-full h-full ${backgroundColor} rounded-[20px] absolute backface-hidden`}
     style={{
       boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
       willChange: 'transform',
@@ -157,7 +157,7 @@ const CardFace: React.FC<CardFaceProps> = ({
   >
     {/* Lighting gradient overlay */}
     <div 
-      className="absolute inset-0 rounded-2xl"
+      className="absolute inset-0 rounded-[20px]"
       style={{
         background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 100%)',
         pointerEvents: 'none'
@@ -168,7 +168,7 @@ const CardFace: React.FC<CardFaceProps> = ({
 
     {/* Edge highlight */}
     <div 
-      className="absolute inset-0 rounded-2xl"
+      className="absolute inset-0 rounded-[20px]"
       style={{
         boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.3), inset -1px -1px 1px rgba(0,0,0,0.2)'
       }}
