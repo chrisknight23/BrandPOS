@@ -106,7 +106,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
           <AnimatePresence>
             {showLogo && (
               <motion.div 
-                className="absolute bottom-6 left-6"
+                className="absolute bottom-8 left-8"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
