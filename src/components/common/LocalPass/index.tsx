@@ -733,12 +733,12 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                       }}
                       transition={{ duration: 0.3 }}
                     >
-                      {/* Progress timer bar */}
+                      {/* Progress timer bar - positioned left, drain from right to left */}
                       <motion.div 
-                        className="absolute top-0 bottom-0 right-0 bg-black bg-opacity-10"
+                        className="absolute top-0 bottom-0 left-0 bg-black bg-opacity-10"
                         style={{ 
-                          width: `${progressTimer}%`,
-                          transformOrigin: 'right' 
+                          width: `${100 - progressTimer}%`,
+                          transformOrigin: 'left'
                         }}
                       />
                       
