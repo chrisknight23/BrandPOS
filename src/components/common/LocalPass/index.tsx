@@ -545,20 +545,70 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     }
   }, [animationState]);
 
-  // Enhanced handleButtonClick to flip the card
+  // Handle double tap to flip card
+  const handleDoubleTap = () => {
+    console.log('LocalPass: Double tap detected, flipping card');
+    setIsFlipped(!isFlipped);
+    
+    // Call onFlip callback if provided
+    if (onFlip) {
+      onFlip(!isFlipped);
+    }
+  };
+
+  // Enhanced handleButtonClick to handle various actions
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card flipping from the parent click handler
     
     // Reset timer when button is clicked
     setProgressTimer(100);
     
-    // Flip the card instead of cycling states
-    setIsFlipped(!isFlipped);
-    if (onFlip) onFlip(!isFlipped);
+    if (isFlipped) {
+      // When flipped, button press will flip back
+      setIsFlipped(false);
+      
+      // Call onFlip callback if provided
+      if (onFlip) {
+        onFlip(false);
+      }
+    } else {
+      // In normal state, button triggers card flipping
+      setIsFlipped(true);
+      
+      // Call onFlip callback if provided
+      if (onFlip) {
+        onFlip(true);
+      }
+    }
     
     // Call onButtonClick if provided
     if (onButtonClick) {
       onButtonClick(e);
+    }
+  };
+
+  // Handle manual flip when clicking the flip button
+  const handleFlipClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('LocalPass: Flip button clicked');
+    setIsFlipped(!isFlipped);
+    
+    // Call onFlip callback if provided
+    if (onFlip) {
+      onFlip(!isFlipped);
+    }
+  };
+
+  // Reset the card state when going back to normal
+  const resetCard = () => {
+    lottieAnimRef.current?.goToAndStop(0, true);
+    setAnimationState('initial');
+    setShowNumber(false);
+    setIsFlipped(false);
+    
+    // Call onFlip callback to notify about reset
+    if (onFlip) {
+      onFlip(false);
     }
   };
 
@@ -585,12 +635,39 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     console.log('LocalPass: Card isFlipped state changed to:', isFlipped);
   }, [isFlipped]);
 
-  // Add useEffect to initialize and reset isFlipped state
+  // Effect for initial mount
   useEffect(() => {
-    console.log('LocalPass: Component mounted, resetting flip state');
-    // Reset to front-facing
+    if (autoPlay && lottieAnimRef.current) {
+      // Only start playing if we're in expanded state
+      if (animationState === 'expanded') {
+        // Reset any existing animation first
+        lottieAnimRef.current.goToAndStop(0, true);
+        
+        // Start playing after a delay
+        setTimeout(() => {
+          if (lottieAnimRef.current) {
+            console.log(`LocalPass: Playing initial animation (delay: ${animationDelay}ms)`);
+            lottieAnimRef.current.play();
+          }
+        }, animationDelay || DELAYS.INITIAL_ANIMATION);
+      }
+    }
+    
+    // Reset flip state on component mount
     setIsFlipped(false);
-  }, []);
+    
+    // Call onFlip callback to notify about the initial state
+    if (onFlip) {
+      onFlip(false);
+    }
+    
+    return () => {
+      // Clean up any ongoing animations or timers
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [autoPlay, animationState, animationDelay]);
 
   return (
     <div className={`w-full h-full flex items-center justify-center ${className}`}>
