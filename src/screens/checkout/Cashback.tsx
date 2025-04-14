@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import cashBackAnimation from '../../assets/CashBackLogo.json';
 import CashAppLogo from '../../assets/images/CashApplogo.svg';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CashbackProps {
   onNext: (amount?: string) => void;
@@ -14,6 +14,8 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
   const [cardState, setCardState] = useState<CardState>('expanded');
   // Track whether we're currently transitioning states
   const [isTransitioning, setIsTransitioning] = useState(false);
+  // State to control logo visibility
+  const [showLogo, setShowLogo] = useState(false);
   
   // Force an explicit reset when entering the screen
   useEffect(() => {
@@ -22,6 +24,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
     // Reset to expanded state on mount
     setCardState('expanded');
     setIsTransitioning(false);
+    setShowLogo(false);
     
     return () => {
       console.log('Cashback: Component unmounting');
@@ -40,6 +43,14 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
     if (newState !== cardState) {
       setIsTransitioning(true);
     }
+    
+    // Show the logo when the card reaches the initial state
+    if (newState === 'initial') {
+      // Wait a moment after the card reaches initial state to show logo
+      setTimeout(() => {
+        setShowLogo(true);
+      }, 500);
+    }
   };
   
   // Handle animation completion and state changes
@@ -57,8 +68,8 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
   
   // For debugging
   useEffect(() => {
-    console.log(`Current card state: ${cardState}, transitioning: ${isTransitioning}`);
-  }, [cardState, isTransitioning]);
+    console.log(`Current card state: ${cardState}, transitioning: ${isTransitioning}, logo: ${showLogo}`);
+  }, [cardState, isTransitioning, showLogo]);
 
   return (
     <BaseScreen onNext={onNext}>
@@ -91,15 +102,20 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
             animationDelay={500}
           />
           
-          {/* Cash App Logo in bottom left corner */}
-          <motion.div 
-            className="absolute bottom-6 left-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.4 }}
-          >
-            <img src={CashAppLogo} alt="Cash App" width={100} />
-          </motion.div>
+          {/* Cash App Logo in bottom left corner - only shown after card animation completes */}
+          <AnimatePresence>
+            {showLogo && (
+              <motion.div 
+                className="absolute bottom-6 left-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <img src={CashAppLogo} alt="Cash App" width={100} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </motion.div>
     </BaseScreen>
