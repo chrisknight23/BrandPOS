@@ -40,9 +40,9 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
   // Calculate cell size based on container size
   const cellSize = size / gridSize;
   
-  // Position marker dimensions - match logo size (60x60)
-  const cornerOuterSize = 60; // Match logo size exactly (60px)
-  const cornerInnerSize = 24; // 40% of outer size for consistent proportions
+  // Position marker dimensions 
+  const cornerOuterSize = 62; // Outer square size (62x62 pixels)
+  const cornerInnerSize = 25; // 40% of outer size for consistent proportions
   
   // Function to create position markers that align with the corners
   const createCornerMarker = (isTopLeft: boolean, isTopRight: boolean, isBottomLeft: boolean) => {
@@ -76,7 +76,7 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
       row: isTopLeft || isTopRight ? 0 : gridSize - 7,
       col: isTopLeft || isBottomLeft ? 0 : gridSize - 7,
       isHollow: true,
-      cornerRadius: 16 // Adjusted to be proportional with 60px size
+      cornerRadius: 17 // Adjusted to be proportional with 62px size
     });
     
     // Inner square (solid) - centered within the outer square
@@ -93,7 +93,7 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
       row: isTopLeft || isTopRight ? 0 : gridSize - 7,
       col: isTopLeft || isBottomLeft ? 0 : gridSize - 7,
       isHollow: false,
-      cornerRadius: 6 // Adjusted to be proportional with 24px size
+      cornerRadius: 7 // Adjusted to be proportional with 25px size
     });
   };
   
