@@ -103,8 +103,8 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
   createCornerMarker(false, false, true); // Bottom-left
   
   // Generate dots for the main QR code pattern
-  // Dot size for regular pattern - slightly larger dots for better visibility at increased QR size
-  const dotSize = cellSize * 0.85; // 85% of cell size for slightly less spacing but better visibility
+  // Slightly smaller dots to accommodate increased density
+  const dotSize = cellSize * 0.75; // 75% of cell size for better spacing with increased dot count
   
   // Create a balanced distribution of dots in the grid
   for (let row = 0; row < gridSize; row++) {
@@ -125,11 +125,13 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
         continue;
       }
       
-      // Create a consistent pattern - more dots near the corners and edges
-      // and fewer in the middle areas, similar to real QR codes
+      // Create a denser pattern with more dots
       if ((row % 2 === 0 && col % 2 === 0) || // Regular grid pattern
           (row === 8 || col === 8 || row === gridSize-9 || col === gridSize-9) || // Timing patterns
-          ((row + col) % 3 === 0 && Math.random() > 0.3)) { // Random fill with bias
+          ((row + col) % 3 === 0) || // Add more dots with reduced spacing
+          (row % 3 === 0 && col % 2 === 0) || // Additional horizontal lines
+          (row % 2 === 0 && col % 3 === 0) || // Additional vertical lines
+          (Math.random() > 0.6)) { // Random additional dots with 40% chance
         
         // Calculate position based on grid
         const x = col * cellSize + (cellSize - dotSize)/2; // Center in cell
@@ -172,13 +174,12 @@ export const generateMockQRData = (size: number): QRDot[] => {
   // Create a 25x25 grid (standard QR code size)
   const gridSize = 25;
   const moduleSize = size / gridSize;
-  // Add some space between dots
-  const dotSize = moduleSize * 0.85; // Make dots slightly smaller than the module size
+  // Match the same dot size ratio as main generator
+  const dotSize = moduleSize * 0.75; // 75% of cell size for consistent appearance
   
   console.log('Generating mock QR data with size:', size, 'moduleSize:', moduleSize);
   
-  // Create the position marker patterns for corners (7x7 squares in three corners)
-  // These are specially structured square patterns
+  // Create the position marker patterns for corners
   const createPositionMarker = (startRow: number, startCol: number) => {
     // Outer square - solid border
     for (let i = 0; i < 7; i++) {
@@ -228,35 +229,39 @@ export const generateMockQRData = (size: number): QRDot[] => {
         continue;
       }
       
-      // Ensure we have a good number of dots but with more spacing
+      // Create a denser pattern with more dots, similar to main generator
       if (
-        // Create sparse pattern
-        ((row % 3 !== 0) && (col % 3 !== 0)) ||
-        // Create empty space in center for logo
-        (row > 8 && row < 17 && col > 8 && col < 17)
+        // Create pattern with more dots
+        (row % 2 === 0 || col % 2 === 0) ||
+        (row % 3 === 0) || 
+        (col % 3 === 0) ||
+        (Math.random() > 0.6)
       ) {
-        continue;
+        // Skip center area for logo
+        if (row > 8 && row < 17 && col > 8 && col < 17) {
+          continue;
+        }
+        
+        const x = col * moduleSize;
+        const y = row * moduleSize;
+        
+        // Calculate distance from center for sorting
+        const distX = x + moduleSize/2 - center;
+        const distY = y + moduleSize/2 - center;
+        const distanceFromCenter = Math.sqrt(distX*distX + distY*distY);
+        
+        dots.push({
+          x,
+          y,
+          size: dotSize,
+          isRound: true, // Most QR dots are round in the design
+          distanceFromCenter,
+          isPositionMarker: false,
+          row,
+          col,
+          isHollow: false
+        });
       }
-      
-      const x = col * moduleSize;
-      const y = row * moduleSize;
-      
-      // Calculate distance from center for sorting
-      const distX = x + moduleSize/2 - center;
-      const distY = y + moduleSize/2 - center;
-      const distanceFromCenter = Math.sqrt(distX*distX + distY*distY);
-      
-      dots.push({
-        x,
-        y,
-        size: dotSize, // Smaller dots for more spacing
-        isRound: true, // Most QR dots are round in the design
-        distanceFromCenter,
-        isPositionMarker: false,
-        row,
-        col,
-        isHollow: false
-      });
     }
   }
   
