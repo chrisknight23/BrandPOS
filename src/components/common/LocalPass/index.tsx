@@ -235,6 +235,13 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   const lottieControls = useAnimation();
   const numberControls = useAnimation();
   
+  // Progress timer state
+  const [progressTimer, setProgressTimer] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerDuration = 5000; // 5 seconds timer duration
+  const timerInterval = 50; // Update every 50ms
+  
   // Determine initial state based on either new or legacy props
   const derivedInitialState = initialState || (isExpanded ? 'expanded' : 'initial');
   const [animationState, setAnimationState] = useState<CardState>(derivedInitialState);
@@ -519,9 +526,43 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     });
   };
 
-  // Handle button click, call the provided handler or use default behavior
+  // Start the timer when the button is shown
+  useEffect(() => {
+    if (animationState !== 'expanded' && !isTimerRunning) {
+      // Start timer
+      setIsTimerRunning(true);
+      setProgressTimer(100); // Start at 100%
+      
+      timerRef.current = setInterval(() => {
+        setProgressTimer(prev => {
+          const newValue = prev - (100 * timerInterval / timerDuration);
+          if (newValue <= 0) {
+            // Timer finished
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              setIsTimerRunning(false);
+            }
+            return 0;
+          }
+          return newValue;
+        });
+      }, timerInterval);
+    }
+    
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [animationState]);
+
+  // Enhanced handleButtonClick to reset timer
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card flipping
+    
+    // Reset timer when button is clicked
+    setProgressTimer(100);
+    
     if (onButtonClick) {
       onButtonClick(e);
     } else {
@@ -685,20 +726,34 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                 {/* Footer with button - hidden in expanded state */}
                 {animationState !== 'expanded' && (
                   <div className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]">
-                    <motion.button 
-                      className="w-full h-20 py-3 rounded-full bg-black bg-opacity-10 hover:bg-opacity-15 transition-colors text-white font-medium"
-                      onClick={handleButtonClick}
+                    <motion.div 
+                      className="w-full h-20 relative overflow-hidden rounded-full bg-black bg-opacity-10"
                       animate={{ 
                         opacity: animationState === 'dropped' ? 0 : 1 
                       }}
                       transition={{ duration: 0.3 }}
                     >
-                      <span className="text-2xl font-cash-sans-medium antialiased" style={{
-                        textRendering: 'optimizeLegibility',
-                        WebkitFontSmoothing: 'antialiased',
-                        MozOsxFontSmoothing: 'grayscale'
-                      }}>{getButtonText()}</span>
-                    </motion.button>
+                      {/* Progress timer bar */}
+                      <motion.div 
+                        className="absolute top-0 bottom-0 right-0 bg-black bg-opacity-10"
+                        style={{ 
+                          width: `${progressTimer}%`,
+                          transformOrigin: 'right' 
+                        }}
+                      />
+                      
+                      {/* Button content */}
+                      <button 
+                        className="w-full h-full flex items-center justify-center relative z-10"
+                        onClick={handleButtonClick}
+                      >
+                        <span className="text-2xl font-cash-sans-medium text-white antialiased" style={{
+                          textRendering: 'optimizeLegibility',
+                          WebkitFontSmoothing: 'antialiased',
+                          MozOsxFontSmoothing: 'grayscale'
+                        }}>{getButtonText()}</span>
+                      </button>
+                    </motion.div>
                   </div>
                 )}
               </div>
