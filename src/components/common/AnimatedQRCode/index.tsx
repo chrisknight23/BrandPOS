@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateQRData } from './generateQRData';
 import { QRDot } from './types';
-import CashLogo from './CashLogo';
+import QRLogo from '../../../assets/images/QRLogo.svg';
 
 interface AnimatedQRCodeProps {
   // The value to encode in the QR code (URL, text, etc.)
@@ -29,7 +29,7 @@ interface AnimatedQRCodeProps {
   onAnimationComplete?: () => void;
   
   // Optional logo to display in center
-  logo?: string;
+  logo?: string | React.ReactNode;
   
   // QR code correction level (affects how much data can be damaged)
   errorCorrection?: 'L' | 'M' | 'Q' | 'H';
@@ -141,6 +141,37 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
   // Get animation sequence based on pattern
   const animationOrder = getAnimationOrder();
   
+  // Styling for QR dots based on whether they are position markers
+  const getDotStyle = (dot: QRDot, isAnimating: boolean, color: string, placeholderOpacity: number) => {
+    if (dot.isHollow) {
+      // For hollow squares (position markers outer square)
+      return {
+        position: 'absolute' as const,
+        left: dot.x,
+        top: dot.y,
+        width: dot.size,
+        height: dot.size,
+        backgroundColor: 'transparent',
+        border: `${dot.size * 0.1}px solid ${color}`,
+        borderRadius: dot.cornerRadius ? `${dot.cornerRadius}px` : (dot.isRound ? '50%' : '15%'),
+        opacity: isAnimating ? 1 : placeholderOpacity,
+        boxSizing: 'border-box' as const
+      };
+    }
+    
+    // Regular dots or solid squares
+    return {
+      position: 'absolute' as const,
+      left: dot.x,
+      top: dot.y,
+      width: dot.size,
+      height: dot.size,
+      backgroundColor: color,
+      borderRadius: dot.cornerRadius ? `${dot.cornerRadius}px` : (dot.isRound ? '50%' : '15%'),
+      opacity: isAnimating ? 1 : placeholderOpacity
+    };
+  };
+  
   // Use this if you want to let user manually start the animation
   if (!autoAnimate && !isAnimating && !isLoading) {
     return (
@@ -167,9 +198,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
         position: 'relative',
         width: size,
         height: size,
-        backgroundColor: lightColor,
-        borderRadius: '12px',
-        overflow: 'hidden'
+        backgroundColor: 'transparent'
       }}
     >
       {/* Debug button for development */}
@@ -215,20 +244,15 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
       {!isLoading && (
         <>
           {/* Base layer - placeholder QR (darker version) */}
-          <div className="qr-placeholder">
+          <div className="qr-placeholder" style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%'
+          }}>
             {dots.map((dot, idx) => (
               <div
                 key={`base-${idx}`}
-                style={{
-                  position: 'absolute',
-                  left: dot.x,
-                  top: dot.y,
-                  width: dot.size,
-                  height: dot.size,
-                  backgroundColor: darkColor,
-                  borderRadius: dot.isRound ? '50%' : '20%',
-                  opacity: placeholderOpacity
-                }}
+                style={getDotStyle(dot, false, darkColor, placeholderOpacity)}
               />
             ))}
           </div>
@@ -240,19 +264,11 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
                 {animationOrder.map((dot, idx) => (
                   <motion.div
                     key={`anim-${idx}`}
-                    style={{
-                      position: 'absolute',
-                      left: dot.x,
-                      top: dot.y,
-                      width: dot.size,
-                      height: dot.size,
-                      backgroundColor: darkColor,
-                      borderRadius: dot.isRound ? '50%' : '20%'
-                    }}
+                    style={getDotStyle(dot, true, darkColor, 1)}
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{
-                      delay: idx * (0.002 / speed), // Control animation speed
+                      delay: idx * (0.0015 / speed), // Adjust timing for better animation flow
                       duration: 0.3,
                       ease: "easeOut"
                     }}
@@ -270,45 +286,35 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
           
           {/* Center logo */}
           {logo && (
-            <div 
-              className="qr-logo" 
+            <div
               style={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: size * 0.22,
-                height: size * 0.22,
+                width: '60px',
+                height: '60px',
                 zIndex: 2
               }}
             >
-              {/* Handle custom logo types */}
-              {logo === 'cash-icon' ? (
-                <CashLogo size={size * 0.22} />
-              ) : (
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)'
-                  }}
-                >
-                  <img 
-                    src={logo} 
-                    alt="QR Logo" 
-                    width={size * 0.15} 
-                    height={size * 0.15} 
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '100%'
-                    }}
+              {typeof logo === 'string' ? (
+                logo === 'cash-icon' ? (
+                  <img
+                    src={QRLogo}
+                    alt="Cash App Logo"
+                    width={60}
+                    height={60}
                   />
-                </div>
+                ) : (
+                  <img
+                    src={logo}
+                    alt="QR Logo"
+                    width={60}
+                    height={60}
+                  />
+                )
+              ) : (
+                logo
               )}
             </div>
           )}

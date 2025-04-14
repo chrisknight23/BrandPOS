@@ -1,9 +1,8 @@
-import { motion, useAnimation } from 'framer-motion';
-import { useState, useEffect, useRef, ReactNode } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import lottie from 'lottie-web';
 import { AnimatedNumber } from '../AnimatedNumber';
 import { AnimatedQRCode } from '../AnimatedQRCode';
-import CashLogo from '../AnimatedQRCode/CashLogo';
 
 /**
  * A card component that can expand to show additional content with animations.
@@ -32,7 +31,7 @@ export type CardState = 'expanded' | 'initial' | 'dropped';
  */
 interface CardFaceProps {
   /** Content to render inside the card face */
-  children: ReactNode;
+  children: React.ReactNode;
   /** Whether the card is in expanded state */
   isExpanded: boolean;
   /** Background color for the card face */
@@ -78,9 +77,9 @@ export interface LocalPassProps {
   /** Handler for when the animation completes */
   onAnimationComplete?: () => void;
   /** Custom content for card front */
-  frontContent?: ReactNode;
+  frontContent?: React.ReactNode;
   /** Custom content for card back */
-  backContent?: ReactNode;
+  backContent?: React.ReactNode;
   /** Whether animations should play automatically on mount */
   autoPlay?: boolean;
   /** Custom class name for the card container */
@@ -98,7 +97,7 @@ export interface LocalPassProps {
   /** Handler for click events (for backward compatibility) */
   onClick?: () => void;
   /** Optional child elements to render in expanded state (for backward compatibility) */
-  children?: ReactNode;
+  children?: React.ReactNode;
   /** Disable all animations (for backward compatibility) */
   noAnimation?: boolean;
 }
@@ -630,8 +629,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
           className="w-full h-full relative"
           style={{ transformStyle: 'preserve-3d' }}
           animate={{ 
-            rotateY: isFlipped ? 180 : 0,
-            z: isFlipped ? 50 : 0
+            rotateY: isFlipped ? 180 : 0
           }}
           transition={{
             type: "spring",
@@ -795,27 +793,23 @@ export const LocalPass: React.FC<LocalPassProps> = ({
               <div className="w-full h-full flex flex-col items-center justify-center p-8">
                 <h3 className="text-2xl font-medium text-white mb-6">Scan to Cash Out</h3>
                 
-                {/* AnimatedQRCode - only animate when card is flipped */}
-                {(() => {
-                  console.log('LocalPass: Rendering AnimatedQRCode with autoAnimate:', isFlipped);
-                  return null;
-                })()}
-                <AnimatedQRCode
-                  value={`https://cash.app/${amount ? amount : '10'}`}
-                  size={280}
-                  autoAnimate={isFlipped}
-                  pattern="outside-in"
-                  speed={1.2}
-                  darkColor="#FFFFFF"
-                  lightColor="transparent"
-                  placeholderOpacity={0.2}
-                  className="mb-6"
-                  // Use custom logo instead of an image
-                  logo="cash-icon"
-                  onAnimationComplete={() => {
-                    console.log("QR animation complete");
-                  }}
-                />
+                {/* QR code container with better background for visibility */}
+                <div className="relative mb-6">
+                  <AnimatedQRCode
+                    value={`https://cash.app/${amount ? amount : '10'}`}
+                    size={240}
+                    autoAnimate={isFlipped}
+                    pattern="outside-in"
+                    speed={1.0}
+                    darkColor="#FFFFFF"
+                    lightColor="transparent"
+                    placeholderOpacity={0.5}
+                    logo="cash-icon"
+                    onAnimationComplete={() => {
+                      console.log("QR animation complete");
+                    }}
+                  />
+                </div>
                 
                 <p className="text-white/70 text-lg">
                   Open Cash App to scan
