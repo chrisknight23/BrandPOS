@@ -2,6 +2,7 @@ import { LocalPass, CardState } from '../../components/common/LocalPass';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import cashBackAnimation from '../../assets/CashBackLogo.json';
+import CashAppLogo from '../../assets/images/CashApplogo.svg';
 import { motion } from 'framer-motion';
 
 interface CashbackProps {
@@ -89,6 +90,16 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
             autoPlay={true}
             animationDelay={500}
           />
+          
+          {/* Cash App Logo in bottom left corner */}
+          <motion.div 
+            className="absolute bottom-6 left-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.4 }}
+          >
+            <img src={CashAppLogo} alt="Cash App" width={100} />
+          </motion.div>
         </motion.div>
       </motion.div>
     </BaseScreen>
