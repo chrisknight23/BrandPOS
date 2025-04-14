@@ -556,17 +556,20 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     };
   }, [animationState]);
 
-  // Enhanced handleButtonClick to reset timer
+  // Enhanced handleButtonClick to flip the card
   const handleButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card flipping
+    e.stopPropagation(); // Prevent card flipping from the parent click handler
     
     // Reset timer when button is clicked
     setProgressTimer(100);
     
+    // Flip the card instead of cycling states
+    setIsFlipped(!isFlipped);
+    if (onFlip) onFlip(!isFlipped);
+    
+    // Call onButtonClick if provided
     if (onButtonClick) {
       onButtonClick(e);
-    } else {
-      cycleCardState();
     }
   };
 
