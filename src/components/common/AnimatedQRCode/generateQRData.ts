@@ -125,21 +125,48 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
         continue;
       }
       
-      // Create a denser pattern with more dots
-      if ((row % 2 === 0 && col % 2 === 0) || // Regular grid pattern
-          (row === 8 || col === 8 || row === gridSize-9 || col === gridSize-9) || // Timing patterns
-          ((row + col) % 3 === 0) || // Add more dots with reduced spacing
-          (row % 3 === 0 && col % 2 === 0) || // Additional horizontal lines
-          (row % 2 === 0 && col % 3 === 0) || // Additional vertical lines
-          (Math.random() > 0.6)) { // Random additional dots with 40% chance
+      // Calculate distance from center for determining additional patterns
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const cellCenterX = col * cellSize + cellSize/2;
+      const cellCenterY = row * cellSize + cellSize/2;
+      const distFromCenter = Math.sqrt(
+        Math.pow(cellCenterX - centerX, 2) + 
+        Math.pow(cellCenterY - centerY, 2)
+      );
+      
+      // Base pattern - dots distributed across the grid
+      const basePattern = (row % 2 === 0 && col % 2 === 0) || // Regular grid pattern
+                          (row === 8 || col === 8 || row === gridSize-9 || col === gridSize-9); // Timing patterns
+      
+      // Additional patterns to specifically fill in empty areas from screenshot
+      const fillEmptyAreas = 
+         // Top middle area (between position markers)
+         (row < 9 && col > 9 && col < gridSize - 9) ||
+         
+         // Middle section wrap around logo (make denser)
+         (distFromCenter > centerPadding * cellSize && distFromCenter < (centerPadding + 5) * cellSize) ||
+         
+         // Left side gaps and right side gaps (increase density in these areas) 
+         (col < 9 && row > 7 && row < gridSize - 7) || 
+         (col > gridSize - 10 && row > 7 && row < gridSize - 7) ||
+         
+         // Bottom middle gaps
+         (row > gridSize - 10 && col > 9 && col < gridSize - 9);
+      
+      // Existing pattern rules
+      const existingRules = ((row + col) % 3 === 0) || // Add more dots with reduced spacing
+                           (row % 3 === 0 && col % 2 === 0) || // Additional horizontal lines
+                           (row % 2 === 0 && col % 3 === 0); // Additional vertical lines
+      
+      // Final dot presence check with targeted fillings for empty areas
+      if (basePattern || fillEmptyAreas || existingRules || (Math.random() > 0.65)) {
         
         // Calculate position based on grid
         const x = col * cellSize + (cellSize - dotSize)/2; // Center in cell
         const y = row * cellSize + (cellSize - dotSize)/2;
         
         // Calculate distance from center for animation ordering
-        const centerX = size / 2;
-        const centerY = size / 2;
         const distanceFromCenter = Math.sqrt(
           Math.pow((x + dotSize/2) - centerX, 2) + 
           Math.pow((y + dotSize/2) - centerY, 2)
@@ -229,19 +256,35 @@ export const generateMockQRData = (size: number): QRDot[] => {
         continue;
       }
       
-      // Create a denser pattern with more dots, similar to main generator
-      if (
-        // Create pattern with more dots
-        (row % 2 === 0 || col % 2 === 0) ||
-        (row % 3 === 0) || 
-        (col % 3 === 0) ||
-        (Math.random() > 0.6)
-      ) {
-        // Skip center area for logo
-        if (row > 8 && row < 17 && col > 8 && col < 17) {
-          continue;
-        }
-        
+      // Calculate center distance for circular patterns
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const cellCenterX = col * moduleSize + moduleSize/2;
+      const cellCenterY = row * moduleSize + moduleSize/2;
+      const distFromCenter = Math.sqrt(
+        Math.pow(cellCenterX - centerX, 2) + 
+        Math.pow(cellCenterY - centerY, 2)
+      );
+      
+      // Skip center area for logo
+      if (row > 8 && row < 17 && col > 8 && col < 17) {
+        continue;
+      }
+      
+      // Create patterns that match the main generator's filled areas
+      const baseDotPattern = (row % 2 === 0 || col % 2 === 0);
+      const fillGaps = 
+        // Top area
+        (row < 9 && col > 8 && col < gridSize - 8) ||
+        // Circular pattern around logo
+        (distFromCenter > 80 && distFromCenter < 120) ||
+        // Fill left and right side gaps
+        (col < 8 && row > 7 && row < gridSize - 8) ||
+        (col > gridSize - 9 && row > 7 && row < gridSize - 8) ||
+        // Bottom area
+        (row > gridSize - 9 && col > 8 && col < gridSize - 8);
+      
+      if (baseDotPattern || fillGaps || (Math.random() > 0.65)) {
         const x = col * moduleSize;
         const y = row * moduleSize;
         
