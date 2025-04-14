@@ -131,7 +131,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
       <AnimatePresence>
         {isSelected && buttonRect && (
           <motion.div
-            className="shadow-lg bg-[#1189D6] text-white absolute z-50"
+            className="shadow-lg bg-[#00B843] text-white absolute z-50"
             initial={getExpandedInitialStyle()}
             animate={{
               top: 0,
