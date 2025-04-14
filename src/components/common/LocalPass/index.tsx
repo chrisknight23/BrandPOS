@@ -2,6 +2,8 @@ import { motion, useAnimation } from 'framer-motion';
 import { useState, useEffect, useRef, ReactNode } from 'react';
 import lottie from 'lottie-web';
 import { AnimatedNumber } from '../AnimatedNumber';
+import { AnimatedQRCode } from '../AnimatedQRCode';
+import CashLogo from '../AnimatedQRCode/CashLogo';
 
 /**
  * A card component that can expand to show additional content with animations.
@@ -778,8 +780,30 @@ export const LocalPass: React.FC<LocalPassProps> = ({
             animationState={animationState}
           >
             {backContent ? backContent : (
-              <div className="w-full h-full flex items-center justify-center relative">
-                <div className="text-white/50 text-xl">Back</div>
+              <div className="w-full h-full flex flex-col items-center justify-center p-8">
+                <h3 className="text-2xl font-medium text-white mb-6">Scan to Cash Out</h3>
+                
+                {/* AnimatedQRCode - only animate when card is flipped */}
+                <AnimatedQRCode
+                  value={`https://cash.app/${amount ? amount : '10'}`}
+                  size={280}
+                  autoAnimate={isFlipped}
+                  pattern="outside-in"
+                  speed={1.2}
+                  darkColor="#FFFFFF"
+                  lightColor="transparent"
+                  placeholderOpacity={0.2}
+                  className="mb-6"
+                  // Use custom logo instead of an image
+                  logo="cash-icon"
+                  onAnimationComplete={() => {
+                    console.log("QR animation complete");
+                  }}
+                />
+                
+                <p className="text-white/70 text-lg">
+                  Open Cash App to scan
+                </p>
               </div>
             )}
           </CardFace>
