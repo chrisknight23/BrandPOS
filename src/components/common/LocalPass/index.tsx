@@ -239,7 +239,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   const [progressTimer, setProgressTimer] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timerDuration = 5000; // 5 seconds timer duration
+  const timerDuration = 10000; // 10 seconds timer duration
   const timerInterval = 50; // Update every 50ms
   
   // Determine initial state based on either new or legacy props
