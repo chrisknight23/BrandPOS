@@ -797,7 +797,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                 <div className="relative mb-6">
                   <AnimatedQRCode
                     value={`https://cash.app/${amount ? amount : '10'}`}
-                    size={240}
+                    size={260}
                     autoAnimate={isFlipped}
                     pattern="outside-in"
                     speed={1.0}

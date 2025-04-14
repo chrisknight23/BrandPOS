@@ -103,8 +103,8 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
   createCornerMarker(false, false, true); // Bottom-left
   
   // Generate dots for the main QR code pattern
-  // Dot size for regular pattern
-  const dotSize = cellSize * 0.8; // 80% of cell size for some spacing
+  // Dot size for regular pattern - slightly larger dots for better visibility at increased QR size
+  const dotSize = cellSize * 0.85; // 85% of cell size for slightly less spacing but better visibility
   
   // Create a balanced distribution of dots in the grid
   for (let row = 0; row < gridSize; row++) {
@@ -117,7 +117,7 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
       }
       
       // Skip center area for logo
-      const centerPadding = 4; // Cells to reserve around center
+      const centerPadding = 5; // Slightly larger padding for logo at increased size
       const centerStart = Math.floor(gridSize/2) - centerPadding;
       const centerEnd = Math.ceil(gridSize/2) + centerPadding;
       if (row >= centerStart && row <= centerEnd && 

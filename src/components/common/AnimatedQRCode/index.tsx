@@ -152,7 +152,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
         width: dot.size,
         height: dot.size,
         backgroundColor: 'transparent',
-        border: `${dot.size * 0.1}px solid ${color}`,
+        border: `${Math.max(dot.size * 0.12, 2)}px solid ${color}`,
         borderRadius: dot.cornerRadius ? `${dot.cornerRadius}px` : (dot.isRound ? '50%' : '15%'),
         opacity: isAnimating ? 1 : placeholderOpacity,
         boxSizing: 'border-box' as const
