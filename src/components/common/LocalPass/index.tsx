@@ -146,7 +146,7 @@ const CardFace: React.FC<CardFaceProps> = ({
   animationState
 }) => (
   <motion.div
-    className={`w-full h-full ${backgroundColor} rounded-[20px] absolute backface-hidden`}
+    className={`w-full h-full ${backgroundColor} rounded-[32px] absolute backface-hidden`}
     style={{
       boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
       willChange: 'transform',
@@ -157,7 +157,7 @@ const CardFace: React.FC<CardFaceProps> = ({
   >
     {/* Lighting gradient overlay */}
     <div 
-      className="absolute inset-0 rounded-[20px]"
+      className="absolute inset-0 rounded-[32px]"
       style={{
         background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 100%)',
         pointerEvents: 'none'
@@ -168,7 +168,7 @@ const CardFace: React.FC<CardFaceProps> = ({
 
     {/* Edge highlight */}
     <div 
-      className="absolute inset-0 rounded-[20px]"
+      className="absolute inset-0 rounded-[32px]"
       style={{
         boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.3), inset -1px -1px 1px rgba(0,0,0,0.2)'
       }}
@@ -602,7 +602,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                         WebkitFontSmoothing: 'antialiased',
                         MozOsxFontSmoothing: 'grayscale'
                       }}>{headerText}</div>
-                      <div className="w-8 h-8 rounded-[20px] bg-white bg-opacity-20 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
                         <span className="text-white text-xl antialiased" style={{
                           textRendering: 'optimizeLegibility',
                           WebkitFontSmoothing: 'antialiased',
@@ -686,7 +686,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                 {animationState !== 'expanded' && (
                   <div className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]">
                     <motion.button 
-                      className="w-full h-20 py-3 rounded-[20px] bg-black bg-opacity-10 hover:bg-opacity-15 transition-colors text-white font-medium"
+                      className="w-full h-20 py-3 rounded-full bg-black bg-opacity-10 hover:bg-opacity-15 transition-colors text-white font-medium"
                       onClick={handleButtonClick}
                       animate={{ 
                         opacity: animationState === 'dropped' ? 0 : 1 
