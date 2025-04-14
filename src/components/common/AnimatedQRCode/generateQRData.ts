@@ -142,45 +142,42 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
       
       // Create a more scattered pattern of dots with less circular patterns
       
-      // Base pattern - dots distributed across the grid in a more scattered way
+      // Base pattern - dots distributed across the grid in a more scattered way with fewer dots
       const basePattern = (
-        // Regular grid pattern but more scattered
-        (row % 2 === 0 && col % 3 === 0) || 
-        (row % 3 === 0 && col % 2 === 0) ||
-        // Symmetric timing patterns
-        (row === exactCenter - 4 || col === exactCenter - 4 || 
-         row === exactCenter + 4 || col === exactCenter + 4)
+        // More sparse grid pattern
+        (row % 3 === 0 && col % 3 === 0) || 
+        // Symmetric timing patterns - reduced
+        (row === exactCenter - 5 || col === exactCenter - 5)
       );
       
-      // Use pseudo-random structured patterns instead of circles
+      // Use pseudo-random structured patterns instead of circles - much fewer dots
       const structuredPattern = (
-        // Use prime numbers for more natural scattered look
-        ((row + col) % 5 === 1) || 
-        ((row * col) % 7 === 1) ||
-        ((row - col) % 3 === 0 && row % 2 === 1)
+        // Use prime numbers for very sparse scattered look
+        ((row + col) % 7 === 1) || 
+        ((row * col) % 11 === 1)
       );
       
-      // Add some directional patterns but more scattered and less dense
+      // Add some directional patterns but very sparse
       const directionalPattern = (
-        // Horizontal and vertical lines but more sparse
-        ((Math.abs(row - exactCenter) === centerPadding + 2) && col % 3 === 0) ||
-        ((Math.abs(col - exactCenter) === centerPadding + 2) && row % 3 === 0)
+        // Horizontal and vertical lines but very sparse
+        ((Math.abs(row - exactCenter) === centerPadding + 3) && col % 4 === 0) ||
+        ((Math.abs(col - exactCenter) === centerPadding + 3) && row % 4 === 0)
       );
       
-      // Fill the corners between the position markers and logo with more spacing
+      // Fill the corners between the position markers and logo with more spacing and fewer dots
       const cornerFills = (
-        // Top with scatter
-        (row < 8 && col > 8 && col < gridSize - 8 && row % 2 === 0 && col % 2 === 0) ||
-        // Bottom with scatter
-        (row > gridSize - 8 && col > 8 && col < gridSize - 8 && row % 2 === 0 && col % 2 === 0) ||
-        // Left with scatter
-        (col < 8 && row > 8 && row < gridSize - 8 && row % 2 === 0 && col % 2 === 0) || 
-        // Right with scatter
-        (col > gridSize - 8 && row > 8 && row < gridSize - 8 && row % 2 === 0 && col % 2 === 0)
+        // Top with sparse scatter
+        (row < 7 && col > 9 && col < gridSize - 9 && row % 3 === 0 && col % 3 === 0) ||
+        // Bottom with sparse scatter
+        (row > gridSize - 7 && col > 9 && col < gridSize - 9 && row % 3 === 0 && col % 3 === 0) ||
+        // Left with sparse scatter
+        (col < 7 && row > 9 && row < gridSize - 9 && row % 3 === 0 && col % 3 === 0) || 
+        // Right with sparse scatter
+        (col > gridSize - 7 && row > 9 && row < gridSize - 9 && row % 3 === 0 && col % 3 === 0)
       );
       
-      // Add slightly more randomness
-      const randomScatter = Math.random() > 0.65;
+      // Significantly reduce randomness
+      const randomScatter = Math.random() > 0.85;
       
       // Final dot presence check with more scattered patterns
       if (basePattern || structuredPattern || directionalPattern || cornerFills || randomScatter) {
@@ -210,25 +207,19 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
     }
   }
   
-  // Add a small number of well-spaced dots around the logo
-  // not too close but helping with visual balance
+  // Add just a few well-spaced dots around the logo
   const addScatteredDotsNearLogo = () => {
     const exactCenter = Math.floor(gridSize / 2);
     const centerPadding = 4; // Match the same padding as used above
     const logoOffset = centerPadding + 2; // Further from the logo boundary
     
-    // Carefully selected positions for dots around the logo
-    // with some asymmetry but still balanced
+    // Very few carefully selected positions for dots around the logo
     const positions = [
-      // Cardinal directions but offset slightly for a more natural look
-      [exactCenter - logoOffset - 1, exactCenter - 1],
-      [exactCenter + 1, exactCenter + logoOffset + 1],
-      [exactCenter + logoOffset, exactCenter],
-      [exactCenter - 1, exactCenter - logoOffset],
-      
-      // More distant positions with scatter
-      [exactCenter - logoOffset - 2, exactCenter + 2],
-      [exactCenter + 2, exactCenter - logoOffset - 1]
+      // Just four positions for minimal dots
+      [exactCenter - logoOffset - 1, exactCenter],
+      [exactCenter, exactCenter + logoOffset + 1],
+      [exactCenter + logoOffset, exactCenter - 1],
+      [exactCenter - 2, exactCenter - logoOffset]
     ];
     
     for (const [row, col] of positions) {
@@ -349,17 +340,17 @@ export const generateMockQRData = (size: number): QRDot[] => {
         Math.pow(cellCenterY - centerY, 2)
       );
       
-      // Create a scattered pattern that matches the main generator
-      const basePattern = (row % 3 === 0 || col % 3 === 0);
+      // Create a more sparse pattern with fewer dots
+      const basePattern = (row % 4 === 0 || col % 4 === 0);
       
-      // Less circular pattern for more scatter
+      // Much sparser scattered pattern
       const scatteredPattern = (
-        ((row + col) % 5 === 1) || 
-        ((row * col) % 6 === 1)
+        ((row + col) % 7 === 1) || 
+        ((row * col) % 9 === 1)
       );
       
-      // More random and less structured pattern
-      const randomPattern = Math.random() > 0.55;
+      // Less random pattern
+      const randomPattern = Math.random() > 0.85;
       
       if (basePattern || scatteredPattern || randomPattern) {
         const x = col * moduleSize;
