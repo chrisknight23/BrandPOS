@@ -598,6 +598,18 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     }
   };
 
+  // Card flipping debug logs
+  useEffect(() => {
+    console.log('LocalPass: Card isFlipped state changed to:', isFlipped);
+  }, [isFlipped]);
+
+  // Add useEffect to initialize and reset isFlipped state
+  useEffect(() => {
+    console.log('LocalPass: Component mounted, resetting flip state');
+    // Reset to front-facing
+    setIsFlipped(false);
+  }, []);
+
   return (
     <div className={`w-full h-full flex items-center justify-center ${className}`}>
       <motion.div
@@ -784,6 +796,10 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                 <h3 className="text-2xl font-medium text-white mb-6">Scan to Cash Out</h3>
                 
                 {/* AnimatedQRCode - only animate when card is flipped */}
+                {(() => {
+                  console.log('LocalPass: Rendering AnimatedQRCode with autoAnimate:', isFlipped);
+                  return null;
+                })()}
                 <AnimatedQRCode
                   value={`https://cash.app/${amount ? amount : '10'}`}
                   size={280}

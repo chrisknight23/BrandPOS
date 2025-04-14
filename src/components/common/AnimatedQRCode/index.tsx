@@ -58,25 +58,32 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
   
   // Generate QR data when component mounts or value changes
   useEffect(() => {
+    console.log('AnimatedQRCode: Loading QR data, autoAnimate:', autoAnimate);
     setIsLoading(true);
     
     const loadQRData = async () => {
       try {
+        console.log('AnimatedQRCode: Fetching QR data for value:', value);
         const qrData = await generateQRData({
           value, 
           size,
           errorCorrection
         });
         
+        console.log('AnimatedQRCode: QR data loaded, dots:', qrData.length);
         setDots(qrData);
         setIsLoading(false);
         
         // Start animation if autoAnimate is true
         if (autoAnimate) {
           // Short delay before starting animation
+          console.log('AnimatedQRCode: Will start animation after delay');
           setTimeout(() => {
+            console.log('AnimatedQRCode: Starting animation now');
             setIsAnimating(true);
           }, 300);
+        } else {
+          console.log('AnimatedQRCode: Auto-animation disabled');
         }
       } catch (error) {
         console.error('Error loading QR data:', error);
@@ -86,6 +93,20 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
     
     loadQRData();
   }, [value, size, errorCorrection, autoAnimate]);
+  
+  // Add explicit handling for autoAnimate changes
+  useEffect(() => {
+    console.log('AnimatedQRCode: autoAnimate changed to:', autoAnimate);
+    
+    // When autoAnimate becomes true, ensure animation starts
+    if (autoAnimate && !isAnimating && !isLoading && dots.length > 0) {
+      console.log('AnimatedQRCode: Starting animation due to autoAnimate change');
+      // Small delay to ensure everything is ready
+      setTimeout(() => {
+        setIsAnimating(true);
+      }, 300);
+    }
+  }, [autoAnimate, isAnimating, isLoading, dots.length]);
   
   // Function to manually trigger animation
   const startAnimation = () => {
@@ -151,6 +172,27 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
         overflow: 'hidden'
       }}
     >
+      {/* Debug button for development */}
+      {!isAnimating && process.env.NODE_ENV !== 'production' && (
+        <button 
+          onClick={startAnimation}
+          style={{
+            position: 'absolute',
+            top: 5,
+            right: 5,
+            zIndex: 100,
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '4px 8px',
+            fontSize: '10px'
+          }}
+        >
+          Start Animation
+        </button>
+      )}
+      
       {/* Loading state */}
       {isLoading && (
         <div 
