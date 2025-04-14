@@ -43,11 +43,12 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
     // First set the selected amount to trigger the animation
     setSelectedAmount(amount);
     
-    // Simple single timeout for navigation
+    // Use a shorter delay to reduce jitter
+    // The animation starts quickly, so we can navigate sooner
     navigationTimer.current = setTimeout(() => {
       // Navigate to next screen
       onNext(amount);
-    }, 400); // Delay enough to see animation start but not flicker
+    }, 250); // Reduced from 400ms to 250ms for smoother transition
   };
 
   const handleCustomOrNoTip = () => {
