@@ -39,29 +39,12 @@ export const TipButton: React.FC<TipButtonProps> = ({
   // Convert amount to number if it's a string
   const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
 
-  // Pre-calculate button dimensions on initial render and window resize
+  // When selected, capture the position and dimensions of the button
   useEffect(() => {
-    const updateButtonRect = () => {
-      if (buttonRef.current) {
-        const rect = buttonRef.current.getBoundingClientRect();
-        setButtonRect(rect);
-      }
-    };
-
-    // Initial calculation
-    updateButtonRect();
-
-    // Update on window resize
-    window.addEventListener('resize', updateButtonRect);
-    
-    // Update when button is selected
-    if (isSelected) {
-      updateButtonRect();
+    if (isSelected && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setButtonRect(rect);
     }
-
-    return () => {
-      window.removeEventListener('resize', updateButtonRect);
-    };
   }, [isSelected]);
 
   // Calculate the initial style for the expanded state based on the button's original position
@@ -82,8 +65,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
         height: buttonRect.height,
         transformOrigin: 'center',
         borderRadius: '16px',
-        // Use hardware acceleration
-        willChange: 'transform, opacity',
+        willChange: 'transform',
       };
     }
     
@@ -96,21 +78,8 @@ export const TipButton: React.FC<TipButtonProps> = ({
       height: buttonRect.height,
       transformOrigin: 'center',
       borderRadius: '16px',
-      // Use hardware acceleration
-      willChange: 'transform, opacity',
+      willChange: 'transform',
     };
-  };
-
-  // Memoized click handler to prevent re-renders
-  const handleClick = () => {
-    // Pre-calculate dimensions before triggering the onClick
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setButtonRect(rect);
-    }
-    
-    // Then call the provided onClick handler
-    onClick();
   };
 
   return (
@@ -129,10 +98,9 @@ export const TipButton: React.FC<TipButtonProps> = ({
         style={{ 
           height: '248px',
           visibility: isSelected ? 'hidden' : 'visible',
-          // Use hardware acceleration
-          willChange: 'transform, opacity'
+          willChange: 'transform'
         }}
-        onClick={handleClick}
+        onClick={onClick}
         // Handle entrance animation props from parent
         initial={initial}
         animate={animate}
@@ -184,13 +152,13 @@ export const TipButton: React.FC<TipButtonProps> = ({
             }}
             transition={{
               type: "spring",
-              stiffness: 330,  // Increased for snappier animation
+              stiffness: 300,
               damping: 30,
-              mass: 0.8,       // Reduced mass for faster response
-              // Use sync: true to ensure exit animations complete properly
-              opacity: { duration: 0.15 }, // Faster opacity transition
+              mass: 0.8,
+              opacity: { duration: 0.15 }
             }}
             layout={false}
+            style={{ willChange: 'transform, opacity' }}
           >
             {/* Empty expanded state - no content */}
           </motion.div>
