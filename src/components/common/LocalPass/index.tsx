@@ -241,6 +241,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerDuration = 12000; // 12 seconds timer duration
   const timerInterval = 50; // Update every 50ms
+  const timerStartDelay = 1500; // 1.5 second delay before starting the timer
   
   // Determine initial state based on either new or legacy props
   const derivedInitialState = initialState || (isExpanded ? 'expanded' : 'initial');
@@ -529,31 +530,35 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   // Start the timer when the button is shown
   useEffect(() => {
     if (animationState !== 'expanded' && !isTimerRunning) {
-      // Start timer
+      // Start timer with delay
       setIsTimerRunning(true);
       setProgressTimer(100); // Start at 100%
       
-      timerRef.current = setInterval(() => {
-        setProgressTimer(prev => {
-          const newValue = prev - (100 * timerInterval / timerDuration);
-          if (newValue <= 0) {
-            // Timer finished
-            if (timerRef.current) {
-              clearInterval(timerRef.current);
-              setIsTimerRunning(false);
+      // Add delay before starting the countdown
+      const delayTimeout = setTimeout(() => {
+        timerRef.current = setInterval(() => {
+          setProgressTimer(prev => {
+            const newValue = prev - (100 * timerInterval / timerDuration);
+            if (newValue <= 0) {
+              // Timer finished
+              if (timerRef.current) {
+                clearInterval(timerRef.current);
+                setIsTimerRunning(false);
+              }
+              return 0;
             }
-            return 0;
-          }
-          return newValue;
-        });
-      }, timerInterval);
+            return newValue;
+          });
+        }, timerInterval);
+      }, timerStartDelay);
+      
+      return () => {
+        clearTimeout(delayTimeout);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
+      };
     }
-    
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
   }, [animationState]);
 
   // Enhanced handleButtonClick to flip the card
