@@ -117,7 +117,7 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
       }
       
       // Skip center area for logo
-      const centerPadding = 4; // Increased padding around logo for more space
+      const centerPadding = 3; // Reduced padding to allow dots closer to logo
       
       // Ensure exact center placement by calculating from the middle of the grid
       const exactCenter = Math.floor(gridSize / 2);
@@ -150,6 +150,14 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
         (row === exactCenter - 5 || col === exactCenter - 5)
       );
       
+      // Add an inner ring of dots closer to the logo
+      const innerRing = (
+        // Check if we're just outside the center padding area
+        (Math.abs(row - exactCenter) === centerPadding + 1 || Math.abs(col - exactCenter) === centerPadding + 1) &&
+        // Only place a dot every other position for a balanced look
+        ((row + col) % 2 === 0)
+      );
+      
       // Use pseudo-random structured patterns instead of circles - much fewer dots
       const structuredPattern = (
         // Use prime numbers for very sparse scattered look
@@ -180,7 +188,7 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
       const randomScatter = Math.random() > 0.85;
       
       // Final dot presence check with more scattered patterns
-      if (basePattern || structuredPattern || directionalPattern || cornerFills || randomScatter) {
+      if (basePattern || innerRing || structuredPattern || directionalPattern || cornerFills || randomScatter) {
         
         // Calculate position based on grid
         const x = col * cellSize + (cellSize - dotSize)/2; // Center in cell
@@ -207,19 +215,31 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
     }
   }
   
-  // Add just a few well-spaced dots around the logo
-  const addScatteredDotsNearLogo = () => {
+  // Add a balanced set of dots around the logo for better visual connection
+  const addBalancedDotsNearLogo = () => {
     const exactCenter = Math.floor(gridSize / 2);
-    const centerPadding = 4; // Match the same padding as used above
-    const logoOffset = centerPadding + 2; // Further from the logo boundary
+    const centerPadding = 3; // Match the same padding as used above
     
-    // Very few carefully selected positions for dots around the logo
+    // Positions for dots forming a balanced frame around the logo
+    // - includes positions at various distances for better balance
     const positions = [
-      // Just four positions for minimal dots
-      [exactCenter - logoOffset - 1, exactCenter],
-      [exactCenter, exactCenter + logoOffset + 1],
-      [exactCenter + logoOffset, exactCenter - 1],
-      [exactCenter - 2, exactCenter - logoOffset]
+      // Cardinal directions (closer to logo)
+      [exactCenter - centerPadding - 1, exactCenter],
+      [exactCenter, exactCenter + centerPadding + 1],
+      [exactCenter + centerPadding + 1, exactCenter],
+      [exactCenter, exactCenter - centerPadding - 1],
+      
+      // Diagonal positions (closer to logo)
+      [exactCenter - centerPadding - 1, exactCenter - centerPadding - 1],
+      [exactCenter - centerPadding - 1, exactCenter + centerPadding + 1],
+      [exactCenter + centerPadding + 1, exactCenter + centerPadding + 1],
+      [exactCenter + centerPadding + 1, exactCenter - centerPadding - 1],
+      
+      // A few more distant dots for balance
+      [exactCenter - centerPadding - 3, exactCenter],
+      [exactCenter, exactCenter + centerPadding + 3],
+      [exactCenter + centerPadding + 3, exactCenter],
+      [exactCenter, exactCenter - centerPadding - 3]
     ];
     
     for (const [row, col] of positions) {
@@ -250,8 +270,8 @@ export const generateCashAppQRData = (size: number): QRDot[] => {
     }
   };
   
-  // Add the scattered dots around the logo
-  addScatteredDotsNearLogo();
+  // Add the balanced dots around the logo
+  addBalancedDotsNearLogo();
 
   console.log('Generated structured QR with', dots.length, 'dots');
   return dots;
@@ -324,7 +344,7 @@ export const generateMockQRData = (size: number): QRDot[] => {
       
       // Skip center area for logo
       const exactCenter = Math.floor(gridSize / 2);
-      const centerPadding = 5; // Larger padding for mock generator
+      const centerPadding = 4; // Slightly larger padding for mock generator
       if (Math.abs(row - exactCenter) <= centerPadding && 
           Math.abs(col - exactCenter) <= centerPadding) {
         continue;
@@ -343,6 +363,12 @@ export const generateMockQRData = (size: number): QRDot[] => {
       // Create a more sparse pattern with fewer dots
       const basePattern = (row % 4 === 0 || col % 4 === 0);
       
+      // Inner ring pattern like the main generator
+      const innerRing = (
+        (Math.abs(row - exactCenter) === centerPadding + 1 || Math.abs(col - exactCenter) === centerPadding + 1) &&
+        ((row + col) % 2 === 0)
+      );
+      
       // Much sparser scattered pattern
       const scatteredPattern = (
         ((row + col) % 7 === 1) || 
@@ -352,7 +378,7 @@ export const generateMockQRData = (size: number): QRDot[] => {
       // Less random pattern
       const randomPattern = Math.random() > 0.85;
       
-      if (basePattern || scatteredPattern || randomPattern) {
+      if (basePattern || innerRing || scatteredPattern || randomPattern) {
         const x = col * moduleSize;
         const y = row * moduleSize;
         
