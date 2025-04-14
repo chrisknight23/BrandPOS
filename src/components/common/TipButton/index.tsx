@@ -1,180 +1,165 @@
-import { motion } from 'framer-motion';
-import { useRef, useEffect } from 'react';
-import lottie from 'lottie-web';
-import cashBackAnimation from '../../../assets/CashBackLogo.json';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-interface TipButtonProps {
-  amount: string;
-  layoutId: string;
-  onClick?: () => void;
-  isSelected?: boolean;
-  // Animation props can be passed from parent
-  animate?: any;
-  initial?: any;
-  transition?: any;
-}
-
-// Define scaling constants similar to other components
-const BUTTON_SCALES = {
-  SELECTED: 2.4,  // Similar to CARD_SCALES.EXPANDED in other components
-  NORMAL: 1
+// Simple utility function for formatting currency
+const formatCurrency = (amount: number, showDecimals: boolean = true): string => {
+  return showDecimals ? `$${amount.toFixed(2)}` : `$${amount}`;
 };
 
-export const TipButton = ({ 
+type TipButtonProps = {
+  amount: number | string;
+  onClick: () => void;
+  isSelected: boolean;
+  // Animation props that can be passed from parent
+  initial?: any;
+  animate?: any; 
+  transition?: any;
+  // Optional prop to specify animation order for staggered entrance
+  index?: number;
+  // Whether to show percentages and decimal points
+  showPercentage?: boolean;
+};
+
+export const TipButton: React.FC<TipButtonProps> = ({ 
   amount, 
-  layoutId, 
   onClick, 
   isSelected,
-  // Allow parent to control animations
-  animate,
+  // Animation props
   initial,
-  transition: customTransition,
-}: TipButtonProps) => {
-  // Ref for the Lottie animation container
-  const lottieContainer = useRef<HTMLDivElement>(null);
-  const lottieAnimRef = useRef<any>(null);
+  animate,
+  transition,
+  // Animation order
+  index = 0,
+  // Display options
+  showPercentage = false
+}) => {
+  const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  
+  // Convert amount to number if it's a string
+  const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
 
-  // Initialize Lottie animation when the button is selected
+  // When selected, capture the position and dimensions of the button
   useEffect(() => {
-    if (isSelected && lottieContainer.current) {
-      // Clean up any existing animation
-      if (lottieAnimRef.current) {
-        lottieAnimRef.current.destroy();
-      }
-
-      // Create new animation
-      const anim = lottie.loadAnimation({
-        container: lottieContainer.current,
-        renderer: 'svg',
-        loop: false,
-        autoplay: false,
-        animationData: cashBackAnimation,
-        rendererSettings: {
-          progressiveLoad: false,
-          preserveAspectRatio: 'xMidYMid meet',
-          className: 'lottie-svg'
-        }
-      });
-
-      // Set up styles for the container
-      lottieContainer.current.style.position = 'absolute';
-      lottieContainer.current.style.width = '158px';
-      lottieContainer.current.style.height = '158px';
-      lottieContainer.current.style.top = '50%';
-      lottieContainer.current.style.left = '50%';
-      lottieContainer.current.style.transform = 'translate(-50%, -50%)';
-
-      // Stop on the first frame - don't play the animation
-      anim.goToAndStop(0, true);
-
-      lottieAnimRef.current = anim;
+    if (isSelected && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setButtonRect(rect);
     }
-
-    return () => {
-      if (lottieAnimRef.current) {
-        lottieAnimRef.current.destroy();
-        lottieAnimRef.current = null;
-      }
-    };
   }, [isSelected]);
 
-  // Button tap animation only applies to non-selected state
-  const buttonTapAnimation = !isSelected ? {
-    whileTap: { scale: 0.90 },
-    // Use a faster transition for tap interactions
-    transition: {
-      scale: {
-        type: "spring",
-        stiffness: 200,
-        damping: 25
-      }
+  // Calculate the initial style for the expanded state based on the button's original position
+  const getExpandedInitialStyle = () => {
+    if (!buttonRect) return {};
+    
+    // Get button's offset relative to the device frame
+    const frameElement = document.querySelector('.w-\\[800px\\].h-\\[500px\\]');
+    const frameRect = frameElement ? frameElement.getBoundingClientRect() : null;
+    
+    if (frameRect) {
+      // Calculate relative position to the frame
+      return {
+        position: 'absolute' as const,
+        top: buttonRect.top - frameRect.top,
+        left: buttonRect.left - frameRect.left,
+        width: buttonRect.width,
+        height: buttonRect.height,
+        transformOrigin: 'center',
+        borderRadius: '16px',
+      };
     }
-  } : {};
-
-  // Default transition settings if not provided by parent
-  const defaultTransition = {
-    // Use layout: true for smoother layout transitions
-    layout: true,
-    backgroundColor: {
-      type: "tween",
-      duration: 0.3,
-      ease: [0.32, 0.72, 0, 1]
-    },
-    // Add default duration to ensure consistent timing
-    duration: 0.3
+    
+    // Fallback if frame not found
+    return {
+      position: 'absolute' as const,
+      top: buttonRect.top,
+      left: buttonRect.left,
+      width: buttonRect.width,
+      height: buttonRect.height,
+      transformOrigin: 'center',
+      borderRadius: '16px',
+    };
   };
 
-  // Merge default transitions with any custom ones from parent
-  const transition = customTransition || defaultTransition;
-
   return (
-    <motion.div
-      // Entry and expansion animation configuration
-      // The layoutId enables continuous transitions between normal and selected states
-      layoutId={layoutId}
-      onClick={onClick}
-      // Background color animation between normal blue and selected green
-      animate={{
-        backgroundColor: isSelected ? '#00B843' : '#1189D6',
-        ...(animate || {}) // Allow parent to provide additional animations
-      }}
-      // Allow parent to provide initial state
-      initial={initial || { backgroundColor: '#1189D6' }}
-      className={`
-        flex items-center justify-center cursor-pointer rounded-2xl
-        ${isSelected ? 'z-50' : 'relative h-full w-full'}
-      `}
-      // Style changes when selected to fill the device frame
-      style={isSelected ? {
-        width: '800px',
-        height: '500px',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        margin: 'auto',
-        padding: 0
-      } : undefined}
-      // Transition configurations
-      transition={transition}
-      // Apply tap animation for non-selected state
-      {...buttonTapAnimation}
-    >
-      {/* Content wrapper to stabilize position */}
+    <>
+      {/* Regular button that's visible when not selected */}
       <motion.div
-        className="flex items-center justify-center"
-        // This ensures the position stays consistent during animations
-        layout
-        layoutId={`${layoutId}-content-wrapper`}
-        // Match parent transition timing
-        transition={transition}
+        ref={buttonRef}
+        className={`
+          flex flex-col items-center justify-center
+          ${isSelected 
+            ? 'bg-[#1189D6] text-white' 
+            : 'bg-[#1189D6] text-white'
+          }
+          cursor-pointer shadow-sm rounded-[16px]
+        `}
+        style={{ 
+          height: '248px',
+          visibility: isSelected ? 'hidden' : 'visible'
+        }}
+        onClick={onClick}
+        // Handle entrance animation props from parent
+        initial={initial}
+        animate={animate}
+        transition={transition ? {
+          ...transition,
+          // Add a slight delay based on index for staggered animation
+          delay: (transition.delay || 0) + (index * 0.06)
+        } : undefined}
+        // Only keep tap animation, remove hover
+        whileTap={!isSelected ? { scale: 0.98 } : undefined}
       >
-        {isSelected ? (
-          // Show the first frame of Lottie animation when selected
-          <div ref={lottieContainer} className="lottie-container" />
+        {/* Simple variant without percentages */}
+        {!showPercentage ? (
+          <span className="text-7xl font-medium font-cash">
+            {formatCurrency(numericAmount, false)}
+          </span>
         ) : (
-          // Text content with its own animation configuration - only shown when not selected
-          <motion.span 
-            className="text-white font-medium font-cash"
-            // Use consistent text sizing with the same font metrics
-            style={{
-              fontSize: '70px',
-              lineHeight: 1,
-              // Prevent text from shifting during animation
-              display: 'block',
-              transform: 'translateZ(0)'
-            }}
-            // This ensures text size and position animates smoothly with parent
-            layoutId={`${layoutId}-text`}
-            // Coordinated layout transition for text size changes
-            transition={transition}
-          >
-            ${amount}
-          </motion.span>
+          // Variant with amount and percentage
+          <>
+            <span className="text-6xl font-medium font-cash mb-2">
+              {formatCurrency(numericAmount)}
+            </span>
+            <span className="text-xl opacity-80">
+              {Math.round(numericAmount / 10)}%
+            </span>
+          </>
         )}
       </motion.div>
-    </motion.div>
+
+      {/* Expanded version that appears when selected */}
+      <AnimatePresence>
+        {isSelected && buttonRect && (
+          <motion.div
+            className="shadow-lg bg-[#1189D6] text-white absolute z-50"
+            initial={getExpandedInitialStyle()}
+            animate={{
+              top: 0,
+              left: 0,
+              width: 800,
+              height: 500,
+              borderRadius: '4px',
+              opacity: 1,
+              scale: 1
+            }}
+            exit={{ 
+              ...getExpandedInitialStyle(),
+              opacity: 0,
+              transition: { duration: 0.2, ease: "easeInOut" } 
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 250,
+              damping: 30,
+              mass: 1
+            }}
+            layout={false}
+          >
+            {/* Empty expanded state - no content */}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

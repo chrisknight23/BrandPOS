@@ -2,7 +2,7 @@ import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { motion, AnimatePresence } from 'framer-motion';
 import LocalCashIcon from '../../assets/images/Local-Cash-32px.svg';
 import TipButton from '../../components/common/TipButton';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Screen } from '../../types/screen';
 
 interface TippingProps {
@@ -13,28 +13,51 @@ interface TippingProps {
 export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
   const [selectedAmount, setSelectedAmount] = useState<string | null>(null);
   const [isExiting, setIsExiting] = useState(false);
+  const navigationTimer = useRef<number | null>(null);
 
-  // Cleanup function when navigating away
+  // Force state reset when component mounts and cleanup on unmount
   useEffect(() => {
+    // Reset state explicitly when component mounts
+    setSelectedAmount(null);
+    setIsExiting(false);
+    
+    // Cleanup function when navigating away
     return () => {
-      // Reset state when component unmounts
+      // Cancel any pending navigation timeouts
+      if (navigationTimer.current) {
+        clearTimeout(navigationTimer.current);
+        navigationTimer.current = null;
+      }
+      
+      // Reset state immediately when unmounting to avoid flickering
       setSelectedAmount(null);
-      setIsExiting(false);
     };
   }, []);
 
   const handleAmountClick = (amount: string) => {
+    // Cancel any existing navigation timers
+    if (navigationTimer.current) {
+      clearTimeout(navigationTimer.current);
+    }
+    
+    // First set the selected amount to trigger the animation
     setSelectedAmount(amount);
     
-    // Add a slight delay before navigating to the next screen
-    // This gives the Lottie animation time to display its first frame
-    setTimeout(() => {
+    // Simple single timeout for navigation
+    navigationTimer.current = setTimeout(() => {
+      // Navigate to next screen
       onNext(amount);
-    }, 500);
+    }, 400); // Delay enough to see animation start but not flicker
   };
 
   const handleCustomOrNoTip = () => {
-    setSelectedAmount('0');
+    // Navigate to custom tip screen instead of setting amount to 0
+    if (goToScreen) {
+      goToScreen('CustomTip');
+    } else {
+      // Fallback if direct navigation isn't available
+      setSelectedAmount('0');
+    }
   };
   
   // New handler specifically for "No tip" button
@@ -74,10 +97,9 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
   const buttonVariants = {
     // Initial hidden state: smaller scale, offset position, and transparent
     hidden: { 
-      scale: 0.9, 
+      scale: 0.8, 
       opacity: 0,
-      // Ensure stable position during animation
-      y: 0
+      y: 10
     },
     // Final visible state: natural scale, position, and fully visible
     visible: { 
@@ -87,10 +109,11 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
       // Spring animation for natural bouncy entrance
       transition: {
         type: "spring",
-        stiffness: 200,
-        damping: 20,
+        stiffness: 300,
+        damping: 24,
+        mass: 1,
         // Make sure opacity completes with the scaling to avoid flickering
-        opacity: { duration: 0.3 }
+        opacity: { duration: 0.4 }
       }
     }
   };
@@ -110,17 +133,14 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
 
   // Button-specific entrance animation that can be passed to TipButton
   const buttonEntranceAnimation = {
-    initial: { backgroundColor: '#1189D6', scale: 0.97, opacity: 0 },
-    animate: { scale: 1, opacity: 1 }, // Remove backgroundColor to let TipButton handle it
+    initial: { opacity: 0, scale: 0.9, y: 5 },
+    animate: { opacity: 1, scale: 1, y: 0 },
     transition: {
       type: "spring",
       stiffness: 300,
-      damping: 25,
+      damping: 24,
       mass: 1,
-      // Ensure consistent timing for layout and content
-      layout: true,
-      duration: 0.35,
-      // Make opacity match the scaling animation
+      duration: 0.4,
       opacity: { duration: 0.3 }
     }
   };
@@ -216,8 +236,6 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
               >
                 <TipButton
                   amount={amount}
-                  // layoutId enables the shared element transition when selected
-                  layoutId={`tip-amount-${amount}`}
                   onClick={() => handleAmountClick(amount)}
                   isSelected={selectedAmount === amount && !isExiting}
                   // Apply additional entrance animation directly to the button

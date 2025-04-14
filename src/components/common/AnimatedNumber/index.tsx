@@ -306,9 +306,9 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
   };
   
   const defaultAfterDollarSignOffsets = {
-    1: 14, // Reduce spacing between dollar sign and digit '1'
-    2: 4,  // Slight adjustment for digit '2'
-    3: 4,  // Slight adjustment for digit '3'
+    1: 6, // Reduce spacing between dollar sign and digit '1'
+    2: 0,  // Slight adjustment for digit '2'
+    3: 0,  // Slight adjustment for digit '3'
     ...afterDollarSignOffsets
   };
   

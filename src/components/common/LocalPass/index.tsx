@@ -83,6 +83,8 @@ export interface LocalPassProps {
   autoPlay?: boolean;
   /** Custom class name for the card container */
   className?: string;
+  /** Delay in ms before starting animations */
+  animationDelay?: number;
   
   // Original LocalPass props for backward compatibility
   /** Unique ID for Framer Motion layout animations */
@@ -219,6 +221,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   backContent,
   autoPlay = true,
   className = '',
+  animationDelay = 0,
   
   // Original LocalPass props
   layoutId,
@@ -256,17 +259,17 @@ export const LocalPass: React.FC<LocalPassProps> = ({
           lottieAnimRef.current.goToAndStop(0, true);
           setShowNumber(false);
           
-          // Start animation with a slight delay
+          // Start animation with custom delay
           setTimeout(() => {
             if (lottieAnimRef.current) {
-              console.log('LocalPass: Playing animation after initialState change to expanded');
+              console.log(`LocalPass: Playing animation after initialState change to expanded (delay: ${animationDelay}ms)`);
               lottieAnimRef.current.play();
             }
-          }, DELAYS.EXPANDED_ANIMATION);
+          }, animationDelay || DELAYS.EXPANDED_ANIMATION);
         }
       }
     }
-  }, [initialState]);
+  }, [initialState, animationDelay]);
   
   // Number display state
   const [showNumber, setShowNumber] = useState(false);
@@ -296,7 +299,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     }
     
     prevAnimationState.current = animationState;
-  }, [animationState, onClick, onStateChange]);
+  }, [animationState, onClick, onStateChange, animationDelay]);
   
   // Initialize Lottie
   useEffect(() => {
@@ -376,11 +379,11 @@ export const LocalPass: React.FC<LocalPassProps> = ({
       // Start the animation with a slight delay to ensure it's fully loaded and initialized
       if (animationState === 'expanded') {
         setTimeout(() => {
-          console.log('LocalPass: Starting Lottie animation');
+          console.log(`LocalPass: Starting Lottie animation (delay: ${animationDelay}ms)`);
           if (lottieAnimRef.current) {
             lottieAnimRef.current.play();
           }
-        }, 50); // Very small delay to ensure proper initialization
+        }, animationDelay || 50); // Use custom delay or small default delay
       }
     } else {
       // If no lottie animation, just show the number
@@ -407,10 +410,10 @@ export const LocalPass: React.FC<LocalPassProps> = ({
         
         // Play lottie animation after card expansion
         setTimeout(() => {
-          console.log('LocalPass: Playing Lottie animation after state change');
+          console.log(`LocalPass: Playing Lottie animation after state change (delay: ${animationDelay}ms)`);
           lottieAnimRef.current.play();
           // Number will be shown via the 'complete' event listener now
-        }, DELAYS.EXPANDED_ANIMATION);
+        }, animationDelay || DELAYS.EXPANDED_ANIMATION);
       } else {
         // If no lottie animation, just show the number
         setShowNumber(true);
@@ -426,7 +429,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     
     // Update previous state
     prevAnimationState.current = animationState;
-  }, [animationState]);
+  }, [animationState, animationDelay]);
 
   // Handle card scale animations
   useEffect(() => {

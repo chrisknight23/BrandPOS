@@ -7,6 +7,7 @@ export type Screen =
   | 'TapToPay'
   | 'Tipping'
   | 'Cashback'
+  | 'CustomTip'
   | 'End';
 
 export interface ScreenProps {
