@@ -95,7 +95,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
             noAnimation={false}
             useRandomValues={false}
             headerText="Local Cash"
-            subheaderText="Earned for tipping at local businesses"
+            subheaderText=""
             buttonText="Cash Out"
             onAnimationComplete={handleAnimationComplete}
             autoPlay={true}
