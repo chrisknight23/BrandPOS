@@ -325,6 +325,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
     if (activeScreen === 'cart' && currentScreen !== 'Cart') {
       navigateBack();
     }
+    // No longer navigate back if cart is empty - stay on cart screen
   }, [currentScreen, activeScreen]);
 
   // Calculate total if both amounts exist
@@ -414,8 +415,8 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               {/* Profile Button */}
               {ProfileButton}
               
-              {/* Always show items section on Home or Cart screens, regardless of cart contents */}
-              {(currentScreen === 'Home' || currentScreen === 'Cart') && (
+              {/* Only show items section on Cart screen, not on Home */}
+              {currentScreen === 'Cart' && (
                 <div className="rounded-lg">
                   <div className="flex items-center pt-3 pb-2">
                     <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
@@ -467,20 +468,22 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                     </div>
                   </button>
                   
-                  {/* Checkout button */}
-                  <Button
-                    onClick={handleCheckout}
-                    disabled={localCartItems.length === 0}
-                    className={`w-full rounded-full py-4 ${
-                      localCartItems.length > 0 
-                        ? 'bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]' 
-                        : 'bg-white/10 cursor-not-allowed'
-                    }`}
-                  >
-                    <div className="flex items-center justify-center text-white">
-                      <div className="text-base font-medium">Checkout</div>
-                    </div>
-                  </Button>
+                  {/* Only show Checkout button on Cart screen */}
+                  {currentScreen === 'Cart' && (
+                    <Button
+                      onClick={handleCheckout}
+                      disabled={localCartItems.length === 0}
+                      className={`w-full rounded-full py-4 ${
+                        localCartItems.length > 0 
+                          ? 'bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]' 
+                          : 'bg-white/10 cursor-not-allowed'
+                      }`}
+                    >
+                      <div className="flex items-center justify-center text-white">
+                        <div className="text-base font-medium">Checkout</div>
+                      </div>
+                    </Button>
+                  )}
                 </>
               )}
               
