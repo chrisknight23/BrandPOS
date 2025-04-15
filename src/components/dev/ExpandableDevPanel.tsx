@@ -377,8 +377,8 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               {/* Profile Button */}
               {ProfileButton}
               
-              {/* Only show cart items on Home or Cart screens */}
-              {localCartItems.length > 0 && (currentScreen === 'Home' || currentScreen === 'Cart') && (
+              {/* Always show items section on Home or Cart screens, regardless of cart contents */}
+              {(currentScreen === 'Home' || currentScreen === 'Cart') && (
                 <div className="rounded-lg">
                   <div className="flex items-center pt-3 pb-2">
                     <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
@@ -392,6 +392,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                       <span className="text-white/80 font-medium">Add item</span>
                     </button>
                     
+                    {/* Only show cart items if there are any */}
                     {localCartItems.map(item => (
                       <div key={item.id} className="bg-white/5 rounded-lg px-4 py-3 flex items-center justify-between">
                         <div>
