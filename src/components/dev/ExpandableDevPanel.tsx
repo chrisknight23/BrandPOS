@@ -16,6 +16,7 @@ import LeftNavIcon from '../../assets/images/leftNav.svg';
 import RightNavIcon from '../../assets/images/rightNav.svg';
 import MoreIcon from '../../assets/images/more.svg';
 import ChevronRightIcon from '../../assets/images/chevron-right.svg';
+import ControlIcon from '../../assets/images/16/control.svg';
 import { Button } from '../../components/ui/button';
 
 interface ExpandableDevPanelProps {
@@ -531,17 +532,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               
               {/* Divider */}
               <div className="border-t border-white/10 pt-4"></div>
-              
-              {/* Feature button */}
-              <Button
-                onClick={() => setActiveScreen('feature-flags')}
-                className="w-full rounded-lg py-3"
-              >
-                <div className="flex items-center justify-between text-white">
-                  <div className="text-white/80 font-medium">Features</div>
-                  <img src={ChevronRightIcon} alt="arrow" width={20} height={20} />
-                </div>
-              </Button>
             </div>
           </div>
         );
@@ -1031,15 +1021,20 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               </AnimatePresence>
             </div>
             
-            {/* Version text at bottom */}
-            <div className="px-6 py-2 flex justify-between items-center text-white/30 text-xs">
-              <span>Version number V0</span>
-              <button 
-                onClick={() => navigateTo('debug')}
-                className="p-1 hover:bg-white/10 rounded-full transition-colors"
-              >
-                <img src={MoreIcon} alt="More options" className="w-5 h-5" />
-              </button>
+            {/* Footer with version and buttons */}
+            <div className="px-6 py-3 flex justify-between items-center border-t border-white/10">
+              <span className="text-white/30 text-xs">Version number V0</span>
+              <div className="flex space-x-2">
+                <div className="w-10 h-10">
+                  {/* Space for future button */}
+                </div>
+                <button 
+                  onClick={() => setActiveScreen('feature-flags')}
+                  className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/15 active:bg-white/20 flex items-center justify-center"
+                >
+                  <img src={ControlIcon} alt="Features" width={16} height={16} />
+                </button>
+              </div>
             </div>
           </div>
         ) : (
