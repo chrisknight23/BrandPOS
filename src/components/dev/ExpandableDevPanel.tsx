@@ -359,28 +359,28 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               {/* Only show cart items on Home or Cart screens */}
               {localCartItems.length > 0 && (currentScreen === 'Home' || currentScreen === 'Cart') && (
                 <div className="rounded-lg">
+                  {/* Profile button */}
+                  {!currentConfig.backButton && (
+                    <button
+                      className="w-full rounded-lg px-4 py-3 mb-3 border border-white/20 text-white text-left flex items-center justify-between"
+                      onClick={() => navigateTo('profile')}
+                    >
+                      <div>
+                        <div className="font-medium">{profileData[userType].name}</div>
+                        <p className="text-white/60 text-sm">{profileData[userType].subtitle}</p>
+                      </div>
+                      {profileData[userType].avatar && (
+                        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
+                          {profileData[userType].avatar}
+                        </div>
+                      )}
+                    </button>
+                  )}
+                  
                   <div className="flex items-center pt-3 pb-2">
                     <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
                   </div>
                   <div className="space-y-3">
-                    {/* Profile button */}
-                    {!currentConfig.backButton && (
-                      <button
-                        className="w-full rounded-lg px-4 py-3 border border-white/20 text-white text-left flex items-center justify-between"
-                        onClick={() => navigateTo('profile')}
-                      >
-                        <div>
-                          <div className="font-medium">{profileData[userType].name}</div>
-                          <p className="text-white/60 text-sm">{profileData[userType].subtitle}</p>
-                        </div>
-                        {profileData[userType].avatar && (
-                          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
-                            {profileData[userType].avatar}
-                          </div>
-                        )}
-                      </button>
-                    )}
-                    
                     {/* Add item row with stroke instead of background fill */}
                     <button
                       onClick={handleAddItem}
