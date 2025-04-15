@@ -388,38 +388,46 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               
               {/* Always show items section on Home or Cart screens, regardless of cart contents */}
               {(currentScreen === 'Home' || currentScreen === 'Cart') && (
-                <div className="rounded-lg">
+                <>
                   <div className="flex items-center pt-3 pb-2">
                     <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
                   </div>
-                  <div className="space-y-3">
-                    {/* Add item row with stroke instead of background fill */}
+                  <div className="border border-white/20 rounded-lg p-4 flex flex-col h-[calc(100%-80px)] mb-4">
+                    {/* Items list - at the top */}
+                    <div className="flex-1 overflow-auto space-y-3 mb-4">
+                      {localCartItems.length > 0 ? (
+                        localCartItems.map(item => (
+                          <div key={item.id} className="bg-white/5 rounded-lg px-4 py-3 flex items-center justify-between">
+                            <div>
+                              <div className="text-white font-medium">{item.name}</div>
+                              <div className="text-white/60 text-sm">{item.price}</div>
+                            </div>
+                            <button 
+                              onClick={() => handleRemoveCartItem(item.id)}
+                              className="p-1.5 text-white/40 hover:text-white/70 hover:bg-white/10 rounded-full"
+                            >
+                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-white/40 text-center py-8">
+                          No items in cart
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Add button - at the bottom */}
                     <button
                       onClick={handleAddItem}
-                      className="w-full rounded-lg px-4 py-3 border border-white/20 flex items-center justify-center"
+                      className="w-full rounded-lg px-4 py-3 bg-white/5 hover:bg-white/10 flex items-center justify-center mt-auto"
                     >
                       <span className="text-white/80 font-medium">Add item</span>
                     </button>
-                    
-                    {/* Only show cart items if there are any */}
-                    {localCartItems.map(item => (
-                      <div key={item.id} className="bg-white/5 rounded-lg px-4 py-3 flex items-center justify-between">
-                        <div>
-                          <div className="text-white font-medium">{item.name}</div>
-                          <div className="text-white/60 text-sm">{item.price}</div>
-                        </div>
-                        <button 
-                          onClick={() => handleRemoveCartItem(item.id)}
-                          className="p-1.5 text-white/40 hover:text-white/70 hover:bg-white/10 rounded-full"
-                        >
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
                   </div>
-                </div>
+                </>
               )}
             </div>
             
