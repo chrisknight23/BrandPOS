@@ -870,7 +870,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             ref={buttonRef}
           >
             {/* Header area */}
-            <div className="px-6 py-4">
+            <div className="px-6 pt-4">
               <div className="flex justify-between items-center mb-4">
                 <button
                   className="p-2 -ml-2 text-white/60 hover:text-white"
