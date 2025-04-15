@@ -182,7 +182,18 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   };
 
   const handleAppNext = () => {
-    if (onNext) onNext();
+    // If we're on the Home screen with an empty cart, add an item before navigating
+    if (currentScreen === 'Home' && localCartItems.length === 0 && onAddItem && onNext) {
+      console.log('Empty cart detected, adding an item before navigating to Cart');
+      onAddItem(); // Add an item first
+      
+      // Wait a short moment for the state to update before navigating
+      setTimeout(() => {
+        if (onNext) onNext();
+      }, 100);
+    } else if (onNext) {
+      onNext();
+    }
   };
 
   const handleAppRefresh = () => {
