@@ -39,7 +39,7 @@ interface ExpandableDevPanelProps {
 type PanelScreen = 'main' | 'app-info' | 'debug' | 'flag-details' | 'navigation' | 'cart' | 'profile' | 'feature-flags';
 
 // Define user types for the segmented control
-type UserType = 'new' | 'enrolled';
+type UserType = 'new' | 'returning' | 'enrolled';
 
 interface PanelScreenConfig {
   title: string;
@@ -52,20 +52,36 @@ const profileData = {
     name: 'Customer unknown',
     subtitle: 'Card being used for the first time',
     avatar: ' ',
+    bio: 'A customer that has not been identified as a Cash App customer and does not have a Cash App account. This represents a completely new user with no transaction history or saved information.',
     details: [
       { label: 'Status', value: 'New' },
       { label: 'Loyalty Points', value: '0' },
-      { label: 'Orders', value: 'None' }
+      { label: 'Orders', value: 'None' },
+      { label: 'Cash App installed', value: 'No' }
+    ]
+  },
+  returning: {
+    name: 'John Doe',
+    subtitle: 'Visited 3 times',
+    avatar: '👨',
+    bio: 'Regular customer who visits occasionally. Has made a few purchases but has not yet cashed out their local cash. Still uses a physical card for most transactions.',
+    details: [
+      { label: 'Status', value: 'Regular' },
+      { label: 'Loyalty Points', value: '350' },
+      { label: 'Orders', value: '3 completed' },
+      { label: 'Cash App installed', value: 'No' }
     ]
   },
   enrolled: {
     name: 'Jane Smith',
     subtitle: 'Enrolled since Jan 2023',
     avatar: '👩',
+    bio: 'Loyal customer who frequently uses Cash App. Has completed the enrollment process and actively participates in the rewards program. Prefers contactless payment for all transactions.',
     details: [
       { label: 'Status', value: 'Gold Member' },
       { label: 'Loyalty Points', value: '2,450' },
-      { label: 'Orders', value: '24 completed' }
+      { label: 'Orders', value: '24 completed' },
+      { label: 'Cash App installed', value: 'Yes' }
     ]
   }
 };
@@ -317,7 +333,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'cart':
         return { title: 'Cart Management', backButton: true };
       case 'profile':
-        return { title: 'User Profile', backButton: true };
+        return { title: 'Customer Selection', backButton: true };
       case 'feature-flags':
         return { title: `${currentScreen} Features`, backButton: true };
       default:
@@ -356,7 +372,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'cart':
         return 'Manages the shopping cart: add single or multiple items, view current items with price details, remove individual items, or clear the entire cart.';
       case 'profile':
-        return 'Simulates different customer profiles: "New customer" (unknown, first-time card user) or "Returning customer" (Jane Smith, enrolled since Jan 2023).';
+        return ''; // Remove description for profile screen
       case 'feature-flags':
         return 'Enables/disables features available on the current screen. For example: animations on Cashback screen, enhanced UI on Tipping screen, or payment indicators.';
       default:
@@ -432,33 +448,12 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
 
   // Render the current screen content
   const renderScreenContent = () => {
-    // Profile button component that will be used in all screens
-    const ProfileButton = (
-      <button
-        className="w-full rounded-lg px-4 py-3 mb-3 border border-white/20 text-white text-left flex items-center justify-between"
-        onClick={() => navigateTo('profile')}
-      >
-        <div>
-          <div className="font-medium">{profileData[userType].name}</div>
-          <p className="text-white/60 text-sm">{profileData[userType].subtitle}</p>
-        </div>
-        {profileData[userType].avatar && (
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
-            {profileData[userType].avatar}
-          </div>
-        )}
-      </button>
-    );
-    
     switch (activeScreen) {
       case 'main':
         return (
           <div className="space-y-4 flex flex-col h-full">
             {/* Main content section - takes up available space */}
             <div className="flex-1">
-              {/* Profile Button */}
-              {ProfileButton}
-              
               {/* Only show items section on Cart screen, not on Home */}
               {currentScreen === 'Cart' && (
                 <div className="rounded-lg">
@@ -530,9 +525,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                   )}
                 </>
               )}
-              
-              {/* Divider */}
-              <div className="border-t border-white/10 pt-4"></div>
             </div>
           </div>
         );
@@ -847,83 +839,41 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       
       case 'profile':
         return (
-          <div className="space-y-4">
-            <div className="bg-white/5 rounded-lg p-4">
-              <h3 className="text-white font-medium mb-3">User Profile</h3>
-              <div className="text-white/70 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-white/60">Name:</span>
-                  <span className="text-white font-medium">{profileData[userType].name}</span>
+          <div className="space-y-6">
+            {/* Profile card */}
+            <div className="bg-white/5 rounded-2xl overflow-hidden">
+              {/* Avatar and name section */}
+              <div className="flex flex-col items-center pt-8 pb-6">
+                <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-5xl mb-4">
+                  {profileData[userType].avatar}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-white/60">Subtitle:</span>
-                  <span className="text-white font-medium">{profileData[userType].subtitle}</span>
-                </div>
-                {profileData[userType].avatar && (
-                  <div className="flex justify-between">
-                    <span className="text-white/60">Avatar:</span>
-                    <span className="text-white font-medium">{profileData[userType].avatar}</span>
-                  </div>
-                )}
+                <h3 className="text-white text-xl font-medium">
+                  {profileData[userType].name}
+                </h3>
+                <p className="text-white/60 text-sm mt-1">
+                  {profileData[userType].subtitle}
+                </p>
               </div>
-            </div>
-            
-            <div className="bg-white/5 rounded-lg p-4">
-              <h3 className="text-white font-medium mb-3">Customer Type</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-white cursor-pointer flex items-center">
-                    <div className="text-white/90">New customer</div>
-                  </label>
-                  <div className="relative inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="sr-only"
-                      name="customerType"
-                      checked={userType === 'new'}
-                      onChange={() => handleUserTypeChange('new')}
-                    />
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                      userType === 'new' ? 'border-[#00B843] bg-[#00B843]/10' : 'border-white/30'
-                    }`}>
-                      {userType === 'new' && (
-                        <div className="w-3 h-3 rounded-full bg-[#00B843]"></div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <label className="text-white cursor-pointer flex items-center">
-                    <div className="text-white/90">Returning customer</div>
-                  </label>
-                  <div className="relative inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="sr-only"
-                      name="customerType"
-                      checked={userType === 'enrolled'}
-                      onChange={() => handleUserTypeChange('enrolled')}
-                    />
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                      userType === 'enrolled' ? 'border-[#00B843] bg-[#00B843]/10' : 'border-white/30'
-                    }`}>
-                      {userType === 'enrolled' && (
-                        <div className="w-3 h-3 rounded-full bg-[#00B843]"></div>
-                      )}
-                    </div>
-                  </div>
+              
+              {/* Bio section */}
+              <div className="px-4 pb-5">
+                <div className="border-t border-white/10 pt-5">
+                  <h4 className="text-white/60 uppercase text-xs font-medium mb-2">BIO</h4>
+                  <p className="text-white text-sm">
+                    {profileData[userType].bio}
+                  </p>
                 </div>
               </div>
             </div>
             
+            {/* Additional details */}
             <div className="bg-white/5 rounded-lg p-4">
-              <h3 className="text-white font-medium mb-3">User Details</h3>
-              <div className="text-white/70 space-y-2">
+              <h4 className="text-white/60 uppercase text-xs font-medium mb-3">Profile Details</h4>
+              <div className="space-y-2">
                 {profileData[userType].details.map((detail, index) => (
                   <div key={index} className="flex justify-between">
-                    <span className="text-white/60">{detail.label}:</span>
-                    <span className="text-white font-medium">{detail.value}</span>
+                    <span className="text-white/60 text-sm">{detail.label}:</span>
+                    <span className="text-white text-sm font-medium">{detail.value}</span>
                   </div>
                 ))}
               </div>
@@ -988,22 +938,62 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               </div>
             </div>
 
-            {/* Screen description */}
-            <div className="px-6 pb-2">
-              <div className="relative">
-                <p className={`text-white/60 text-sm ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
-                  {getScreenDescription(activeScreen)}
-                </p>
-                {getScreenDescription(activeScreen).length > 120 && (
-                  <button 
-                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                    className="text-xs text-white/40 hover:text-white/60 mt-1"
-                  >
-                    {isDescriptionExpanded ? 'Show less' : 'Read more'}
-                  </button>
-                )}
+            {/* Screen description - hide for profile screen */}
+            {activeScreen !== 'profile' && getScreenDescription(activeScreen) && (
+              <div className="px-6 pb-2">
+                <div className="relative">
+                  <p className={`text-white/60 text-sm ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
+                    {getScreenDescription(activeScreen)}
+                  </p>
+                  {getScreenDescription(activeScreen).length > 120 && (
+                    <button 
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                      className="text-xs text-white/40 hover:text-white/60 mt-1"
+                    >
+                      {isDescriptionExpanded ? 'Show less' : 'Read more'}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Segmented control for profile selection - only visible on profile screen */}
+            {activeScreen === 'profile' && (
+              <div className="px-6 pb-4 pt-1">
+                <div className="flex bg-white/5 p-1 rounded-full">
+                  <button
+                    className={`flex-1 py-2 px-3 rounded-full text-sm font-medium ${
+                      userType === 'new' 
+                        ? 'bg-white text-black' 
+                        : 'text-white/80'
+                    }`}
+                    onClick={() => handleUserTypeChange('new')}
+                  >
+                    New
+                  </button>
+                  <button
+                    className={`flex-1 py-2 px-3 rounded-full text-sm font-medium ${
+                      userType === 'returning' 
+                        ? 'bg-white text-black' 
+                        : 'text-white/80'
+                    }`}
+                    onClick={() => handleUserTypeChange('returning')}
+                  >
+                    Returning
+                  </button>
+                  <button
+                    className={`flex-1 py-2 px-3 rounded-full text-sm font-medium ${
+                      userType === 'enrolled' 
+                        ? 'bg-white text-black' 
+                        : 'text-white/80'
+                    }`}
+                    onClick={() => handleUserTypeChange('enrolled')}
+                  >
+                    Enrolled
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Content with nested screen animations */}
             <div className="relative flex-1 overflow-hidden">
@@ -1022,28 +1012,62 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               </AnimatePresence>
             </div>
             
-            {/* Footer with version and buttons */}
-            <div className="px-6 py-3 flex flex-col border-t border-white/10">
+            {/* Buttons moved above footer */}
+            <div className="px-6 pb-1">
+              {/* Divider line above buttons */}
+              <div className="border-t border-white/10 mb-5"></div>
+              
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <button 
-                    onClick={() => navigateTo('profile')}
-                    className="h-10 px-3 rounded-full border border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 flex items-center space-x-2"
+                    onClick={() => activeScreen === 'profile' ? setActiveScreen('main') : navigateTo('profile')}
+                    className={`h-10 px-3 rounded-full border ${
+                      activeScreen === 'profile' 
+                        ? 'bg-white border-white text-black' 
+                        : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 text-white/80'
+                    } flex items-center space-x-2`}
                   >
-                    <img src={AvatarIcon} alt="Profile" width={16} height={16} className="text-white/80" />
-                    <span className="text-white/80 text-sm">{userType === 'new' ? 'New customer' : 'Returning customer'}</span>
+                    <img 
+                      src={AvatarIcon} 
+                      alt="Profile" 
+                      width={16} 
+                      height={16} 
+                      className={activeScreen === 'profile' ? 'brightness-0' : 'opacity-80'} 
+                    />
+                    <span className={`text-sm ${activeScreen === 'profile' ? 'text-black' : 'text-white/80'}`}>
+                      {userType === 'new' 
+                        ? 'New' 
+                        : userType === 'returning'
+                          ? 'Returning'
+                          : 'Enrolled'
+                      }
+                    </span>
                   </button>
                 </div>
                 <div className="flex space-x-2">
                   <button 
-                    onClick={() => setActiveScreen('feature-flags')}
-                    className="w-10 h-10 rounded-full border border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 flex items-center justify-center"
+                    onClick={() => activeScreen === 'feature-flags' ? setActiveScreen('main') : setActiveScreen('feature-flags')}
+                    className={`w-10 h-10 rounded-full border ${
+                      activeScreen === 'feature-flags' 
+                        ? 'bg-white border-white' 
+                        : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'
+                    } flex items-center justify-center`}
                   >
-                    <img src={ControlIcon} alt="Features" width={16} height={16} />
+                    <img 
+                      src={ControlIcon} 
+                      alt="Features" 
+                      width={16} 
+                      height={16}
+                      className={activeScreen === 'feature-flags' ? 'brightness-0' : 'opacity-80'} 
+                    />
                   </button>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-white/30">Version number V0</div>
+            </div>
+            
+            {/* Footer with version number only */}
+            <div className="px-6 py-2 flex flex-col">
+              <div className="text-[12px] text-white/30 font-medium text-center">Version number V0</div>
             </div>
           </div>
         ) : (
