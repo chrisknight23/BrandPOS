@@ -17,6 +17,7 @@ import RightNavIcon from '../../assets/images/rightNav.svg';
 import MoreIcon from '../../assets/images/more.svg';
 import ChevronRightIcon from '../../assets/images/chevron-right.svg';
 import ControlIcon from '../../assets/images/16/control.svg';
+import AvatarIcon from '../../assets/images/16/avatar.svg';
 import { Button } from '../../components/ui/button';
 
 interface ExpandableDevPanelProps {
@@ -1022,19 +1023,27 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             </div>
             
             {/* Footer with version and buttons */}
-            <div className="px-6 py-3 flex justify-between items-center border-t border-white/10">
-              <span className="text-white/30 text-xs">Version number V0</span>
-              <div className="flex space-x-2">
-                <div className="w-10 h-10">
-                  {/* Space for future button */}
+            <div className="px-6 py-3 flex flex-col border-t border-white/10">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={() => navigateTo('profile')}
+                    className="h-10 px-3 rounded-full border border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 flex items-center space-x-2"
+                  >
+                    <img src={AvatarIcon} alt="Profile" width={16} height={16} className="text-white/80" />
+                    <span className="text-white/80 text-sm">{userType === 'new' ? 'New customer' : 'Returning customer'}</span>
+                  </button>
                 </div>
-                <button 
-                  onClick={() => setActiveScreen('feature-flags')}
-                  className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/15 active:bg-white/20 flex items-center justify-center"
-                >
-                  <img src={ControlIcon} alt="Features" width={16} height={16} />
-                </button>
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={() => setActiveScreen('feature-flags')}
+                    className="w-10 h-10 rounded-full border border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 flex items-center justify-center"
+                  >
+                    <img src={ControlIcon} alt="Features" width={16} height={16} />
+                  </button>
+                </div>
               </div>
+              <div className="mt-2 text-xs text-white/30">Version number V0</div>
             </div>
           </div>
         ) : (
