@@ -244,19 +244,28 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
 
   // Navigation functions
   const navigateTo = (screen: PanelScreen) => {
+    console.log(`Navigating to: ${screen}`);
     setNavDirection('forward');
     setActiveScreen(screen);
     setNavHistory(prev => [...prev, screen]);
   };
 
   const navigateBack = () => {
-    if (navHistory.length <= 1) return;
+    console.log(`Navigating back from: ${activeScreen}, history: ${navHistory.join(',')}`);
+    if (navHistory.length <= 1) {
+      // If we're at the root level, close the panel
+      console.log('At root level, closing panel');
+      togglePanel();
+      return;
+    }
     
     setNavDirection('backward');
     const newHistory = [...navHistory];
     newHistory.pop();
+    const previousScreen = newHistory[newHistory.length - 1];
+    console.log(`Going back to: ${previousScreen}`);
     setNavHistory(newHistory);
-    setActiveScreen(newHistory[newHistory.length - 1]);
+    setActiveScreen(previousScreen);
   };
 
   // Get screen configuration
