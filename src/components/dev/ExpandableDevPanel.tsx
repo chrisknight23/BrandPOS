@@ -338,44 +338,86 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
     switch (activeScreen) {
       case 'main':
         return (
-          <div className="space-y-4">
-            {/* Only show cart items on Home or Cart screens */}
-            {localCartItems.length > 0 && (currentScreen === 'Home' || currentScreen === 'Cart') && (
-              <div className="bg-white/5 rounded-lg">
-                <h3 className="text-white font-medium px-4 pt-3 pb-2">Cart Items</h3>
-                <div className="divide-y divide-white/5">
-                  {localCartItems.map(item => (
-                    <div key={item.id} className="px-4 py-3 flex items-center justify-between">
-                      <div>
-                        <div className="text-white font-medium">{item.name}</div>
-                        <div className="text-white/60 text-sm">{item.price}</div>
+          <div className="space-y-4 flex flex-col h-full">
+            {/* Main content section - takes up available space */}
+            <div className="flex-1">
+              {/* Only show cart items on Home or Cart screens */}
+              {localCartItems.length > 0 && (currentScreen === 'Home' || currentScreen === 'Cart') && (
+                <div className="bg-white/5 rounded-lg">
+                  <h3 className="text-white font-medium px-4 pt-3 pb-2">Cart Items</h3>
+                  <div className="divide-y divide-white/5">
+                    {localCartItems.map(item => (
+                      <div key={item.id} className="px-4 py-3 flex items-center justify-between">
+                        <div>
+                          <div className="text-white font-medium">{item.name}</div>
+                          <div className="text-white/60 text-sm">{item.price}</div>
+                        </div>
+                        <button 
+                          onClick={() => handleRemoveCartItem(item.id)}
+                          className="p-1.5 text-white/40 hover:text-white/70 hover:bg-white/10 rounded-full"
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
                       </div>
-                      <button 
-                        onClick={() => handleRemoveCartItem(item.id)}
-                        className="p-1.5 text-white/40 hover:text-white/70 hover:bg-white/10 rounded-full"
+                    ))}
+                  </div>
+                  {localCartItems.length > 0 && (
+                    <div className="px-4 py-3 border-t border-white/10">
+                      <button
+                        onClick={handleClearCart}
+                        className="py-2 px-3 bg-red-900/30 hover:bg-red-900/50 active:bg-red-900/70 text-white text-sm rounded transition-colors w-full flex items-center justify-center"
                       >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7M10 11V17M14 11V17M3 7H21M16 7L15.133 4.266C14.9426 3.64976 14.3745 3.22534 13.7303 3.22534H10.2697C9.62553 3.22534 9.05742 3.64976 8.867 4.266L8 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
+                        Clear All Items
                       </button>
                     </div>
-                  ))}
+                  )}
                 </div>
-                {localCartItems.length > 0 && (
-                  <div className="px-4 py-3 border-t border-white/10">
-                    <button
-                      onClick={handleClearCart}
-                      className="py-2 px-3 bg-red-900/30 hover:bg-red-900/50 active:bg-red-900/70 text-white text-sm rounded transition-colors w-full flex items-center justify-center"
-                    >
-                      <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7M10 11V17M14 11V17M3 7H21M16 7L15.133 4.266C14.9426 3.64976 14.3745 3.22534 13.7303 3.22534H10.2697C9.62553 3.22534 9.05742 3.64976 8.867 4.266L8 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Clear All Items
-                    </button>
+              )}
+            </div>
+            
+            {/* Bottom buttons section */}
+            <div className="space-y-4 mt-auto">
+              {/* Add Item button - only shown on Home or Cart screens */}
+              {(currentScreen === 'Home' || currentScreen === 'Cart') && (
+                <Button
+                  onClick={handleAddItem}
+                  className="w-full rounded-full py-4 bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]"
+                >
+                  <div className="flex items-center justify-center text-white">
+                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <div className="text-base font-medium">Add Item {localCartItems.length > 0 && `(${localCartItems.length})`}</div>
                   </div>
-                )}
-              </div>
-            )}
+                </Button>
+              )}
+              
+              {/* Feature Flags button */}
+              <Button
+                onClick={() => setActiveScreen('feature-flags')}
+                className={`w-full rounded-lg py-3 bg-white/10 hover:bg-white/20 active:bg-white/30 ${
+                  activeScreen === 'feature-flags' ? 'bg-white/20' : ''
+                }`}
+              >
+                <div className="flex items-center justify-between text-white">
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 flex items-center justify-center mr-3">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 21V7L12 3L20 7V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M12 7L4 11M12 7V15M12 7L20 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                    <div>Feature Flags</div>
+                  </div>
+                  <img src={ChevronRightIcon} alt="arrow" width={20} height={20} />
+                </div>
+              </Button>
+            </div>
           </div>
         );
       
@@ -731,46 +773,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
 
   const currentConfig = getScreenConfig(activeScreen);
 
-  const renderBottomIcons = () => {
-    return (
-      <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 pt-4 space-y-4">
-        {(currentScreen === 'Home' || currentScreen === 'Cart') && (
-          <Button
-            onClick={handleAddItem}
-            className="w-full rounded-full py-4 bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]"
-          >
-            <div className="flex items-center justify-center text-white">
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <div className="text-base font-medium">Add Item {localCartItems.length > 0 && `(${localCartItems.length})`}</div>
-            </div>
-          </Button>
-        )}
-
-        <Button
-          onClick={() => setActiveScreen('feature-flags')}
-          className={`w-full rounded-lg py-3 bg-white/10 hover:bg-white/20 active:bg-white/30 ${
-            activeScreen === 'feature-flags' ? 'bg-white/20' : ''
-          }`}
-        >
-          <div className="flex items-center justify-between text-white">
-            <div className="flex items-center">
-              <div className="w-6 h-6 flex items-center justify-center mr-3">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 21V7L12 3L20 7V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M12 7L4 11M12 7V15M12 7L20 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <div>Feature Flags</div>
-            </div>
-            <img src={ChevronRightIcon} alt="arrow" width={20} height={20} />
-          </div>
-        </Button>
-      </div>
-    );
-  };
-
   return (
     <LayoutGroup>
       <div className="fixed top-0 right-0 p-4 z-[10000]">
@@ -874,7 +876,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               <AnimatePresence custom={navDirection} initial={false}>
                 <motion.div
                   key={activeScreen}
-                  className="absolute inset-0 overflow-auto px-6 py-6 pb-32"
+                  className="absolute inset-0 overflow-auto px-6 py-6"
                   custom={navDirection}
                   initial="enter"
                   animate="center"
@@ -885,13 +887,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                 </motion.div>
               </AnimatePresence>
             </div>
-            
-            {/* Feature Flags button at bottom */}
-            {activeScreen === 'main' && (
-              <div className="px-6 pt-2 pb-3 border-t border-white/5">
-                {renderBottomIcons()}
-              </div>
-            )}
             
             {/* Version text at bottom */}
             <div className="px-6 py-2 flex justify-between items-center text-white/30 text-xs">
