@@ -350,33 +350,36 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
 
   // Render the current screen content
   const renderScreenContent = () => {
+    // Profile button component that will be used in all screens
+    const ProfileButton = (
+      <button
+        className="w-full rounded-lg px-4 py-3 mb-3 border border-white/20 text-white text-left flex items-center justify-between"
+        onClick={() => navigateTo('profile')}
+      >
+        <div>
+          <div className="font-medium">{profileData[userType].name}</div>
+          <p className="text-white/60 text-sm">{profileData[userType].subtitle}</p>
+        </div>
+        {profileData[userType].avatar && (
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
+            {profileData[userType].avatar}
+          </div>
+        )}
+      </button>
+    );
+    
     switch (activeScreen) {
       case 'main':
         return (
           <div className="space-y-4 flex flex-col h-full">
             {/* Main content section - takes up available space */}
             <div className="flex-1">
+              {/* Profile button at the top */}
+              {ProfileButton}
+              
               {/* Only show cart items on Home or Cart screens */}
               {localCartItems.length > 0 && (currentScreen === 'Home' || currentScreen === 'Cart') && (
                 <div className="rounded-lg">
-                  {/* Profile button */}
-                  {!currentConfig.backButton && (
-                    <button
-                      className="w-full rounded-lg px-4 py-3 mb-3 border border-white/20 text-white text-left flex items-center justify-between"
-                      onClick={() => navigateTo('profile')}
-                    >
-                      <div>
-                        <div className="font-medium">{profileData[userType].name}</div>
-                        <p className="text-white/60 text-sm">{profileData[userType].subtitle}</p>
-                      </div>
-                      {profileData[userType].avatar && (
-                        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
-                          {profileData[userType].avatar}
-                        </div>
-                      )}
-                    </button>
-                  )}
-                  
                   <div className="flex items-center pt-3 pb-2">
                     <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
                   </div>
@@ -444,6 +447,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'feature-flags':
         return (
           <div className="space-y-4">
+            {/* Profile button at the top */}
+            {ProfileButton}
+            
             {/* Feature flag list */}
             {relevantFlags.length > 0 ? (
               relevantFlags.map(flag => (
@@ -498,6 +504,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'navigation':
         return (
           <div className="space-y-4">
+            {/* Profile button at the top */}
+            {ProfileButton}
+            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-3">App Navigation</h3>
               <div className="space-y-2">
@@ -527,6 +536,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'app-info':
         return (
           <div className="space-y-4">
+            {/* Profile button at the top */}
+            {ProfileButton}
+            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-3">Application State</h3>
               <div className="text-white/70 space-y-2">
@@ -556,6 +568,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'debug':
         return (
           <div className="space-y-4">
+            {/* Profile button at the top */}
+            {ProfileButton}
+            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-3">Application State</h3>
               <div className="text-white/70 space-y-2">
@@ -636,6 +651,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         if (!selectedFlag) return null;
         return (
           <div className="space-y-4">
+            {/* Profile button at the top */}
+            {ProfileButton}
+            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-1">{selectedFlag.name}</h3>
               <p className="text-white/60 text-sm mb-4">{selectedFlag.description}</p>
@@ -675,6 +693,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'cart':
         return (
           <div className="space-y-4">
+            {/* Profile button at the top */}
+            {ProfileButton}
+            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-3">Cart Management</h3>
               
