@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { DevNav } from './dev/DevNav';
+import { ExpandableDevPanel } from './dev/ExpandableDevPanel';
 import { logNavigation } from '../utils/debug';
 import { SCREEN_ORDER } from '../constants/screens';
 import { Screen } from '../types/screen';
@@ -8,6 +8,27 @@ import * as screens from '../screens/checkout';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Cart', 'TapToPay', 'Tipping', 'Cashback', 'End'];
+
+// Define cart item interface
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+// Function to generate a random item
+const generateRandomItem = (id: number): CartItem => {
+  const itemNames = [
+    'Coffee', 'Sandwich', 'Salad', 'Pastry', 
+    'Smoothie', 'Burger', 'Pizza', 'Soda',
+    'Chips', 'Cookie', 'Muffin', 'Water'
+  ];
+  const name = itemNames[Math.floor(Math.random() * itemNames.length)];
+  // Random price between $3 and $25
+  const price = Math.round((Math.random() * 22 + 3) * 100) / 100;
+  return { id, name, price, quantity: 1 };
+};
 
 /**
  * Main application view that manages screen transitions and state.
@@ -21,11 +42,47 @@ export const MainView = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [baseAmount, setBaseAmount] = useState<string | null>(null);
   const [tipAmount, setTipAmount] = useState<string | null>(null);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  
+  // Cart state
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    { id: 1, name: 'Coffee', price: 4.50, quantity: 1 }
+  ]);
+  const [nextItemId, setNextItemId] = useState(2);
   
   // Log the current screen for debugging
   useEffect(() => {
     console.log(`MainView: Current screen is now ${currentScreen}`);
   }, [currentScreen]);
+  
+  // Handle adding an item to the cart
+  const handleAddItem = useCallback(() => {
+    console.log('MainView: Adding item to cart');
+    const newItem = generateRandomItem(nextItemId);
+    setCartItems(prevItems => [...prevItems, newItem]);
+    setNextItemId(prevId => prevId + 1);
+    
+    // Ensure we're on the Cart screen to see the changes
+    if (currentScreen !== 'Cart') {
+      setCurrentScreen('Cart');
+    }
+  }, [nextItemId, currentScreen]);
+  
+  // Handle clearing the cart
+  const handleClearCart = useCallback(() => {
+    console.log('MainView: Clearing cart');
+    setCartItems([]);
+    
+    // Ensure we're on the Cart screen to see the changes
+    if (currentScreen !== 'Cart') {
+      setCurrentScreen('Cart');
+    }
+  }, [currentScreen]);
+  
+  // Handle cart updates from the Cart component
+  const handleCartUpdate = useCallback((items: CartItem[]) => {
+    setCartItems(items);
+  }, []);
   
   // Handle navigation to next screen with amounts
   const handleNext = useCallback((amount?: string) => {
@@ -161,7 +218,14 @@ export const MainView = () => {
         goToScreen: goToScreen,  // Pass direct navigation function to End
         resetToHome: handleReset  // Also pass reset function as an alternative
       };
-    } else if (currentScreen === 'Cart' || currentScreen === 'TapToPay') {
+    } else if (currentScreen === 'Cart') {
+      return {
+        ...baseProps,
+        amount: baseAmount || undefined,
+        cartItems: cartItems,
+        onCartUpdate: handleCartUpdate
+      };
+    } else if (currentScreen === 'TapToPay') {
       return {
         ...baseProps,
         amount: baseAmount || undefined
@@ -181,14 +245,23 @@ export const MainView = () => {
     }
   };
   
+  // Handle panel toggle notification from ExpandableDevPanel
+  const handlePanelToggle = useCallback((isOpen: boolean) => {
+    setIsPanelOpen(isOpen);
+  }, []);
+  
   return (
     <div className="flex flex-col w-screen h-screen bg-black">
       {/* Main content area that centers all screens */}
-      <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+      <div className={`flex-1 flex items-center relative overflow-hidden ${
+        isPanelOpen ? 'justify-start pl-8' : 'justify-center'
+      }`}>
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={`${currentScreen}-${refreshKey}`}
-            className="absolute flex items-center justify-center w-full h-full"
+            className={`absolute flex items-center justify-center h-full ${
+              isPanelOpen ? 'w-[calc(100%-360px)]' : 'w-full'
+            }`}
             initial={{ 
               x: isInstantTransition ? 0 : 200, 
               opacity: isInstantTransition ? 1 : 0.8
@@ -221,12 +294,19 @@ export const MainView = () => {
       {/* Debug navigation */}
       {renderScreenNav()}
       
-      {/* DevNav buttons */}
-      <DevNav
+      {/* New Expandable Dev Panel */}
+      <ExpandableDevPanel 
+        currentScreen={currentScreen} 
+        baseAmount={baseAmount} 
+        tipAmount={tipAmount} 
+        cartItems={cartItems}
         onBack={handleBack}
-        onRefresh={handleRefresh}
         onNext={handleDevNavNext}
-        resetToHome={handleReset}
+        onRefresh={handleRefresh}
+        onReset={handleReset}
+        onPanelToggle={handlePanelToggle}
+        onAddItem={handleAddItem}
+        onClearCart={handleClearCart}
       />
     </div>
   );
