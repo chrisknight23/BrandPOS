@@ -15,21 +15,16 @@ interface QROptions {
 export const generateQRData = async ({ 
   value, 
   size, 
-  errorCorrection = 'H' // Use high error correction
+  errorCorrection = 'M' 
 }: QROptions): Promise<QRDot[]> => {
   try {
-    console.log('Generating standard QR code for:', value);
+    console.log('Generating QR code for:', value);
     
-    // Generate a standard QR code as a string
-    const qrString = await QRCode.toString(value, {
-      type: 'svg',
-      errorCorrectionLevel: errorCorrection,
-      margin: 4, // Standard QR code margin
-      width: size
-    });
+    // Create QR code matrix using canvas-based approach
+    const qrCodeMatrix = await generateMatrix(value, errorCorrection);
     
-    // Parse the SVG to extract dot positions
-    return extractDotsFromSVG(qrString, size);
+    // Convert matrix to QR dots with styling
+    return createQRDots(qrCodeMatrix, size);
   } catch (error) {
     console.error('Error generating QR code:', error);
     return generateMockQRData(size);
@@ -37,150 +32,128 @@ export const generateQRData = async ({
 };
 
 /**
- * Extract dot positions from SVG string
+ * Generate QR code matrix using QRCode library via canvas
  */
-const extractDotsFromSVG = (svgString: string, size: number): QRDot[] => {
+const generateMatrix = async (text: string, errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H'): Promise<boolean[][]> => {
+  return new Promise((resolve, reject) => {
+    // Create a temporary canvas
+    const canvas = document.createElement('canvas');
+    
+    // Generate QR code on canvas
+    QRCode.toCanvas(canvas, text, {
+      errorCorrectionLevel,
+      margin: 0,
+      scale: 1
+    }, (error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+      
+      // Get image data from canvas
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // Create a matrix where true represents dark modules (black pixels)
+      const matrix: boolean[][] = [];
+      const size = canvas.width;
+      
+      for (let y = 0; y < size; y++) {
+        const row: boolean[] = [];
+        for (let x = 0; x < size; x++) {
+          // Get the index in the image data (each pixel is 4 bytes - RGBA)
+          const index = (y * size + x) * 4;
+          // Check if the pixel is black (dark module)
+          const isDark = data[index] === 0 && data[index + 1] === 0 && data[index + 2] === 0;
+          row.push(isDark);
+        }
+        matrix.push(row);
+      }
+      
+      resolve(matrix);
+    });
+  });
+};
+
+/**
+ * Convert QR matrix to styled QR dots
+ */
+const createQRDots = (matrix: boolean[][], size: number): QRDot[] => {
   const dots: QRDot[] = [];
-  const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(svgString, 'image/svg+xml');
-  const paths = svgDoc.querySelectorAll('path');
+  const moduleCount = matrix.length;
+  const moduleSize = size / moduleCount;
   
-  // Calculate the center point of the QR code
+  // Logo and position marker settings
+  const markerSize = 60; // Fixed 60px
+  const markerModuleSize = Math.round(markerSize / moduleSize); // How many modules the marker covers
+  const markerInnerSize = markerSize * 0.4;
   const centerX = size / 2;
   const centerY = size / 2;
   
-  // Get the viewBox size to calculate scaling
-  const svg = svgDoc.querySelector('svg');
-  const viewBox = svg?.getAttribute('viewBox');
-  const viewBoxSize = viewBox ? parseInt(viewBox.split(' ')[2], 10) : 100;
-  
-  // Calculate scale factor
-  const scaleFactor = size / viewBoxSize;
-  
-  // Logo size (60px)
-  const logoSize = 60;
-  
-  // Position marker size
-  const markerSize = 60;
-  const markerInnerSize = markerSize * 0.4;
+  // Logo settings
+  const logoSize = 60; // Fixed 60px for logo
+  const logoModuleSize = Math.round(logoSize / moduleSize); // How many modules the logo covers
+  const logoStartModule = Math.floor(moduleCount / 2 - logoModuleSize / 2);
+  const logoEndModule = logoStartModule + logoModuleSize;
   
   // Create position markers
-  // Top-left
   createPositionMarker(dots, 0, 0, markerSize, markerInnerSize, centerX, centerY);
+  createPositionMarker(dots, size - markerSize, 0, markerSize, markerInnerSize, centerX, centerY);
+  createPositionMarker(dots, 0, size - markerSize, markerSize, markerInnerSize, centerX, centerY);
   
-  // Top-right (positioning based on QR code size)
-  const rightX = size - markerSize;
-  createPositionMarker(dots, rightX, 0, markerSize, markerInnerSize, centerX, centerY);
-  
-  // Bottom-left (positioning based on QR code size)
-  const bottomY = size - markerSize;
-  createPositionMarker(dots, 0, bottomY, markerSize, markerInnerSize, centerX, centerY);
-  
-  // Process each path in the SVG (each one is a QR code module/dot)
-  paths.forEach((path, index) => {
-    // Get the 'd' attribute which contains path data
-    const d = path.getAttribute('d');
-    if (!d) return;
-    
-    // Skip the path if it's part of the position markers
-    // The path is likely a position marker if it starts with 'M0 0' or similar patterns
-    // for corners
-    if (isPositionMarkerPath(d)) {
-      return;
+  // Create dots for QR code data
+  for (let row = 0; row < moduleCount; row++) {
+    for (let col = 0; col < moduleCount; col++) {
+      // Skip if in position marker areas (top-left, top-right, bottom-left corners)
+      if ((row < markerModuleSize && col < markerModuleSize) || // Top-left
+          (row < markerModuleSize && col >= moduleCount - markerModuleSize) || // Top-right
+          (row >= moduleCount - markerModuleSize && col < markerModuleSize)) { // Bottom-left
+        continue;
+      }
+      
+      // Skip if in logo area (center)
+      if (row >= logoStartModule && row < logoEndModule && 
+          col >= logoStartModule && col < logoEndModule) {
+        continue;
+      }
+      
+      // Only create dots for dark modules
+      if (matrix[row][col]) {
+        const x = col * moduleSize;
+        const y = row * moduleSize;
+        const dotSize = moduleSize * 0.8; // Slightly smaller than module size
+        const offsetX = (moduleSize - dotSize) / 2;
+        const offsetY = (moduleSize - dotSize) / 2;
+        
+        // Calculate distance from center for animation ordering
+        const distanceFromCenter = Math.sqrt(
+          Math.pow((x + moduleSize / 2) - centerX, 2) + 
+          Math.pow((y + moduleSize / 2) - centerY, 2)
+        );
+        
+        dots.push({
+          x: x + offsetX,
+          y: y + offsetY,
+          size: dotSize,
+          isRound: true,
+          distanceFromCenter,
+          isPositionMarker: false,
+          row,
+          col,
+          isHollow: false
+        });
+      }
     }
-    
-    // Extract coordinates from the path data
-    const coordinates = extractCoordinates(d);
-    if (!coordinates) return;
-    
-    // Scale the coordinates to match the desired size
-    const x = coordinates.x * scaleFactor;
-    const y = coordinates.y * scaleFactor;
-    const width = coordinates.width * scaleFactor;
-    const height = coordinates.height * scaleFactor;
-    
-    // Skip if this dot would be in the center (logo area)
-    const logoHalfSize = logoSize / 2;
-    if (
-      x > centerX - logoHalfSize - 5 && 
-      x < centerX + logoHalfSize + 5 - width &&
-      y > centerY - logoHalfSize - 5 && 
-      y < centerY + logoHalfSize + 5 - height
-    ) {
-      return;
-    }
-    
-    // Skip if this dot would be in the position marker areas
-    // Top-left
-    if (x < markerSize + 5 && y < markerSize + 5) {
-      return;
-    }
-    
-    // Top-right
-    if (x > size - markerSize - 5 - width && y < markerSize + 5) {
-      return;
-    }
-    
-    // Bottom-left
-    if (x < markerSize + 5 && y > size - markerSize - 5 - height) {
-      return;
-    }
-    
-    // Calculate distance from center for animation ordering
-    const dotCenterX = x + width / 2;
-    const dotCenterY = y + height / 2;
-    const distanceFromCenter = Math.sqrt(
-      Math.pow(dotCenterX - centerX, 2) + 
-      Math.pow(dotCenterY - centerY, 2)
-    );
-    
-    // Add dot to the collection
-    dots.push({
-      x,
-      y,
-      size: width, // Assuming width equals height for QR dots
-      isRound: true,
-      distanceFromCenter,
-      isPositionMarker: false,
-      row: Math.floor(y / (size / 25)), // Approximate row
-      col: Math.floor(x / (size / 25)), // Approximate column
-      isHollow: false
-    });
-  });
+  }
   
   console.log('Generated QR code with', dots.length, 'dots');
   return dots;
-};
-
-/**
- * Helper function to check if a path is part of a position marker
- */
-const isPositionMarkerPath = (d: string): boolean => {
-  // Position markers are typically at the corners and have specific path patterns
-  return d.startsWith('M0 0') || 
-         d.includes('M0,0') || 
-         d.includes('M7,0') || 
-         d.includes('M0,7');
-};
-
-/**
- * Helper function to extract coordinates from SVG path data
- */
-const extractCoordinates = (d: string): { x: number, y: number, width: number, height: number } | null => {
-  // Most QR code paths are in the format: M{x},{y}h{width}v{height}h-{width}z
-  const regex = /M(\d+(?:\.\d+)?)[, ](\d+(?:\.\d+)?)h(\d+(?:\.\d+)?)v(\d+(?:\.\d+)?)/;
-  const match = d.match(regex);
-  
-  if (match) {
-    return {
-      x: parseFloat(match[1]),
-      y: parseFloat(match[2]),
-      width: parseFloat(match[3]),
-      height: parseFloat(match[4])
-    };
-  }
-  
-  return null;
 };
 
 /**
@@ -251,7 +224,7 @@ export const generateMockQRData = (size: number): QRDot[] => {
   const innerMarkerSize = positionMarkerSize * 0.4;
   
   // Padding around markers and logo
-  const padding = 8;
+  const padding = 4;
   
   // Center point
   const centerX = size / 2;
@@ -264,18 +237,19 @@ export const generateMockQRData = (size: number): QRDot[] => {
       const y = row * dotSize;
       
       // Skip position marker areas
-      if ((y < positionMarkerSize + padding && x < positionMarkerSize + padding) || // Top-left
-          (y < positionMarkerSize + padding && x > size - positionMarkerSize - padding) || // Top-right
-          (y > size - positionMarkerSize - padding && x < positionMarkerSize + padding)) { // Bottom-left
+      const markerWidth = Math.ceil(positionMarkerSize / dotSize);
+      if ((row < markerWidth && col < markerWidth) || // Top-left
+          (row < markerWidth && col >= gridSize - markerWidth) || // Top-right
+          (row >= gridSize - markerWidth && col < markerWidth)) { // Bottom-left
         continue;
       }
       
       // Skip center for logo
-      const halfLogo = logoSize / 2;
-      if (x > centerX - halfLogo - padding && 
-          x < centerX + halfLogo + padding &&
-          y > centerY - halfLogo - padding && 
-          y < centerY + halfLogo + padding) {
+      const logoModules = Math.ceil(logoSize / dotSize);
+      const logoStart = Math.floor(gridSize / 2 - logoModules / 2);
+      const logoEnd = logoStart + logoModules;
+      
+      if (row >= logoStart && row < logoEnd && col >= logoStart && col < logoEnd) {
         continue;
       }
       
@@ -290,10 +264,13 @@ export const generateMockQRData = (size: number): QRDot[] => {
       const dotProbability = 0.3 + normalizedDistance * 0.3;
       
       if (Math.random() < dotProbability) {
+        const dotX = x + (dotSize - dotSize * 0.8) / 2;
+        const dotY = y + (dotSize - dotSize * 0.8) / 2;
+        
         dots.push({
-          x,
-          y,
-          size: dotSize * 0.85,
+          x: dotX,
+          y: dotY,
+          size: dotSize * 0.8,
           isRound: true,
           distanceFromCenter,
           isPositionMarker: false,
