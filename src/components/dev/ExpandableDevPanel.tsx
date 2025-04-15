@@ -343,7 +343,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             <div className="flex-1">
               {/* Only show cart items on Home or Cart screens */}
               {localCartItems.length > 0 && (currentScreen === 'Home' || currentScreen === 'Cart') && (
-                <div className="bg-white/5 rounded-lg">
+                <div className="rounded-lg">
                   <div className="flex justify-between items-center px-4 pt-3 pb-2">
                     <h3 className="text-white font-medium">Cart Items</h3>
                     {localCartItems.length > 0 && (
@@ -352,9 +352,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                       </span>
                     )}
                   </div>
-                  <div className="divide-y divide-white/5">
+                  <div className="space-y-1">
                     {localCartItems.map(item => (
-                      <div key={item.id} className="px-4 py-3 flex items-center justify-between">
+                      <div key={item.id} className="bg-white/5 rounded-lg px-4 py-3 flex items-center justify-between">
                         <div>
                           <div className="text-white font-medium">{item.name}</div>
                           <div className="text-white/60 text-sm">{item.price}</div>
@@ -370,19 +370,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                       </div>
                     ))}
                   </div>
-                  {localCartItems.length > 0 && (
-                    <div className="px-4 py-3 border-t border-white/10">
-                      <button
-                        onClick={handleClearCart}
-                        className="py-2 px-3 bg-red-900/30 hover:bg-red-900/50 active:bg-red-900/70 text-white text-sm rounded transition-colors w-full flex items-center justify-center"
-                      >
-                        <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7M10 11V17M14 11V17M3 7H21M16 7L15.133 4.266C14.9426 3.64976 14.3745 3.22534 13.7303 3.22534H10.2697C9.62553 3.22534 9.05742 3.64976 8.867 4.266L8 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        Clear All Items
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
