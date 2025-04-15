@@ -4,60 +4,6 @@ import { BaseScreen } from '../../components/common/BaseScreen/index';
 import cashBackAnimation from '../../assets/CashBackLogo.json';
 import CashAppLogo from '../../assets/images/CashApplogo.svg';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Environment } from '@react-three/drei';
-import * as THREE from 'three';
-
-// Lighting effects component for Three.js
-const EnvironmentalLighting: React.FC<{ isFlipped: boolean }> = ({ isFlipped }) => {
-  const lightRef = useRef<THREE.DirectionalLight>(null);
-  const secondaryLightRef = useRef<THREE.DirectionalLight>(null);
-  
-  // Update lighting based on flip state
-  useFrame(() => {
-    if (lightRef.current && secondaryLightRef.current) {
-      // Moving primary light based on card flip state
-      // When card flips, move light to simulate environment changing
-      if (isFlipped) {
-        // Light positions for back side of card
-        lightRef.current.position.x = THREE.MathUtils.lerp(lightRef.current.position.x, -3, 0.05);
-        lightRef.current.position.y = THREE.MathUtils.lerp(lightRef.current.position.y, 2, 0.05);
-        lightRef.current.intensity = THREE.MathUtils.lerp(lightRef.current.intensity, 1.2, 0.05);
-        
-        secondaryLightRef.current.position.x = THREE.MathUtils.lerp(secondaryLightRef.current.position.x, 4, 0.05);
-        secondaryLightRef.current.intensity = THREE.MathUtils.lerp(secondaryLightRef.current.intensity, 0.8, 0.05);
-      } else {
-        // Light positions for front side of card
-        lightRef.current.position.x = THREE.MathUtils.lerp(lightRef.current.position.x, 3, 0.05);
-        lightRef.current.position.y = THREE.MathUtils.lerp(lightRef.current.position.y, 3, 0.05);
-        lightRef.current.intensity = THREE.MathUtils.lerp(lightRef.current.intensity, 1.5, 0.05);
-        
-        secondaryLightRef.current.position.x = THREE.MathUtils.lerp(secondaryLightRef.current.position.x, -3, 0.05);
-        secondaryLightRef.current.intensity = THREE.MathUtils.lerp(secondaryLightRef.current.intensity, 0.6, 0.05);
-      }
-    }
-  });
-
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <directionalLight
-        ref={lightRef}
-        position={[3, 3, 5]}
-        intensity={1.5}
-        color="#ffffff"
-      />
-      <directionalLight
-        ref={secondaryLightRef}
-        position={[-3, -2, 5]}
-        intensity={0.6}
-        color="#d0d0ff" // Slightly blue tint for secondary light
-      />
-      {/* Environment for realistic reflections */}
-      <Environment preset="sunset" />
-    </>
-  );
-};
 
 interface CashbackProps {
   onNext: (amount?: string) => void;
@@ -70,8 +16,6 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   // State to control logo visibility
   const [showLogo, setShowLogo] = useState(false);
-  // Track if card is flipped for lighting effects
-  const [isCardFlipped, setIsCardFlipped] = useState(false);
   
   // Force an explicit reset when entering the screen
   useEffect(() => {
@@ -81,7 +25,6 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
     setCardState('expanded');
     setIsTransitioning(false);
     setShowLogo(false);
-    setIsCardFlipped(false);
     
     return () => {
       console.log('Cashback: Component unmounting');
@@ -108,12 +51,6 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
         setShowLogo(true);
       }, 500);
     }
-  };
-  
-  // Handle flip state changes
-  const handleFlip = (isFlipped: boolean) => {
-    console.log(`Cashback: Card flip state changed to ${isFlipped}`);
-    setIsCardFlipped(isFlipped);
   };
   
   // Handle animation completion and state changes
@@ -143,40 +80,33 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 1 }}
       >
+        {/* Black background for consistency */}
+        <div className="absolute inset-0 bg-black" />
+        
+        {/* Content container */}
         <motion.div 
-          className="w-full h-full bg-black relative overflow-hidden flex items-center justify-center"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
+          className="w-full h-full relative flex items-center justify-center"
+          style={{ zIndex: 2 }}
         >
-          {/* Three.js canvas for environmental lighting */}
-          <div className="absolute inset-0 pointer-events-none">
-            <Canvas 
-              camera={{ position: [0, 0, 10], fov: 45 }}
-              gl={{ alpha: true }}
-              style={{ background: 'transparent' }}
-            >
-              <EnvironmentalLighting isFlipped={isCardFlipped} />
-              {/* No meshes needed - we're just using the lighting effects */}
-            </Canvas>
-          </div>
-          
-          <LocalPass
-            amount={amount}
-            initialState={cardState}
-            isExpanded={cardState === 'expanded'}
-            onClick={handleNextClick}
-            onStateChange={handleStateChange}
-            onFlip={handleFlip}
-            lottieAnimation={cashBackAnimation}
-            noAnimation={false}
-            useRandomValues={false}
-            headerText="Local Cash"
-            subheaderText=""
-            buttonText="Cash Out"
-            onAnimationComplete={handleAnimationComplete}
-            autoPlay={true}
-            animationDelay={500}
-          />
+          {/* Original LocalPass card component */}
+          <motion.div>
+            <LocalPass
+              amount={amount}
+              initialState={cardState}
+              isExpanded={cardState === 'expanded'}
+              onClick={handleNextClick}
+              onStateChange={handleStateChange}
+              lottieAnimation={cashBackAnimation}
+              noAnimation={false}
+              useRandomValues={false}
+              headerText="Local Cash"
+              subheaderText=""
+              buttonText="Cash Out"
+              onAnimationComplete={handleAnimationComplete}
+              autoPlay={true}
+              animationDelay={500}
+            />
+          </motion.div>
           
           {/* Cash App Logo in bottom left corner - only shown after card animation completes */}
           <AnimatePresence>
@@ -187,6 +117,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
+                style={{ zIndex: 3 }}
               >
                 <img src={CashAppLogo} alt="Cash App" width={100} />
               </motion.div>

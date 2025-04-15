@@ -545,70 +545,20 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     }
   }, [animationState]);
 
-  // Handle double tap to flip card
-  const handleDoubleTap = () => {
-    console.log('LocalPass: Double tap detected, flipping card');
-    setIsFlipped(!isFlipped);
-    
-    // Call onFlip callback if provided
-    if (onFlip) {
-      onFlip(!isFlipped);
-    }
-  };
-
-  // Enhanced handleButtonClick to handle various actions
+  // Enhanced handleButtonClick to flip the card
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card flipping from the parent click handler
     
     // Reset timer when button is clicked
     setProgressTimer(100);
     
-    if (isFlipped) {
-      // When flipped, button press will flip back
-      setIsFlipped(false);
-      
-      // Call onFlip callback if provided
-      if (onFlip) {
-        onFlip(false);
-      }
-    } else {
-      // In normal state, button triggers card flipping
-      setIsFlipped(true);
-      
-      // Call onFlip callback if provided
-      if (onFlip) {
-        onFlip(true);
-      }
-    }
+    // Flip the card instead of cycling states
+    setIsFlipped(!isFlipped);
+    if (onFlip) onFlip(!isFlipped);
     
     // Call onButtonClick if provided
     if (onButtonClick) {
       onButtonClick(e);
-    }
-  };
-
-  // Handle manual flip when clicking the flip button
-  const handleFlipClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log('LocalPass: Flip button clicked');
-    setIsFlipped(!isFlipped);
-    
-    // Call onFlip callback if provided
-    if (onFlip) {
-      onFlip(!isFlipped);
-    }
-  };
-
-  // Reset the card state when going back to normal
-  const resetCard = () => {
-    lottieAnimRef.current?.goToAndStop(0, true);
-    setAnimationState('initial');
-    setShowNumber(false);
-    setIsFlipped(false);
-    
-    // Call onFlip callback to notify about reset
-    if (onFlip) {
-      onFlip(false);
     }
   };
 
@@ -635,39 +585,12 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     console.log('LocalPass: Card isFlipped state changed to:', isFlipped);
   }, [isFlipped]);
 
-  // Effect for initial mount
+  // Add useEffect to initialize and reset isFlipped state
   useEffect(() => {
-    if (autoPlay && lottieAnimRef.current) {
-      // Only start playing if we're in expanded state
-      if (animationState === 'expanded') {
-        // Reset any existing animation first
-        lottieAnimRef.current.goToAndStop(0, true);
-        
-        // Start playing after a delay
-        setTimeout(() => {
-          if (lottieAnimRef.current) {
-            console.log(`LocalPass: Playing initial animation (delay: ${animationDelay}ms)`);
-            lottieAnimRef.current.play();
-          }
-        }, animationDelay || DELAYS.INITIAL_ANIMATION);
-      }
-    }
-    
-    // Reset flip state on component mount
+    console.log('LocalPass: Component mounted, resetting flip state');
+    // Reset to front-facing
     setIsFlipped(false);
-    
-    // Call onFlip callback to notify about the initial state
-    if (onFlip) {
-      onFlip(false);
-    }
-    
-    return () => {
-      // Clean up any ongoing animations or timers
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [autoPlay, animationState, animationDelay]);
+  }, []);
 
   return (
     <div className={`w-full h-full flex items-center justify-center ${className}`}>
@@ -853,8 +776,11 @@ export const LocalPass: React.FC<LocalPassProps> = ({
               <div className="w-full h-full flex flex-col items-center justify-center p-8">
                 <h3 className="text-2xl font-medium text-white mb-6">Scan to Cash Out</h3>
                 
-                {/* QR code container with better background for visibility */}
-                <div className="relative mb-6">
+                {/* QR code container with better containment */}
+                <div 
+                  className="relative mb-6 overflow-hidden"
+                  style={{ maxHeight: '300px' }}
+                >
                   <AnimatedQRCode
                     value={`https://cash.app/${amount ? amount : '10'}`}
                     size={260}
@@ -865,6 +791,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                     lightColor="transparent"
                     placeholderOpacity={0.5}
                     logo="cash-icon"
+                    className="max-h-[260px] overflow-hidden"
                     onAnimationComplete={() => {
                       console.log("QR animation complete");
                     }}

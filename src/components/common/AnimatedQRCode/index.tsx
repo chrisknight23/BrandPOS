@@ -113,28 +113,33 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
     setIsAnimating(true);
   };
   
+  // Separate position markers from regular dots
+  const positionMarkers = dots.filter(dot => dot.isPositionMarker);
+  const regularDots = dots.filter(dot => !dot.isPositionMarker);
+  
   // Different animation patterns
   const getAnimationOrder = () => {
+    // Only apply patterns to regular dots, not position markers
     switch(pattern) {
       case 'inside-out':
         // Sort dots by distance from center
-        return [...dots].sort((a, b) => a.distanceFromCenter - b.distanceFromCenter);
+        return [...regularDots].sort((a, b) => a.distanceFromCenter - b.distanceFromCenter);
       case 'outside-in':
         // Reverse of inside-out
-        return [...dots].sort((a, b) => b.distanceFromCenter - a.distanceFromCenter);
+        return [...regularDots].sort((a, b) => b.distanceFromCenter - a.distanceFromCenter);
       case 'wave':
         // Sort by y position to create wave effect
-        return [...dots].sort((a, b) => a.y - b.y);
+        return [...regularDots].sort((a, b) => a.y - b.y);
       case 'sequential':
         // Sort by row and column for sequential animation
-        return [...dots].sort((a, b) => {
+        return [...regularDots].sort((a, b) => {
           if (a.row === b.row) return a.col - b.col;
           return a.row - b.row;
         });
       case 'random':
       default:
         // Randomize order
-        return [...dots].sort(() => Math.random() - 0.5);
+        return [...regularDots].sort(() => Math.random() - 0.5);
     }
   };
   
@@ -198,7 +203,8 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
         position: 'relative',
         width: size,
         height: size,
-        backgroundColor: 'transparent'
+        backgroundColor: 'transparent',
+        overflow: 'hidden' // Prevent any content from spilling outside
       }}
     >
       {/* Debug button for development */}
@@ -243,13 +249,28 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
       
       {!isLoading && (
         <>
+          {/* Position markers - always visible at full opacity */}
+          <div className="qr-position-markers" style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            zIndex: 2  // Ensure markers are above placeholder dots
+          }}>
+            {positionMarkers.map((dot, idx) => (
+              <div
+                key={`marker-${idx}`}
+                style={getDotStyle(dot, true, darkColor, 1)}
+              />
+            ))}
+          </div>
+        
           {/* Base layer - placeholder QR (darker version) */}
           <div className="qr-placeholder" style={{
             position: 'relative',
             width: '100%',
             height: '100%'
           }}>
-            {dots.map((dot, idx) => (
+            {regularDots.map((dot, idx) => (
               <div
                 key={`base-${idx}`}
                 style={getDotStyle(dot, false, darkColor, placeholderOpacity)}
@@ -257,7 +278,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
             ))}
           </div>
           
-          {/* Animation layer */}
+          {/* Animation layer - only for regular dots, not position markers */}
           <AnimatePresence>
             {isAnimating && (
               <>
@@ -294,7 +315,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
                 transform: 'translate(-50%, -50%)',
                 width: '62px',
                 height: '62px',
-                zIndex: 2
+                zIndex: 3  // Ensure logo is on top
               }}
             >
               {typeof logo === 'string' ? (
