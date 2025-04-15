@@ -352,7 +352,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                       </span>
                     )}
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-3">
                     {localCartItems.map(item => (
                       <div key={item.id} className="bg-white/5 rounded-lg px-4 py-3 flex items-center justify-between">
                         <div>
