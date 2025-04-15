@@ -366,7 +366,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                     {/* Add item row with stroke instead of background fill */}
                     <button
                       onClick={handleAddItem}
-                      className="w-full rounded-lg px-4 py-3 border border-white/20 hover:border-white/40 flex items-center justify-center"
+                      className="w-full rounded-lg px-4 py-3 border border-white/20 flex items-center justify-center"
                     >
                       <span className="text-white/80 font-medium">Add item</span>
                     </button>
