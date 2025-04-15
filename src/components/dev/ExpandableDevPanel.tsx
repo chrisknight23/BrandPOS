@@ -423,7 +423,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                   className={`w-full rounded-full py-4 ${
                     localCartItems.length > 0 
                       ? 'bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]' 
-                      : 'bg-gray-500 opacity-70 cursor-not-allowed'
+                      : 'bg-white/10 cursor-not-allowed'
                   }`}
                 >
                   <div className="flex items-center justify-center text-white">
