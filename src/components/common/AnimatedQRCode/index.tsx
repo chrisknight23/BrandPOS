@@ -64,7 +64,11 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
     const loadQRData = async () => {
       try {
         console.log('AnimatedQRCode: Fetching QR data for value:', value);
-        const qrData = await generateQRData(value, size);
+        const qrData = await generateQRData({
+          value, 
+          size,
+          errorCorrection
+        });
         
         console.log('AnimatedQRCode: QR data loaded, dots:', qrData.length);
         setDots(qrData);
@@ -144,33 +148,33 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
   
   // Styling for QR dots based on whether they are position markers
   const getDotStyle = (dot: QRDot, isAnimating: boolean, color: string, placeholderOpacity: number) => {
-    const baseStyle = {
+    if (dot.isHollow) {
+      // For hollow squares (position markers outer square)
+      return {
+        position: 'absolute' as const,
+        left: dot.x,
+        top: dot.y,
+        width: dot.size,
+        height: dot.size,
+        backgroundColor: 'transparent',
+        border: `${Math.max(dot.size * 0.12, 2)}px solid ${color}`,
+        borderRadius: dot.cornerRadius ? `${dot.cornerRadius}px` : (dot.isRound ? '50%' : '15%'),
+        opacity: isAnimating ? 1 : placeholderOpacity,
+        boxSizing: 'border-box' as const
+      };
+    }
+    
+    // Regular dots or solid squares
+    return {
       position: 'absolute' as const,
       left: dot.x,
       top: dot.y,
       width: dot.size,
       height: dot.size,
+      backgroundColor: color,
+      borderRadius: dot.cornerRadius ? `${dot.cornerRadius}px` : (dot.isRound ? '50%' : '15%'),
+      opacity: isAnimating ? 1 : placeholderOpacity
     };
-
-    if (dot.isPositionMarker) {
-      // Position markers are either hollow or solid squares
-      return {
-        ...baseStyle,
-        backgroundColor: dot.isHollow ? 'transparent' : color,
-        border: dot.isHollow ? `${Math.max(dot.size * 0.1, 2)}px solid ${color}` : 'none',
-        borderRadius: dot.cornerRadius !== undefined ? `${dot.cornerRadius}px` : '0px',
-        opacity: 1, // Position markers always fully visible
-        boxSizing: 'border-box' as const,
-      };
-    } else {
-      // Regular dots
-      return {
-        ...baseStyle,
-        backgroundColor: color,
-        borderRadius: dot.isRound ? '50%' : '0px',
-        opacity: isAnimating ? 1 : placeholderOpacity,
-      };
-    }
   };
   
   // Use this if you want to let user manually start the animation
@@ -309,8 +313,8 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '60px',
-                height: '60px',
+                width: '62px',
+                height: '62px',
                 zIndex: 3  // Ensure logo is on top
               }}
             >
@@ -319,15 +323,15 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
                   <img
                     src={QRLogo}
                     alt="Cash App Logo"
-                    width={60}
-                    height={60}
+                    width={62}
+                    height={62}
                   />
                 ) : (
                   <img
                     src={logo}
                     alt="QR Logo"
-                    width={60}
-                    height={60}
+                    width={62}
+                    height={62}
                   />
                 )
               ) : (

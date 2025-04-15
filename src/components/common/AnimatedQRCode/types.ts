@@ -25,4 +25,10 @@ export interface QRDot {
   // Row and column in the QR matrix (for sorting)
   row: number;
   col: number;
+  
+  // Whether this is a hollow shape (for position markers)
+  isHollow?: boolean;
+  
+  // Corner radius for rounded squares (in pixels)
+  cornerRadius?: number;
 } 
