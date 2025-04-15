@@ -3,127 +3,122 @@ import { QRDot } from './types';
 // Import the exact SVG paths for the QR code
 import QRCodeSVG from '../../../assets/images/QRCode.svg';
 
-interface QROptions {
-  errorCorrectionLevel?: 'low' | 'medium' | 'quartile' | 'high';
-  margin?: number;
-  scale?: number;
-  width?: number;
-  color?: {
-    dark?: string;
-    light?: string;
-  };
+// Define options for QR code generation
+export interface QRDataOptions {
+  value: string;
+  size?: number;
+  errorCorrection?: 'L' | 'M' | 'Q' | 'H';
 }
 
 /**
- * Generates a matrix representation of a QR code
+ * Generate QR code data with Cash App styling
  */
-const generateQRMatrix = async (value: string): Promise<boolean[][]> => {
+export const generateQRData = async ({ 
+  value, 
+  size = 300, 
+  errorCorrection = 'M' 
+}: QRDataOptions): Promise<QRDot[]> => {
   try {
-    // Create QR code instance directly
-    const qrcode = QRCode.create(value, { errorCorrectionLevel: 'H' }); // Use high error correction
-    const moduleCount = qrcode.modules.size;
-    const matrix: boolean[][] = [];
+    // Generate a matrix of booleans representing the QR code
+    const matrix = await generateQRMatrix(value, errorCorrection);
     
-    for (let row = 0; row < moduleCount; row++) {
-      const newRow: boolean[] = [];
-      for (let col = 0; col < moduleCount; col++) {
-        newRow.push(!!qrcode.modules.get(row, col));
-      }
-      matrix.push(newRow);
-    }
-    
-    return matrix;
+    // Convert the matrix to QRDot objects with Cash App styling
+    return generateCashAppStyledQRData(matrix, size);
   } catch (error) {
-    console.error('Error generating QR matrix:', error);
-    return []; // Return empty array on error
-  }
-};
-
-/**
- * Generates QR code data with Cash App styling
- */
-export const generateQRData = async (
-  value: string,
-  size: number = 200
-): Promise<QRDot[]> => {
-  try {
-    // Generate the QR matrix using QRCode library
-    const matrix = await generateQRMatrix(value);
-    if (!matrix.length) return generateMockQRData(size);
-    
-    // Generate a standard QR code first
-    const dots = createBasicQRDots(matrix, size);
-    
-    // Add position markers as separate custom elements
-    addPositionMarkers(dots, size);
-    
-    // Add a clear area for the logo in the center
-    removeDotsForLogo(dots, size);
-    
-    return dots;
-  } catch (error) {
-    console.error('Error generating QR data:', error);
+    console.error('Error generating QR code:', error);
+    // Fall back to a smaller set of dots if there was an error
     return generateMockQRData(size);
   }
 };
 
 /**
- * Creates basic QR dots from a matrix
+ * Generate a QR code matrix from a value
  */
-const createBasicQRDots = (matrix: boolean[][], size: number): QRDot[] => {
+const generateQRMatrix = (value: string, errorCorrection: 'L' | 'M' | 'Q' | 'H'): Promise<boolean[][]> => {
+  return new Promise((resolve, reject) => {
+    // Use toDataURL to leverage QRCode's internal matrix generation
+    QRCode.toDataURL(value, {
+      errorCorrectionLevel: errorCorrection,
+      margin: 0, // No margin needed as we'll handle padding ourselves
+    }, (err, url) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      // Extract the matrix from the QRCode instance
+      // @ts-ignore - We're using internal QRCode properties
+      const matrix = QRCode.create(value, { 
+        errorCorrectionLevel: errorCorrection
+      }).modules.data;
+      
+      // Convert the flat array to a 2D boolean matrix
+      const moduleCount = Math.sqrt(matrix.length);
+      const booleanMatrix: boolean[][] = [];
+      
+      for (let row = 0; row < moduleCount; row++) {
+        const rowData: boolean[] = [];
+        for (let col = 0; col < moduleCount; col++) {
+          // QR modules are dark when true
+          rowData.push(!!matrix[row * moduleCount + col]);
+        }
+        booleanMatrix.push(rowData);
+      }
+      
+      resolve(booleanMatrix);
+    });
+  });
+};
+
+/**
+ * Convert a QR matrix to QRDot objects with Cash App styling
+ */
+const generateCashAppStyledQRData = (matrix: boolean[][], size: number): QRDot[] => {
   const dots: QRDot[] = [];
   const moduleCount = matrix.length;
   
-  // Use 4% padding for better scanning
-  const padding = 0.04;
-  const effectiveSize = size * (1 - 2 * padding);
+  // Apply 5% padding on each side
+  const padding = size * 0.05;
+  const effectiveSize = size - padding * 2;
+  
+  // Calculate the size of each dot
   const dotSize = effectiveSize / moduleCount;
-  const offset = size * padding;
   
-  // Calculate center for distance calculation
-  const centerPoint = size / 2;
+  // Center position of the QR code
+  const center = size / 2;
   
-  // Position marker areas (7x7 modules in three corners)
-  const isInPositionMarkerArea = (row: number, col: number): boolean => {
-    const markerSize = 7;
-    return (
-      // Top-left
-      (row < markerSize && col < markerSize) ||
-      // Top-right
-      (row < markerSize && col >= moduleCount - markerSize) ||
-      // Bottom-left
-      (row >= moduleCount - markerSize && col < markerSize)
-    );
-  };
-  
-  // Create dots for each module
   for (let row = 0; row < moduleCount; row++) {
     for (let col = 0; col < moduleCount; col++) {
-      // Skip position marker areas - we'll add custom ones
-      if (isInPositionMarkerArea(row, col)) {
-        continue;
-      }
-      
-      // Create dot for dark modules
+      // Only create dots for dark modules
       if (matrix[row][col]) {
-        const x = offset + col * dotSize;
-        const y = offset + row * dotSize;
+        // Check if this dot is part of a position marker
+        const isPositionMarker = (
+          // Top-left position marker
+          (row < 7 && col < 7) ||
+          // Top-right position marker
+          (row < 7 && col >= moduleCount - 7) ||
+          // Bottom-left position marker
+          (row >= moduleCount - 7 && col < 7)
+        );
         
-        // Distance from center for animation ordering
-        const dx = x + dotSize / 2 - centerPoint;
-        const dy = y + dotSize / 2 - centerPoint;
-        const distanceFromCenter = Math.sqrt(dx * dx + dy * dy) / (size / 2);
+        // Calculate x and y positions with padding
+        const x = padding + col * dotSize;
+        const y = padding + row * dotSize;
+        
+        // Calculate distance from center (normalized to 0-1)
+        const dx = x + dotSize / 2 - center;
+        const dy = y + dotSize / 2 - center;
+        const distance = Math.sqrt(dx * dx + dy * dy) / (size / 2);
         
         dots.push({
           x,
           y,
-          size: dotSize * 0.95, // Slightly smaller dots
-          isRound: true, // Regular dots are round
-          distanceFromCenter,
-          isPositionMarker: false,
+          size: dotSize,
+          isRound: !isPositionMarker, // Make position markers square
+          distanceFromCenter: distance,
+          isPositionMarker,
           row,
-          col,
-          isHollow: false
+          col
         });
       }
     }
@@ -133,141 +128,46 @@ const createBasicQRDots = (matrix: boolean[][], size: number): QRDot[] => {
 };
 
 /**
- * Adds custom position markers to the QR code
- */
-const addPositionMarkers = (dots: QRDot[], size: number): void => {
-  // Position marker size (approx 16% of total QR size)
-  const markerSize = size * 0.16;
-  
-  // Add all three position markers
-  addSinglePositionMarker(dots, 0, 0, markerSize, size); // Top-left
-  addSinglePositionMarker(dots, size - markerSize, 0, markerSize, size); // Top-right
-  addSinglePositionMarker(dots, 0, size - markerSize, markerSize, size); // Bottom-left
-};
-
-/**
- * Adds a single position marker at the specified coordinates
- */
-const addSinglePositionMarker = (dots: QRDot[], x: number, y: number, size: number, totalSize: number): void => {
-  const centerPoint = totalSize / 2;
-  const distanceFromCenter = Math.sqrt(
-    Math.pow(x + size / 2 - centerPoint, 2) + 
-    Math.pow(y + size / 2 - centerPoint, 2)
-  ) / (totalSize / 2);
-  
-  // Row and column (approximate)
-  const row = Math.floor(y / (totalSize / 25));
-  const col = Math.floor(x / (totalSize / 25));
-  
-  // Outer square (border)
-  dots.push({
-    x,
-    y,
-    size,
-    isRound: false,
-    distanceFromCenter,
-    isPositionMarker: true,
-    row,
-    col,
-    isHollow: true,
-    cornerRadius: 0 // Sharp corners for position markers
-  });
-  
-  // Inner square (solid)
-  const innerSize = size * 0.6;
-  const innerOffset = (size - innerSize) / 2;
-  dots.push({
-    x: x + innerOffset,
-    y: y + innerOffset,
-    size: innerSize,
-    isRound: false,
-    distanceFromCenter,
-    isPositionMarker: true,
-    row,
-    col,
-    isHollow: false,
-    cornerRadius: 0 // Sharp corners for position markers
-  });
-};
-
-/**
- * Removes dots from the center area to make space for a logo
- */
-const removeDotsForLogo = (dots: QRDot[], size: number): void => {
-  const logoSize = 60; // Fixed logo size of 60px
-  const logoRadius = logoSize / 2;
-  const centerPoint = size / 2;
-  
-  // Filter out dots that would be covered by the logo
-  for (let i = dots.length - 1; i >= 0; i--) {
-    const dot = dots[i];
-    const dotCenterX = dot.x + dot.size / 2;
-    const dotCenterY = dot.y + dot.size / 2;
-    
-    // Calculate distance from center
-    const distanceFromCenter = Math.sqrt(
-      Math.pow(dotCenterX - centerPoint, 2) + 
-      Math.pow(dotCenterY - centerPoint, 2)
-    );
-    
-    // Remove if dot is in logo area (with small margin)
-    if (distanceFromCenter < logoRadius * 1.2) {
-      dots.splice(i, 1);
-    }
-  }
-};
-
-/**
- * Fallback function to generate mock QR data
+ * Generate mock QR data (used as a fallback)
  */
 const generateMockQRData = (size: number): QRDot[] => {
   const dots: QRDot[] = [];
-  const moduleCount = 25; // Mock size
-  const dotSize = size / moduleCount;
-  const centerPoint = size / 2;
+  const mockModuleCount = 21; // Minimum QR code size
   
-  // Add basic dots in a pattern
-  for (let row = 0; row < moduleCount; row++) {
-    for (let col = 0; col < moduleCount; col++) {
-      if ((row + col) % 3 === 0 || row === col || row === moduleCount - col - 1) {
-        const x = col * dotSize;
-        const y = row * dotSize;
-        
-        // Skip corners where position markers will be
-        if ((row < 7 && col < 7) || 
-            (row < 7 && col >= moduleCount - 7) || 
-            (row >= moduleCount - 7 && col < 7)) {
-          continue;
-        }
-        
-        // Skip center for logo
-        const dx = x + dotSize / 2 - centerPoint;
-        const dy = y + dotSize / 2 - centerPoint;
-        const distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
-        if (distanceFromCenter < 30) {
-          continue;
-        }
-        
-        dots.push({
-          x,
-          y,
-          size: dotSize * 0.9,
-          isRound: true,
-          distanceFromCenter: distanceFromCenter / (size / 2),
-          isPositionMarker: false,
-          row,
-          col,
-          isHollow: false
-        });
-      }
+  // Apply 5% padding on each side
+  const padding = size * 0.05;
+  const effectiveSize = size - padding * 2;
+  const dotSize = effectiveSize / mockModuleCount;
+  const center = size / 2;
+  
+  // Generate a minimal set of dots in a grid pattern
+  for (let row = 0; row < mockModuleCount; row += 2) {
+    for (let col = 0; col < mockModuleCount; col += 2) {
+      const x = padding + col * dotSize;
+      const y = padding + row * dotSize;
+      
+      const dx = x + dotSize / 2 - center;
+      const dy = y + dotSize / 2 - center;
+      const distance = Math.sqrt(dx * dx + dy * dy) / (size / 2);
+      
+      const isPositionMarker = (
+        (row < 7 && col < 7) ||
+        (row < 7 && col >= mockModuleCount - 7) ||
+        (row >= mockModuleCount - 7 && col < 7)
+      );
+      
+      dots.push({
+        x,
+        y,
+        size: dotSize,
+        isRound: !isPositionMarker,
+        distanceFromCenter: distance,
+        isPositionMarker,
+        row,
+        col
+      });
     }
   }
-  
-  // Add position markers
-  const markerSize = size * 0.16;
-  addSinglePositionMarker(dots, 0, 0, markerSize, size); // Top-left
-  addSinglePositionMarker(dots, size - markerSize, 0, markerSize, size); // Top-right
-  addSinglePositionMarker(dots, 0, size - markerSize, markerSize, size); // Bottom-left
   
   return dots;
 }; 
