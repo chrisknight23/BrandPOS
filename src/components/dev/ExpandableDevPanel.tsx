@@ -109,6 +109,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   // Cart state - convert from parent format
   const [localCartItems, setLocalCartItems] = useState<InternalCartItem[]>([]);
   
+  // Description state
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  
   // Convert parent cart items to internal format
   useEffect(() => {
     // Map parent cart items to internal format
@@ -317,6 +320,30 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         return { title: `${currentScreen} Features`, backButton: true };
       default:
         return { title: currentScreen, backButton: false };
+    }
+  };
+
+  // Get screen description
+  const getScreenDescription = (screen: PanelScreen): string => {
+    switch (screen) {
+      case 'main':
+        return 'Main control panel for this screen. Access features, manage items, and control app flow from here.';
+      case 'app-info':
+        return 'View details about the current app state, including amounts, screen state, and navigation flow.';
+      case 'debug':
+        return 'Access debugging tools, view active feature flags, check environment details, and examine navigation history.';
+      case 'flag-details':
+        return 'Toggle and configure individual feature flags. See which screens a flag affects and manage its settings.';
+      case 'navigation':
+        return 'Control app navigation between screens. Move forward or backward, refresh the current screen, or reset to home.';
+      case 'cart':
+        return 'Manage cart items for testing. Add, remove, or clear items from the cart to test different checkout flows.';
+      case 'profile':
+        return 'Switch between user profiles to test different user experiences. Configure user details and status.';
+      case 'feature-flags':
+        return 'View and toggle features available on this screen. Enable experimental features or disable existing ones.';
+      default:
+        return '';
     }
   };
 
@@ -952,6 +979,23 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                 <span className="text-white font-medium text-2xl">
                   {currentConfig.title}
                 </span>
+              </div>
+            </div>
+
+            {/* Screen description */}
+            <div className="px-6 pb-2">
+              <div className="relative">
+                <p className={`text-white/60 text-sm ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
+                  {getScreenDescription(activeScreen)}
+                </p>
+                {getScreenDescription(activeScreen).length > 120 && (
+                  <button 
+                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    className="text-xs text-white/40 hover:text-white/60 mt-1"
+                  >
+                    {isDescriptionExpanded ? 'Show less' : 'Read more'}
+                  </button>
+                )}
               </div>
             </div>
 
