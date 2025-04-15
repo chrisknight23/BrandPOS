@@ -344,7 +344,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               {/* Only show cart items on Home or Cart screens */}
               {localCartItems.length > 0 && (currentScreen === 'Home' || currentScreen === 'Cart') && (
                 <div className="rounded-lg">
-                  <div className="flex items-center pl-6 pt-3 pb-2">
+                  <div className="flex items-center pt-3 pb-2">
                     <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
                   </div>
                   <div className="space-y-3">
