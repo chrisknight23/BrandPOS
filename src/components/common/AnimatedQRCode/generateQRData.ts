@@ -42,7 +42,7 @@ const generateMatrix = async (text: string, errorCorrectionLevel: 'L' | 'M' | 'Q
     // Generate QR code on canvas
     QRCode.toCanvas(canvas, text, {
       errorCorrectionLevel,
-      margin: 0,
+      margin: 1, // Small margin to help with scanning
       scale: 1
     }, (error) => {
       if (error) {
@@ -96,8 +96,8 @@ const createQRDots = (matrix: boolean[][], size: number): QRDot[] => {
   const centerX = size / 2;
   const centerY = size / 2;
   
-  // Add some additional breathing room around markers (in modules)
-  const markerPadding = 1; // Reduced from 3 to 1 for more subtle spacing
+  // Minimal padding to maintain scanning functionality
+  const markerPadding = 0.5; // Half a module for minimal breathing room
   
   // Logo settings
   const logoSize = 60; // Fixed 60px for logo
@@ -105,8 +105,8 @@ const createQRDots = (matrix: boolean[][], size: number): QRDot[] => {
   const logoStartModule = Math.floor(moduleCount / 2 - logoModuleSize / 2);
   const logoEndModule = logoStartModule + logoModuleSize;
   
-  // Add some additional breathing room around logo (in modules)
-  const logoPadding = 1; // Reduced from 4 to 1 for more subtle spacing
+  // Very minimal padding for logo
+  const logoPadding = 0.5; // Half a module for minimal breathing room
   
   // Create position markers
   createPositionMarker(dots, 0, 0, markerSize, markerInnerSize, centerX, centerY);
@@ -116,15 +116,14 @@ const createQRDots = (matrix: boolean[][], size: number): QRDot[] => {
   // Create dots for QR code data
   for (let row = 0; row < moduleCount; row++) {
     for (let col = 0; col < moduleCount; col++) {
-      // Skip if in position marker areas (top-left, top-right, bottom-left corners)
-      // Include additional padding around the markers
-      if ((row < markerModuleSize + markerPadding && col < markerModuleSize + markerPadding) || // Top-left with padding
-          (row < markerModuleSize + markerPadding && col >= moduleCount - markerModuleSize - markerPadding) || // Top-right with padding
-          (row >= moduleCount - markerModuleSize - markerPadding && col < markerModuleSize + markerPadding)) { // Bottom-left with padding
+      // Skip if in position marker areas with minimal padding
+      if ((row < markerModuleSize + markerPadding && col < markerModuleSize + markerPadding) || // Top-left
+          (row < markerModuleSize + markerPadding && col >= moduleCount - markerModuleSize - markerPadding) || // Top-right
+          (row >= moduleCount - markerModuleSize - markerPadding && col < markerModuleSize + markerPadding)) { // Bottom-left
         continue;
       }
       
-      // Skip if in logo area (center) with additional padding
+      // Skip if in logo area with minimal padding
       if (row >= logoStartModule - logoPadding && row < logoEndModule + logoPadding && 
           col >= logoStartModule - logoPadding && col < logoEndModule + logoPadding) {
         continue;
@@ -134,7 +133,7 @@ const createQRDots = (matrix: boolean[][], size: number): QRDot[] => {
       if (matrix[row][col]) {
         const x = col * moduleSize;
         const y = row * moduleSize;
-        const dotSize = moduleSize * 0.8; // Slightly smaller than module size
+        const dotSize = moduleSize * 0.85; // Slightly smaller for better appearance
         const offsetX = (moduleSize - dotSize) / 2;
         const offsetY = (moduleSize - dotSize) / 2;
         
@@ -231,7 +230,7 @@ export const generateMockQRData = (size: number): QRDot[] => {
   const innerMarkerSize = positionMarkerSize * 0.4;
   
   // Padding around markers and logo
-  const padding = 4;
+  const padding = 2;
   
   // Center point
   const centerX = size / 2;
