@@ -313,8 +313,8 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '62px',
-                height: '62px',
+                width: '60px',
+                height: '60px',
                 zIndex: 3  // Ensure logo is on top
               }}
             >
@@ -323,15 +323,15 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
                   <img
                     src={QRLogo}
                     alt="Cash App Logo"
-                    width={62}
-                    height={62}
+                    width={60}
+                    height={60}
                   />
                 ) : (
                   <img
                     src={logo}
                     alt="QR Logo"
-                    width={62}
-                    height={62}
+                    width={60}
+                    height={60}
                   />
                 )
               ) : (

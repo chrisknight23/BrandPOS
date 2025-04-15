@@ -10,7 +10,7 @@ interface QROptions {
 }
 
 /**
- * Generates QR code data for animation based on the exact SVG paths provided
+ * Generates QR code data for animation based on the value
  */
 export const generateQRData = async ({ 
   value, 
@@ -18,380 +18,269 @@ export const generateQRData = async ({
   errorCorrection = 'M' 
 }: QROptions): Promise<QRDot[]> => {
   try {
-    console.log('Using Cash App QR Code design with size:', size);
+    console.log('Generating functional Cash App styled QR code for:', value);
     
-    // Use custom QR code design for better visibility
-    return generateCashAppQRData(size);
+    // Get QR code data using a simpler approach
+    const matrix = await generateQRMatrix(value, errorCorrection);
+    
+    // Generate styled QR code dots
+    return generateStyledQRData(matrix, size);
   } catch (error) {
     console.error('Error generating QR code:', error);
+    // Fallback to mock data if real generation fails
     return generateMockQRData(size);
   }
 };
 
 /**
- * Generates QR dot data based on the Cash App QR design
+ * Generate QR code matrix data using QRCode library
  */
-export const generateCashAppQRData = (size: number): QRDot[] => {
+const generateQRMatrix = async (
+  text: string, 
+  errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H'
+): Promise<boolean[][]> => {
+  // Create a QR code in a canvas and extract the matrix
+  const options = { 
+    errorCorrectionLevel,
+    margin: 0,
+    scale: 1
+  };
+  
+  // Create a temporary canvas to generate the QR code
+  const canvas = document.createElement('canvas');
+  
+  // Return a promise that resolves with the QR matrix
+  return new Promise((resolve, reject) => {
+    QRCode.toCanvas(canvas, text, options, (error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+      
+      // Get image data from canvas
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // Create a matrix where true represents dark modules (black pixels)
+      const matrix: boolean[][] = [];
+      const size = canvas.width;
+      
+      for (let y = 0; y < size; y++) {
+        const row: boolean[] = [];
+        for (let x = 0; x < size; x++) {
+          // Get the index in the image data (each pixel is 4 bytes - RGBA)
+          const index = (y * size + x) * 4;
+          // Check if the pixel is black (dark module)
+          // If R, G, B are all 0, it's a black pixel
+          const isDark = data[index] === 0 && data[index + 1] === 0 && data[index + 2] === 0;
+          row.push(isDark);
+        }
+        matrix.push(row);
+      }
+      
+      resolve(matrix);
+    });
+  });
+};
+
+/**
+ * Generates QR dot data with Cash App styling based on the QR matrix
+ */
+const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
   const dots: QRDot[] = [];
   
-  // Create a structured grid-based layout for clean alignment
-  const gridSize = 23;
+  // Get the size of the QR matrix
+  const matrixSize = qrMatrix.length;
   
   // Calculate cell size based on container size
-  const cellSize = size / gridSize;
+  const cellSize = size / matrixSize;
   
-  // Position marker dimensions 
-  const cornerOuterSize = 62; // Outer square size (62x62 pixels)
-  const cornerInnerSize = 25; // 40% of outer size for consistent proportions
+  // Get the logo size from the SVG (60px)
+  const logoSize = 60;
   
-  // Function to create position markers that align with the corners
-  const createCornerMarker = (isTopLeft: boolean, isTopRight: boolean, isBottomLeft: boolean) => {
-    // Calculate position to align with corners
-    let posX = 0;
-    let posY = 0;
+  // Position marker dimensions - make them exactly match the logo size (60px)
+  const cornerSize = logoSize;
+  const cornerInnerSize = cornerSize * 0.4; // 40% of outer size
+  
+  // Function to create position markers that align with corners
+  const createCornerMarker = (row: number, col: number) => {
+    // Calculate position - align exactly with the grid
+    const posX = col * cellSize;
+    const posY = row * cellSize;
     
-    if (isTopRight) {
-      posX = size - cornerOuterSize;
-      posY = 0;
-    } else if (isBottomLeft) {
-      posX = 0;
-      posY = size - cornerOuterSize;
-    }
+    // Calculate center of the marker
+    const centerX = posX + cornerSize/2;
+    const centerY = posY + cornerSize/2;
     
-    // Calculate center of the marker for inner square positioning
-    const centerX = posX + cornerOuterSize/2;
-    const centerY = posY + cornerOuterSize/2;
+    // Distance from center for animation timing
+    const distanceFromCenter = Math.sqrt(
+      Math.pow(centerX - size/2, 2) + 
+      Math.pow(centerY - size/2, 2)
+    );
     
     // Outer square (border)
     dots.push({
       x: posX,
       y: posY,
-      size: cornerOuterSize,
+      size: cornerSize,
       isRound: false,
-      distanceFromCenter: Math.sqrt(
-        Math.pow(centerX - size/2, 2) + 
-        Math.pow(centerY - size/2, 2)
-      ),
+      distanceFromCenter,
       isPositionMarker: true,
-      row: isTopLeft || isTopRight ? 0 : gridSize - 7,
-      col: isTopLeft || isBottomLeft ? 0 : gridSize - 7,
+      row,
+      col,
       isHollow: true,
-      cornerRadius: 17 // Adjusted to be proportional with 62px size
+      cornerRadius: cornerSize * 0.25 // Rounded corners - 25% of size
     });
     
-    // Inner square (solid) - centered within the outer square
+    // Inner square (solid)
+    const innerX = posX + (cornerSize - cornerInnerSize) / 2;
+    const innerY = posY + (cornerSize - cornerInnerSize) / 2;
+    
     dots.push({
-      x: centerX - cornerInnerSize/2,
-      y: centerY - cornerInnerSize/2,
+      x: innerX,
+      y: innerY,
       size: cornerInnerSize,
       isRound: false,
-      distanceFromCenter: Math.sqrt(
-        Math.pow(centerX - size/2, 2) + 
-        Math.pow(centerY - size/2, 2)
-      ),
+      distanceFromCenter,
       isPositionMarker: true,
-      row: isTopLeft || isTopRight ? 0 : gridSize - 7,
-      col: isTopLeft || isBottomLeft ? 0 : gridSize - 7,
+      row,
+      col,
       isHollow: false,
-      cornerRadius: 7 // Adjusted to be proportional with 25px size
+      cornerRadius: cornerInnerSize * 0.25 // Rounded corners - 25% of size
     });
   };
   
-  // Create the three position markers exactly in the corners
-  createCornerMarker(true, false, false); // Top-left
-  createCornerMarker(false, true, false); // Top-right
-  createCornerMarker(false, false, true); // Bottom-left
+  // Create position markers at fixed locations at corners
+  // We'll position them at the corners with exact pixel size instead of grid-based
+  createCornerMarker(0, 0); // Top-left
+  createCornerMarker(0, Math.floor(matrixSize - (cornerSize / cellSize))); // Top-right
+  createCornerMarker(Math.floor(matrixSize - (cornerSize / cellSize)), 0); // Bottom-left
   
   // Generate dots for the main QR code pattern
-  // Slightly smaller dots to accommodate increased density
-  const dotSize = cellSize * 0.75; // 75% of cell size for better spacing with increased dot count
+  const dotSize = cellSize * 0.75; // Slightly smaller dots for better visibility
   
-  // Create a balanced distribution of dots in the grid
-  for (let row = 0; row < gridSize; row++) {
-    for (let col = 0; col < gridSize; col++) {
-      // Skip position marker areas - adjust to match exact corner marker positions
-      if ((row < 7 && col < 7) || // Top-left
-          (row < 7 && col >= gridSize - 7) || // Top-right
-          (row >= gridSize - 7 && col < 7)) { // Bottom-left
+  // Center for calculating distance
+  const centerX = size / 2;
+  const centerY = size / 2;
+  
+  // Logo area to avoid placing dots - make it exactly the same size as the logo (60px)
+  const logoAreaSize = logoSize;
+  const logoOffset = Math.floor((size - logoAreaSize) / 2);
+  
+  // Process each module in the QR matrix
+  for (let row = 0; row < matrixSize; row++) {
+    for (let col = 0; col < matrixSize; col++) {
+      // Calculate the current position in pixels
+      const posX = col * cellSize;
+      const posY = row * cellSize;
+      
+      // Skip position marker areas - using exact pixel locations to match cornerSize
+      if ((posY < cornerSize && posX < cornerSize) || // Top-left
+          (posY < cornerSize && posX > size - cornerSize) || // Top-right
+          (posY > size - cornerSize && posX < cornerSize)) { // Bottom-left
         continue;
       }
       
-      // Skip center area for logo
-      const centerPadding = 3; // Reduced padding to allow dots closer to logo
-      
-      // Ensure exact center placement by calculating from the middle of the grid
-      const exactCenter = Math.floor(gridSize / 2);
-      const centerStart = exactCenter - centerPadding;
-      const centerEnd = exactCenter + centerPadding;
-      
-      // Skip the exact center square area to ensure symmetry
-      if (row >= centerStart && row <= centerEnd && 
-          col >= centerStart && col <= centerEnd) {
-        continue;
-      }
-      
-      // Calculate distance from center for determining additional patterns
+      // Skip center area for logo - using exact pixel locations for logo size
       const centerX = size / 2;
       const centerY = size / 2;
-      const cellCenterX = col * cellSize + cellSize/2;
-      const cellCenterY = row * cellSize + cellSize/2;
-      const distFromCenter = Math.sqrt(
-        Math.pow(cellCenterX - centerX, 2) + 
-        Math.pow(cellCenterY - centerY, 2)
-      );
+      const halfLogo = logoAreaSize / 2;
       
-      // Create a more scattered pattern of dots with less circular patterns
+      if (posX > centerX - halfLogo && posX < centerX + halfLogo &&
+          posY > centerY - halfLogo && posY < centerY + halfLogo) {
+        continue;
+      }
       
-      // Base pattern - dots distributed across the grid in a more scattered way with fewer dots
-      const basePattern = (
-        // More sparse grid pattern
-        (row % 3 === 0 && col % 3 === 0) || 
-        // Symmetric timing patterns - reduced
-        (row === exactCenter - 5 || col === exactCenter - 5)
-      );
-      
-      // Add an inner ring of dots closer to the logo
-      const innerRing = (
-        // Check if we're just outside the center padding area
-        (Math.abs(row - exactCenter) === centerPadding + 1 || Math.abs(col - exactCenter) === centerPadding + 1) &&
-        // Only place a dot every other position for a balanced look
-        ((row + col) % 2 === 0)
-      );
-      
-      // Use pseudo-random structured patterns instead of circles - much fewer dots
-      const structuredPattern = (
-        // Use prime numbers for very sparse scattered look
-        ((row + col) % 7 === 1) || 
-        ((row * col) % 11 === 1)
-      );
-      
-      // Add some directional patterns but very sparse
-      const directionalPattern = (
-        // Horizontal and vertical lines but very sparse
-        ((Math.abs(row - exactCenter) === centerPadding + 3) && col % 4 === 0) ||
-        ((Math.abs(col - exactCenter) === centerPadding + 3) && row % 4 === 0)
-      );
-      
-      // Fill the corners between the position markers and logo with more spacing and fewer dots
-      const cornerFills = (
-        // Top with sparse scatter
-        (row < 7 && col > 9 && col < gridSize - 9 && row % 3 === 0 && col % 3 === 0) ||
-        // Bottom with sparse scatter
-        (row > gridSize - 7 && col > 9 && col < gridSize - 9 && row % 3 === 0 && col % 3 === 0) ||
-        // Left with sparse scatter
-        (col < 7 && row > 9 && row < gridSize - 9 && row % 3 === 0 && col % 3 === 0) || 
-        // Right with sparse scatter
-        (col > gridSize - 7 && row > 9 && row < gridSize - 9 && row % 3 === 0 && col % 3 === 0)
-      );
-      
-      // Significantly reduce randomness
-      const randomScatter = Math.random() > 0.85;
-      
-      // Final dot presence check with more scattered patterns
-      if (basePattern || innerRing || structuredPattern || directionalPattern || cornerFills || randomScatter) {
-        
+      // Only create a dot if this position is dark in the QR matrix
+      if (qrMatrix[row][col]) {
         // Calculate position based on grid
-        const x = col * cellSize + (cellSize - dotSize)/2; // Center in cell
-        const y = row * cellSize + (cellSize - dotSize)/2;
+        const x = col * cellSize + (cellSize - dotSize) / 2; // Center in cell
+        const y = row * cellSize + (cellSize - dotSize) / 2;
         
         // Calculate distance from center for animation ordering
         const distanceFromCenter = Math.sqrt(
-          Math.pow((x + dotSize/2) - centerX, 2) + 
-          Math.pow((y + dotSize/2) - centerY, 2)
-        ) / size; // Normalize to 0-1 range
+          Math.pow((x + dotSize / 2) - centerX, 2) + 
+          Math.pow((y + dotSize / 2) - centerY, 2)
+        );
         
+        // Add the dot with Cash App styling
         dots.push({
           x,
           y,
           size: dotSize,
-          isRound: true, // Round dots
+          isRound: true, // Use round dots for standard QR code elements
           distanceFromCenter,
           isPositionMarker: false,
           row,
           col,
-          isHollow: false
+          isHollow: false,
+          cornerRadius: undefined // No corner radius for regular dots
         });
       }
     }
   }
   
-  // Add a balanced set of dots around the logo for better visual connection
-  const addBalancedDotsNearLogo = () => {
-    const exactCenter = Math.floor(gridSize / 2);
-    const centerPadding = 3; // Match the same padding as used above
-    
-    // Positions for dots forming a balanced frame around the logo
-    // - includes positions at various distances for better balance
-    const positions = [
-      // Cardinal directions (closer to logo)
-      [exactCenter - centerPadding - 1, exactCenter],
-      [exactCenter, exactCenter + centerPadding + 1],
-      [exactCenter + centerPadding + 1, exactCenter],
-      [exactCenter, exactCenter - centerPadding - 1],
-      
-      // Diagonal positions (closer to logo)
-      [exactCenter - centerPadding - 1, exactCenter - centerPadding - 1],
-      [exactCenter - centerPadding - 1, exactCenter + centerPadding + 1],
-      [exactCenter + centerPadding + 1, exactCenter + centerPadding + 1],
-      [exactCenter + centerPadding + 1, exactCenter - centerPadding - 1],
-      
-      // A few more distant dots for balance
-      [exactCenter - centerPadding - 3, exactCenter],
-      [exactCenter, exactCenter + centerPadding + 3],
-      [exactCenter + centerPadding + 3, exactCenter],
-      [exactCenter, exactCenter - centerPadding - 3]
-    ];
-    
-    for (const [row, col] of positions) {
-      // Skip if out of bounds
-      if (row < 0 || col < 0 || row >= gridSize || col >= gridSize) continue;
-      
-      const x = col * cellSize + (cellSize - dotSize)/2;
-      const y = row * cellSize + (cellSize - dotSize)/2;
-      
-      const centerX = size / 2;
-      const centerY = size / 2;
-      const distanceFromCenter = Math.sqrt(
-        Math.pow((x + dotSize/2) - centerX, 2) + 
-        Math.pow((y + dotSize/2) - centerY, 2)
-      ) / size;
-      
-      dots.push({
-        x,
-        y,
-        size: dotSize,
-        isRound: true,
-        distanceFromCenter,
-        isPositionMarker: false,
-        row,
-        col,
-        isHollow: false
-      });
-    }
-  };
-  
-  // Add the balanced dots around the logo
-  addBalancedDotsNearLogo();
-
-  console.log('Generated structured QR with', dots.length, 'dots');
+  console.log('Generated styled QR code with', dots.length, 'dots');
   return dots;
 };
 
 /**
- * Generates mock QR data for testing or fallback
+ * Fallback to generate mock QR data if real generation fails
  */
 export const generateMockQRData = (size: number): QRDot[] => {
   const dots: QRDot[] = [];
-  const center = size / 2;
+  const gridSize = 25; // Fixed grid size for consistent proportions
+  const dotSize = size / gridSize;
   
-  // Create a 25x25 grid (standard QR code size)
-  const gridSize = 25;
-  const moduleSize = size / gridSize;
-  // Match the same dot size ratio as main generator
-  const dotSize = moduleSize * 0.75; // 75% of cell size for consistent appearance
+  // Match the logo size (60px)
+  const logoSize = 60;
+  const positionMarkerSize = logoSize; // Set same size as logo
+  const innerMarkerSize = positionMarkerSize * 0.4; // 40% of outer size
   
-  console.log('Generating mock QR data with size:', size, 'moduleSize:', moduleSize);
-  
-  // Create the position marker patterns for corners
-  const createPositionMarker = (startRow: number, startCol: number) => {
-    // Outer square - solid border
-    for (let i = 0; i < 7; i++) {
-      for (let j = 0; j < 7; j++) {
-        // Only create dots for the border or inner solid square
-        if (i === 0 || i === 6 || j === 0 || j === 6 || // Outer border
-            (i >= 2 && i <= 4 && j >= 2 && j <= 4)) {   // Inner solid square
-          const row = startRow + i;
-          const col = startCol + j;
-          const x = col * moduleSize;
-          const y = row * moduleSize;
-          
-          // Calculate distance from center
-          const distX = x + moduleSize/2 - center;
-          const distY = y + moduleSize/2 - center;
-          const distanceFromCenter = Math.sqrt(distX*distX + distY*distY);
-          
-          // Position markers are square
-          dots.push({
-            x,
-            y,
-            size: dotSize,
-            isRound: false, // Position markers are square
-            distanceFromCenter,
-            isPositionMarker: true,
-            row,
-            col,
-            isHollow: false
-          });
-        }
-      }
-    }
-  };
-  
-  // Create the three position markers at corners
-  createPositionMarker(0, 0);                    // Top-left
-  createPositionMarker(0, gridSize - 7);         // Top-right
-  createPositionMarker(gridSize - 7, 0);         // Bottom-left
-  
-  // Pattern for a QR-like grid with proper spacing
+  // Create a simple pattern that looks like a QR code
   for (let row = 0; row < gridSize; row++) {
     for (let col = 0; col < gridSize; col++) {
-      // Skip cells in position marker areas
-      if ((row < 7 && col < 7) ||                  // Top-left marker
-          (row < 7 && col > gridSize - 8) ||       // Top-right marker
-          (row > gridSize - 8 && col < 7)) {       // Bottom-left marker
+      // Calculate the position in pixels
+      const posX = col * dotSize;
+      const posY = row * dotSize;
+      
+      // Skip the corners for position markers
+      if ((posY < positionMarkerSize && posX < positionMarkerSize) || // Top-left
+          (posY < positionMarkerSize && posX > size - positionMarkerSize) || // Top-right
+          (posY > size - positionMarkerSize && posX < positionMarkerSize)) { // Bottom-left
         continue;
       }
       
-      // Skip center area for logo
-      const exactCenter = Math.floor(gridSize / 2);
-      const centerPadding = 4; // Slightly larger padding for mock generator
-      if (Math.abs(row - exactCenter) <= centerPadding && 
-          Math.abs(col - exactCenter) <= centerPadding) {
-        continue;
-      }
-      
-      // Calculate center distance for patterns
+      // Skip center for logo - exactly match the logo size
       const centerX = size / 2;
       const centerY = size / 2;
-      const cellCenterX = col * moduleSize + moduleSize/2;
-      const cellCenterY = row * moduleSize + moduleSize/2;
-      const distFromCenter = Math.sqrt(
-        Math.pow(cellCenterX - centerX, 2) + 
-        Math.pow(cellCenterY - centerY, 2)
-      );
+      const halfLogo = logoSize / 2;
       
-      // Create a more sparse pattern with fewer dots
-      const basePattern = (row % 4 === 0 || col % 4 === 0);
+      if (posX > centerX - halfLogo && posX < centerX + halfLogo &&
+          posY > centerY - halfLogo && posY < centerY + halfLogo) {
+        continue;
+      }
       
-      // Inner ring pattern like the main generator
-      const innerRing = (
-        (Math.abs(row - exactCenter) === centerPadding + 1 || Math.abs(col - exactCenter) === centerPadding + 1) &&
-        ((row + col) % 2 === 0)
-      );
-      
-      // Much sparser scattered pattern
-      const scatteredPattern = (
-        ((row + col) % 7 === 1) || 
-        ((row * col) % 9 === 1)
-      );
-      
-      // Less random pattern
-      const randomPattern = Math.random() > 0.85;
-      
-      if (basePattern || innerRing || scatteredPattern || randomPattern) {
-        const x = col * moduleSize;
-        const y = row * moduleSize;
-        
-        // Calculate distance from center for sorting
-        const distX = x + moduleSize/2 - center;
-        const distY = y + moduleSize/2 - center;
-        const distanceFromCenter = Math.sqrt(distX*distX + distY*distY);
+      // Add some dots randomly to simulate QR code pattern
+      if (Math.random() > 0.65) {
+        const x = col * dotSize;
+        const y = row * dotSize;
+        const distanceFromCenter = Math.sqrt(
+          Math.pow(x + dotSize / 2 - size / 2, 2) + 
+          Math.pow(y + dotSize / 2 - size / 2, 2)
+        );
         
         dots.push({
           x,
           y,
           size: dotSize,
-          isRound: true, // Most QR dots are round in the design
+          isRound: true,
           distanceFromCenter,
           isPositionMarker: false,
           row,
@@ -401,6 +290,88 @@ export const generateMockQRData = (size: number): QRDot[] => {
       }
     }
   }
+  
+  // Create position markers - use exact pixel sizes rather than grid-based
+  // Top-left
+  dots.push({
+    x: 0,
+    y: 0,
+    size: positionMarkerSize,
+    isRound: false,
+    distanceFromCenter: Math.sqrt(Math.pow(positionMarkerSize/2 - size/2, 2) + Math.pow(positionMarkerSize/2 - size/2, 2)),
+    isPositionMarker: true,
+    row: 0,
+    col: 0,
+    isHollow: true,
+    cornerRadius: positionMarkerSize * 0.25
+  });
+  
+  dots.push({
+    x: (positionMarkerSize - innerMarkerSize) / 2,
+    y: (positionMarkerSize - innerMarkerSize) / 2,
+    size: innerMarkerSize,
+    isRound: false,
+    distanceFromCenter: Math.sqrt(Math.pow(positionMarkerSize/2 - size/2, 2) + Math.pow(positionMarkerSize/2 - size/2, 2)),
+    isPositionMarker: true,
+    row: 0,
+    col: 0,
+    isHollow: false,
+    cornerRadius: innerMarkerSize * 0.25
+  });
+  
+  // Top-right
+  dots.push({
+    x: size - positionMarkerSize,
+    y: 0,
+    size: positionMarkerSize,
+    isRound: false,
+    distanceFromCenter: Math.sqrt(Math.pow((size - positionMarkerSize/2) - size/2, 2) + Math.pow(positionMarkerSize/2 - size/2, 2)),
+    isPositionMarker: true,
+    row: 0,
+    col: gridSize - Math.floor(positionMarkerSize / dotSize),
+    isHollow: true,
+    cornerRadius: positionMarkerSize * 0.25
+  });
+  
+  dots.push({
+    x: size - positionMarkerSize + (positionMarkerSize - innerMarkerSize) / 2,
+    y: (positionMarkerSize - innerMarkerSize) / 2,
+    size: innerMarkerSize,
+    isRound: false,
+    distanceFromCenter: Math.sqrt(Math.pow((size - positionMarkerSize/2) - size/2, 2) + Math.pow(positionMarkerSize/2 - size/2, 2)),
+    isPositionMarker: true,
+    row: 0,
+    col: gridSize - Math.floor(positionMarkerSize / dotSize),
+    isHollow: false,
+    cornerRadius: innerMarkerSize * 0.25
+  });
+  
+  // Bottom-left
+  dots.push({
+    x: 0,
+    y: size - positionMarkerSize,
+    size: positionMarkerSize,
+    isRound: false,
+    distanceFromCenter: Math.sqrt(Math.pow(positionMarkerSize/2 - size/2, 2) + Math.pow((size - positionMarkerSize/2) - size/2, 2)),
+    isPositionMarker: true,
+    row: gridSize - Math.floor(positionMarkerSize / dotSize),
+    col: 0,
+    isHollow: true,
+    cornerRadius: positionMarkerSize * 0.25
+  });
+  
+  dots.push({
+    x: (positionMarkerSize - innerMarkerSize) / 2,
+    y: size - positionMarkerSize + (positionMarkerSize - innerMarkerSize) / 2,
+    size: innerMarkerSize,
+    isRound: false,
+    distanceFromCenter: Math.sqrt(Math.pow(positionMarkerSize/2 - size/2, 2) + Math.pow((size - positionMarkerSize/2) - size/2, 2)),
+    isPositionMarker: true,
+    row: gridSize - Math.floor(positionMarkerSize / dotSize),
+    col: 0,
+    isHollow: false,
+    cornerRadius: innerMarkerSize * 0.25
+  });
   
   console.log('Generated mock QR data with', dots.length, 'dots');
   return dots;
