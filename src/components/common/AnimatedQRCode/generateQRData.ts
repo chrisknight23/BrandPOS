@@ -96,11 +96,17 @@ const createQRDots = (matrix: boolean[][], size: number): QRDot[] => {
   const centerX = size / 2;
   const centerY = size / 2;
   
+  // Add some additional breathing room around markers (in modules)
+  const markerPadding = 3; // Increased from 2 to 3 for more space
+  
   // Logo settings
   const logoSize = 60; // Fixed 60px for logo
   const logoModuleSize = Math.round(logoSize / moduleSize); // How many modules the logo covers
   const logoStartModule = Math.floor(moduleCount / 2 - logoModuleSize / 2);
   const logoEndModule = logoStartModule + logoModuleSize;
+  
+  // Add some additional breathing room around logo (in modules)
+  const logoPadding = 4; // Increased from 3 to 4 for more space
   
   // Create position markers
   createPositionMarker(dots, 0, 0, markerSize, markerInnerSize, centerX, centerY);
@@ -111,15 +117,16 @@ const createQRDots = (matrix: boolean[][], size: number): QRDot[] => {
   for (let row = 0; row < moduleCount; row++) {
     for (let col = 0; col < moduleCount; col++) {
       // Skip if in position marker areas (top-left, top-right, bottom-left corners)
-      if ((row < markerModuleSize && col < markerModuleSize) || // Top-left
-          (row < markerModuleSize && col >= moduleCount - markerModuleSize) || // Top-right
-          (row >= moduleCount - markerModuleSize && col < markerModuleSize)) { // Bottom-left
+      // Include additional padding around the markers
+      if ((row < markerModuleSize + markerPadding && col < markerModuleSize + markerPadding) || // Top-left with padding
+          (row < markerModuleSize + markerPadding && col >= moduleCount - markerModuleSize - markerPadding) || // Top-right with padding
+          (row >= moduleCount - markerModuleSize - markerPadding && col < markerModuleSize + markerPadding)) { // Bottom-left with padding
         continue;
       }
       
-      // Skip if in logo area (center)
-      if (row >= logoStartModule && row < logoEndModule && 
-          col >= logoStartModule && col < logoEndModule) {
+      // Skip if in logo area (center) with additional padding
+      if (row >= logoStartModule - logoPadding && row < logoEndModule + logoPadding && 
+          col >= logoStartModule - logoPadding && col < logoEndModule + logoPadding) {
         continue;
       }
       
