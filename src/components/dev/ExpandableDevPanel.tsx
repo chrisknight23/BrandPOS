@@ -374,7 +374,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
           <div className="space-y-4 flex flex-col h-full">
             {/* Main content section - takes up available space */}
             <div className="flex-1">
-              {/* Profile button at the top */}
+              {/* Profile Button */}
               {ProfileButton}
               
               {/* Only show cart items on Home or Cart screens */}
@@ -447,9 +447,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'feature-flags':
         return (
           <div className="space-y-4">
-            {/* Profile button at the top */}
-            {ProfileButton}
-            
             {/* Feature flag list */}
             {relevantFlags.length > 0 ? (
               relevantFlags.map(flag => (
@@ -504,9 +501,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'navigation':
         return (
           <div className="space-y-4">
-            {/* Profile button at the top */}
-            {ProfileButton}
-            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-3">App Navigation</h3>
               <div className="space-y-2">
@@ -536,9 +530,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'app-info':
         return (
           <div className="space-y-4">
-            {/* Profile button at the top */}
-            {ProfileButton}
-            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-3">Application State</h3>
               <div className="text-white/70 space-y-2">
@@ -568,9 +559,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'debug':
         return (
           <div className="space-y-4">
-            {/* Profile button at the top */}
-            {ProfileButton}
-            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-3">Application State</h3>
               <div className="text-white/70 space-y-2">
@@ -651,9 +639,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         if (!selectedFlag) return null;
         return (
           <div className="space-y-4">
-            {/* Profile button at the top */}
-            {ProfileButton}
-            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-1">{selectedFlag.name}</h3>
               <p className="text-white/60 text-sm mb-4">{selectedFlag.description}</p>
@@ -693,9 +678,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'cart':
         return (
           <div className="space-y-4">
-            {/* Profile button at the top */}
-            {ProfileButton}
-            
             <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-3">Cart Management</h3>
               
@@ -869,7 +851,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         {isExpanded ? (
           // Expanded panel - no animations
           <div 
-            className="bg-[#0C0C0C] rounded-xl overflow-hidden shadow-lg border border-white/10 w-[calc(100vw-32px)] h-[calc(100vh-32px)] max-w-[360px] flex flex-col"
+            className="bg-[#141414] rounded-[24px] overflow-hidden shadow-lg border border-white/10 w-[calc(100vw-32px)] h-[calc(100vh-32px)] max-w-[360px] flex flex-col"
             ref={buttonRef}
           >
             {/* Header area */}
@@ -944,7 +926,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         ) : (
           // Collapsed button - no animations
           <div 
-            className="bg-[#0C0C0C] rounded-xl overflow-hidden shadow-lg border border-white/10 cursor-pointer"
+            className="bg-[#141414] rounded-[24px] overflow-hidden shadow-lg border border-white/10 cursor-pointer"
             onClick={togglePanel}
           >
             <div className="flex items-center justify-between pl-6 pr-4 py-3">
