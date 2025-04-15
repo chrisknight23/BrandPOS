@@ -757,6 +757,55 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             </div>
             
             <div className="bg-white/5 rounded-lg p-4">
+              <h3 className="text-white font-medium mb-3">Customer Type</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-white cursor-pointer flex items-center">
+                    <div className="text-white/90">New customer</div>
+                  </label>
+                  <div className="relative inline-flex items-center">
+                    <input
+                      type="radio"
+                      className="sr-only"
+                      name="customerType"
+                      checked={userType === 'new'}
+                      onChange={() => handleUserTypeChange('new')}
+                    />
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                      userType === 'new' ? 'border-[#00B843] bg-[#00B843]/10' : 'border-white/30'
+                    }`}>
+                      {userType === 'new' && (
+                        <div className="w-3 h-3 rounded-full bg-[#00B843]"></div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <label className="text-white cursor-pointer flex items-center">
+                    <div className="text-white/90">Returning customer</div>
+                  </label>
+                  <div className="relative inline-flex items-center">
+                    <input
+                      type="radio"
+                      className="sr-only"
+                      name="customerType"
+                      checked={userType === 'enrolled'}
+                      onChange={() => handleUserTypeChange('enrolled')}
+                    />
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                      userType === 'enrolled' ? 'border-[#00B843] bg-[#00B843]/10' : 'border-white/30'
+                    }`}>
+                      {userType === 'enrolled' && (
+                        <div className="w-3 h-3 rounded-full bg-[#00B843]"></div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white/5 rounded-lg p-4">
               <h3 className="text-white font-medium mb-3">User Details</h3>
               <div className="text-white/70 space-y-2">
                 {profileData[userType].details.map((detail, index) => (
