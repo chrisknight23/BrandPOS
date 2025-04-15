@@ -327,21 +327,21 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   const getScreenDescription = (screen: PanelScreen): string => {
     switch (screen) {
       case 'main':
-        return 'Main control panel for this screen. Access features, manage items, and control app flow from here.';
+        return 'The central control hub for the current screen. Manage cart items, test user profiles, and access feature flags to configure your experience.';
       case 'app-info':
-        return 'View details about the current app state, including amounts, screen state, and navigation flow.';
+        return 'View active transaction details including base amount, tip amount, and total. Useful for verifying calculation accuracy and state management.';
       case 'debug':
-        return 'Access debugging tools, view active feature flags, check environment details, and examine navigation history.';
+        return 'Developer tools showing environment details, active feature flags, and navigation history. Use to diagnose issues or understand the application state.';
       case 'flag-details':
-        return 'Toggle and configure individual feature flags. See which screens a flag affects and manage its settings.';
+        return 'Configure individual feature flags to test specific behaviors or UI elements. Each flag controls discrete functionality across the payment flow.';
       case 'navigation':
-        return 'Control app navigation between screens. Move forward or backward, refresh the current screen, or reset to home.';
+        return 'Move through the payment flow from Home → Cart → Tap to Pay → Tipping → Cashback → End. Test different paths or reset the flow at any point.';
       case 'cart':
-        return 'Manage cart items for testing. Add, remove, or clear items from the cart to test different checkout flows.';
+        return 'Add or remove test items to simulate different purchase scenarios. Build carts of varying sizes to test the checkout experience and item management.';
       case 'profile':
-        return 'Switch between user profiles to test different user experiences. Configure user details and status.';
+        return 'Toggle between new and returning customers to test different user journeys. New users appear as unknown customers, while returning users show profile details.';
       case 'feature-flags':
-        return 'View and toggle features available on this screen. Enable experimental features or disable existing ones.';
+        return 'Enable or disable experimental features specific to this screen. Test new animations, UI components, or interaction patterns safely in isolation.';
       default:
         return '';
     }
