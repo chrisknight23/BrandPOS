@@ -407,7 +407,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               {/* Feature button */}
               <Button
                 onClick={() => setActiveScreen('feature-flags')}
-                className="w-full rounded-lg py-3 border border-white/10 hover:bg-white/5 active:bg-white/10"
+                className="w-full rounded-lg py-3"
               >
                 <div className="flex items-center justify-between text-white">
                   <div className="text-white/80 font-medium">Features</div>
