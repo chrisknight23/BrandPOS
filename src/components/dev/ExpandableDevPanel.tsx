@@ -345,7 +345,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               {localCartItems.length > 0 && (currentScreen === 'Home' || currentScreen === 'Cart') && (
                 <div className="rounded-lg">
                   <div className="flex items-center pt-3 pb-2">
-                    <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
+                    <h3 className="text-white font-medium text-2xl">Items ({localCartItems.length})</h3>
                   </div>
                   <div className="space-y-3">
                     {localCartItems.map(item => (
