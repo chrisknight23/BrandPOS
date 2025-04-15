@@ -79,6 +79,17 @@ export const MainView = () => {
     }
   }, [currentScreen]);
   
+  // Handle removing a specific item from the cart
+  const handleRemoveCartItem = useCallback((itemId: number) => {
+    console.log(`MainView: Removing item ${itemId} from cart`);
+    setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
+    
+    // Ensure we're on the Cart screen to see the changes
+    if (currentScreen !== 'Cart') {
+      setCurrentScreen('Cart');
+    }
+  }, [currentScreen]);
+  
   // Handle cart updates from the Cart component
   const handleCartUpdate = useCallback((items: CartItem[]) => {
     setCartItems(items);
@@ -307,6 +318,7 @@ export const MainView = () => {
         onPanelToggle={handlePanelToggle}
         onAddItem={handleAddItem}
         onClearCart={handleClearCart}
+        onRemoveCartItem={handleRemoveCartItem}
       />
     </div>
   );

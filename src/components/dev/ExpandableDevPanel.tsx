@@ -29,6 +29,7 @@ interface ExpandableDevPanelProps {
   onPanelToggle?: (isOpen: boolean) => void;
   onAddItem?: () => void;
   onClearCart?: () => void;
+  onRemoveCartItem?: (itemId: number) => void;
 }
 
 // Define the navigation screens that can be shown in the panel
@@ -85,7 +86,8 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   onReset,
   onPanelToggle,
   onAddItem,
-  onClearCart
+  onClearCart,
+  onRemoveCartItem
 }) => {
   // Panel state
   const [isExpanded, setIsExpanded] = useState(false);
@@ -212,8 +214,17 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   };
 
   const handleRemoveCartItem = (id: string) => {
-    // Only remove from local state - we can't remove individual items from parent yet
+    // Remove from local state
     setLocalCartItems(prev => prev.filter(item => item.id !== id));
+    
+    // If the parent provided a remove function and the ID is from a parent item,
+    // extract the numeric ID and call the parent's remove function
+    if (onRemoveCartItem && id.startsWith('parent-')) {
+      const parentId = parseInt(id.replace('parent-', ''), 10);
+      if (!isNaN(parentId)) {
+        onRemoveCartItem(parentId);
+      }
+    }
   };
 
   // Navigation functions
