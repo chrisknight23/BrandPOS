@@ -42,7 +42,7 @@ const generateQRMatrix = async (
   // Create a QR code in a canvas and extract the matrix
   const options = { 
     errorCorrectionLevel,
-    margin: 0,
+    margin: 0, // No margin to ensure proper data density
     scale: 1
   };
   
@@ -104,8 +104,8 @@ const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
   // Get the logo size from the SVG (60px)
   const logoSize = 60;
   
-  // Add some padding around the markers and logo (in pixels)
-  const padding = 12; // Increased padding to ensure no dots touch the markers
+  // Use smaller padding to avoid removing too much QR data
+  const padding = 6; // Reduced from 12 to ensure scanning works
   
   // Position marker dimensions - make them exactly match the logo size (60px)
   const cornerSize = logoSize;
@@ -160,10 +160,10 @@ const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
   };
   
   // Create position markers at fixed locations at corners
-  // We'll position them at the corners with exact pixel size instead of grid-based
   createCornerMarker(0, 0); // Top-left
   
   // Calculate top-right position to ensure it's exactly at the right edge
+  // This ensures proper alignment with the QR code matrix
   const topRightCol = Math.floor((size - cornerSize) / cellSize);
   createCornerMarker(0, topRightCol); // Top-right
   
@@ -172,15 +172,15 @@ const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
   createCornerMarker(bottomLeftRow, 0); // Bottom-left
   
   // Generate dots for the main QR code pattern
-  const dotSize = cellSize * 0.75; // Slightly smaller dots for better visibility
+  const dotSize = cellSize * 0.9; // Increased dot size (was 0.75) for better scanning
   
   // Center for calculating distance
   const centerX = size / 2;
   const centerY = size / 2;
   
   // Logo area to avoid placing dots - make it exactly the same size as the logo (60px)
-  // but add padding around it
-  const logoAreaSize = logoSize + (padding * 2);
+  // but add less padding to preserve QR code data
+  const logoAreaSize = logoSize + padding; // Reduced padding for logo area
   const logoOffset = Math.floor((size - logoAreaSize) / 2);
   
   // Process each module in the QR matrix
@@ -190,20 +190,27 @@ const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
       const posX = col * cellSize;
       const posY = row * cellSize;
       
-      // Skip position marker areas - using exact pixel locations to match cornerSize
-      // Add padding to avoid dots running into the markers
-      if ((posY < cornerSize + padding && posX < cornerSize + padding) || // Top-left with padding
-          (posY < cornerSize + padding && posX > size - cornerSize - padding) || // Top-right with padding
-          (posY > size - cornerSize - padding && posX < cornerSize + padding)) { // Bottom-left with padding
+      // Modified padding calculation for position markers
+      // Don't remove essential QR code data
+      const leftMargin = cornerSize + (padding / 2);
+      const rightMargin = size - cornerSize - (padding / 2);
+      const bottomMargin = size - cornerSize - (padding / 2);
+      
+      // Only skip areas that are INSIDE the corner markers
+      if ((posY < cornerSize && posX < cornerSize) || // Top-left
+          (posY < cornerSize && posX > rightMargin) || // Top-right
+          (posY > bottomMargin && posX < cornerSize)) { // Bottom-left
         continue;
       }
       
-      // Skip center area for logo - using exact pixel locations for logo size
-      // Add padding to avoid dots running into the logo
-      const halfLogo = logoAreaSize / 2;
+      // Skip center area for logo - using reduced padding to preserve QR data
+      const halfLogo = logoSize / 2;
+      const logoPadding = padding / 2;
       
-      if (posX > centerX - halfLogo && posX < centerX + halfLogo &&
-          posY > centerY - halfLogo && posY < centerY + halfLogo) {
+      if (posX > centerX - halfLogo - logoPadding && 
+          posX < centerX + halfLogo + logoPadding &&
+          posY > centerY - halfLogo - logoPadding && 
+          posY < centerY + halfLogo + logoPadding) {
         continue;
       }
       
@@ -219,14 +226,8 @@ const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
           Math.pow((y + dotSize / 2) - centerY, 2)
         );
         
-        // Skip dots that would be too close to position markers (additional safety check)
-        const topLeft = Math.sqrt(Math.pow(x - 0, 2) + Math.pow(y - 0, 2)) < cornerSize + padding;
-        const topRight = Math.sqrt(Math.pow(x - (size - cornerSize), 2) + Math.pow(y - 0, 2)) < cornerSize + padding;
-        const bottomLeft = Math.sqrt(Math.pow(x - 0, 2) + Math.pow(y - (size - cornerSize), 2)) < cornerSize + padding;
-        
-        if (topLeft || topRight || bottomLeft) {
-          continue;
-        }
+        // Remove the additional distance check that was removing too many dots
+        // This was likely causing the scanning issue
         
         // Add the dot with Cash App styling
         dots.push({
@@ -263,7 +264,7 @@ export const generateMockQRData = (size: number): QRDot[] => {
   const innerMarkerSize = positionMarkerSize * 0.4; // 40% of outer size
   
   // Add some padding around the markers and logo (in pixels)
-  const padding = 12; // Increased padding
+  const padding = 6; // Reduced padding (was 12)
   
   // Create a simple pattern that looks like a QR code
   for (let row = 0; row < gridSize; row++) {
@@ -272,34 +273,28 @@ export const generateMockQRData = (size: number): QRDot[] => {
       const posX = col * dotSize;
       const posY = row * dotSize;
       
-      // Skip the corners for position markers (with padding)
-      if ((posY < positionMarkerSize + padding && posX < positionMarkerSize + padding) || // Top-left with padding
-          (posY < positionMarkerSize + padding && posX > size - positionMarkerSize - padding) || // Top-right with padding
-          (posY > size - positionMarkerSize - padding && posX < positionMarkerSize + padding)) { // Bottom-left with padding
+      // Use tighter padding for position markers
+      if ((posY < positionMarkerSize && posX < positionMarkerSize) || // Top-left
+          (posY < positionMarkerSize && posX > size - positionMarkerSize) || // Top-right
+          (posY > size - positionMarkerSize && posX < positionMarkerSize)) { // Bottom-left
         continue;
       }
       
-      // Additional safety check using distance from marker centers
-      const topLeft = Math.sqrt(Math.pow(posX - positionMarkerSize/2, 2) + Math.pow(posY - positionMarkerSize/2, 2)) < positionMarkerSize + padding;
-      const topRight = Math.sqrt(Math.pow(posX - (size - positionMarkerSize/2), 2) + Math.pow(posY - positionMarkerSize/2, 2)) < positionMarkerSize + padding;
-      const bottomLeft = Math.sqrt(Math.pow(posX - positionMarkerSize/2, 2) + Math.pow(posY - (size - positionMarkerSize/2), 2)) < positionMarkerSize + padding;
-      
-      if (topLeft || topRight || bottomLeft) {
-        continue;
-      }
-      
-      // Skip center for logo - exactly match the logo size (with padding)
+      // Skip center for logo - with minimal padding
       const centerX = size / 2;
       const centerY = size / 2;
-      const halfLogo = (logoSize + (padding * 2)) / 2;
+      const halfLogo = logoSize / 2;
+      const logoPadding = padding / 2;
       
-      if (posX > centerX - halfLogo && posX < centerX + halfLogo &&
-          posY > centerY - halfLogo && posY < centerY + halfLogo) {
+      if (posX > centerX - halfLogo - logoPadding && 
+          posX < centerX + halfLogo + logoPadding &&
+          posY > centerY - halfLogo - logoPadding && 
+          posY < centerY + halfLogo + logoPadding) {
         continue;
       }
       
-      // Add some dots randomly to simulate QR code pattern
-      if (Math.random() > 0.65) {
+      // Add more dots for higher density QR code simulation
+      if (Math.random() > 0.55) { // Increased probability (was 0.65)
         const x = col * dotSize;
         const y = row * dotSize;
         const distanceFromCenter = Math.sqrt(
@@ -310,7 +305,7 @@ export const generateMockQRData = (size: number): QRDot[] => {
         dots.push({
           x,
           y,
-          size: dotSize,
+          size: dotSize * 0.9, // Slightly larger dots (multiplier was not present before)
           isRound: true,
           distanceFromCenter,
           isPositionMarker: false,
