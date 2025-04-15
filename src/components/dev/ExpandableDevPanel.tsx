@@ -344,7 +344,14 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               {/* Only show cart items on Home or Cart screens */}
               {localCartItems.length > 0 && (currentScreen === 'Home' || currentScreen === 'Cart') && (
                 <div className="bg-white/5 rounded-lg">
-                  <h3 className="text-white font-medium px-4 pt-3 pb-2">Cart Items</h3>
+                  <div className="flex justify-between items-center px-4 pt-3 pb-2">
+                    <h3 className="text-white font-medium">Cart Items</h3>
+                    {localCartItems.length > 0 && (
+                      <span className="bg-white/20 text-white text-xs font-medium px-2 py-1 rounded-full">
+                        {localCartItems.length}
+                      </span>
+                    )}
+                  </div>
                   <div className="divide-y divide-white/5">
                     {localCartItems.map(item => (
                       <div key={item.id} className="px-4 py-3 flex items-center justify-between">
@@ -389,10 +396,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                   className="w-full rounded-full py-4 bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]"
                 >
                   <div className="flex items-center justify-center text-white">
-                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <div className="text-base font-medium">Add Item {localCartItems.length > 0 && `(${localCartItems.length})`}</div>
+                    <div className="text-base font-medium">Add Item</div>
                   </div>
                 </Button>
               )}
