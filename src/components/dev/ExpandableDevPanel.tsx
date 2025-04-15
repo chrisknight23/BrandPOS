@@ -873,34 +873,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                 </span>
               </div>
               
-              {/* Segmented control for user type - only show on main screen */}
-              {!currentConfig.backButton && (
-                <div className="mt-4 mb-2">
-                  <div className="bg-white/10 p-1 rounded-lg flex">
-                    <button
-                      className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
-                        userType === 'new' 
-                          ? 'bg-white/20 text-white' 
-                          : 'text-white/60 hover:text-white/80'
-                      }`}
-                      onClick={() => handleUserTypeChange('new')}
-                    >
-                      New user
-                    </button>
-                    <button
-                      className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
-                        userType === 'enrolled' 
-                          ? 'bg-white/20 text-white' 
-                          : 'text-white/60 hover:text-white/80'
-                      }`}
-                      onClick={() => handleUserTypeChange('enrolled')}
-                    >
-                      Enrolled user
-                    </button>
-                  </div>
-                </div>
-              )}
-              
               {/* Profile section - Always visible on main screen */}
               {!currentConfig.backButton && (
                 <div className="mb-6 mt-4">
