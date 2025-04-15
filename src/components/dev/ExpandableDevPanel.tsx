@@ -386,7 +386,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                   className="w-full rounded-full py-4 bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]"
                 >
                   <div className="flex items-center justify-center text-white">
-                    <div className="text-base font-medium">Add Item</div>
+                    <div className="text-base font-medium">Checkout</div>
                   </div>
                 </Button>
               )}
