@@ -13,7 +13,13 @@ interface TippingProps {
 export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
   const [selectedAmount, setSelectedAmount] = useState<string | null>(null);
   const [isExiting, setIsExiting] = useState(false);
-  const navigationTimer = useRef<number | null>(null);
+  const [activeText, setActiveText] = useState(0); // 0 for "Give a Tip", 1 for "Local Cash"
+  const [textFade, setTextFade] = useState(false); // Track fade state
+  const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const textChangeInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Text options to cycle through - using simple strings now
+  const textOptions = ["Give a Tip", "Earn Local Cash"];
 
   // Force state reset when component mounts and cleanup on unmount
   useEffect(() => {
@@ -21,12 +27,39 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
     setSelectedAmount(null);
     setIsExiting(false);
     
+    // Start text animation cycle
+    let fadeTimeout: ReturnType<typeof setTimeout> | null = null;
+    
+    textChangeInterval.current = setInterval(() => {
+      // First fade out
+      setTextFade(true);
+      
+      // After fade out, change text and fade back in
+      fadeTimeout = setTimeout(() => {
+        setActiveText(prev => (prev === 0 ? 1 : 0));
+        setTextFade(false);
+      }, 300); // Time to fade out
+      
+    }, 3000); // Switch every 3 seconds
+    
     // Cleanup function when navigating away
     return () => {
       // Cancel any pending navigation timeouts
       if (navigationTimer.current) {
         clearTimeout(navigationTimer.current);
         navigationTimer.current = null;
+      }
+      
+      // Clear text animation interval
+      if (textChangeInterval.current) {
+        clearInterval(textChangeInterval.current);
+        textChangeInterval.current = null;
+      }
+      
+      // Clear fade timeout
+      if (fadeTimeout) {
+        clearTimeout(fadeTimeout);
+        fadeTimeout = null;
       }
       
       // Reset state immediately when unmounting to avoid flickering
@@ -177,35 +210,64 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
 
                 {/* Right side: Local Cash Button */}
                 <div className="relative">
-                  {/* Expandable button container - width animation */}
+                  {/* Expandable button container with right-justified icon */}
                   <motion.div 
-                    className="flex items-center bg-black border border-white/20 rounded-full overflow-hidden"
-                    // Start as just an icon button width
+                    className="flex items-center justify-between bg-black border border-white/20 rounded-full overflow-hidden"
+                    // Initial animation for entering the screen
                     initial={{ width: "56px" }}
-                    // Expand to show text
-                    animate={{ width: "auto" }}
-                    // Smooth expansion with delay
+                    // Use consistent width for both text options
+                    animate={{ 
+                      width: "220px",
+                    }}
+                    // Use custom width values with specific transition for width
                     transition={{
-                      duration: 0.5,
-                      delay: 0.4,
-                      ease: [0.32, 0.72, 0, 1]
+                      width: {
+                        type: "spring",
+                        stiffness: 50,
+                        damping: 15,
+                        mass: 1.2,
+                        duration: 1.5
+                      }
                     }}
                   >
-                    {/* "Local Cash" text - slides in from right with fade */}
-                    <motion.span 
-                      className="text-[18px] font-medium font-cash whitespace-nowrap pl-6"
-                      initial={{ opacity: 0, x: 24 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{
-                        duration: 0.4,
-                        delay: 0.5,
-                        ease: [0.32, 0.72, 0, 1]
-                      }}
-                    >
-                      Local Cash
-                    </motion.span>
-                    {/* Local Cash icon - stays fixed in position */}
-                    <div className="py-4 pr-4 ml-2">
+                    {/* Text container with consistent 16px left padding */}
+                    <div className="h-[30px] pl-4 relative overflow-hidden">
+                      <div className="ml-4">
+                      {/* AnimatePresence with consistent timing for both animations */}
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        <motion.div
+                          key={`text-${activeText}`}
+                          className="text-[18px] font-medium font-cash whitespace-nowrap"
+                          initial={{ y: 30, opacity: 0 }}
+                          animate={{ 
+                            y: activeText === 0 ? 0 : 1, // Slight adjustment for "Get Cash Back" to close gap at bottom
+                            opacity: 1
+                          }}
+                          exit={{ y: -30, opacity: 0 }}
+                          // Consistent timing settings for both text options
+                          transition={{
+                            type: "spring",
+                            stiffness: 120,  // Lower stiffness for slower movement
+                            damping: 20,     // Consistent damping
+                            mass: 1.0,       // Standard mass
+                            duration: 1.0    // Same duration for both
+                          }}
+                        >
+                          {activeText === 0 ? (
+                            <>
+                              <span className="text-[#1189D6] mr-1">NEW</span>
+                              {textOptions[0]}
+                            </>
+                          ) : (
+                            textOptions[1]
+                          )}
+                        </motion.div>
+                      </AnimatePresence>
+                      </div>
+                    </div>
+                    
+                    {/* Local Cash icon - tightened spacing */}
+                    <div className="py-4 pr-4 flex-shrink-0">
                       <img src={LocalCashIcon} alt="Local Cash" className="w-8 h-8" />
                     </div>
                   </motion.div>
