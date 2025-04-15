@@ -227,6 +227,21 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
     }
   };
 
+  // Handle checkout - Navigate to TapToPay screen
+  const handleCheckout = () => {
+    if (onNext && currentScreen === 'Cart') {
+      // If we're on the Cart screen, navigate to TapToPay
+      onNext();
+    } else if (currentScreen === 'Home' && onNext) {
+      // If we're on Home, we need to go to Cart first, then to TapToPay
+      onNext();
+      // Add a small delay before navigating to TapToPay to allow for screen transition
+      setTimeout(() => {
+        if (onNext) onNext();
+      }, 100);
+    }
+  };
+
   // Navigation functions
   const navigateTo = (screen: PanelScreen) => {
     setNavDirection('forward');
@@ -382,7 +397,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               {/* Add Item button - only shown on Home or Cart screens */}
               {(currentScreen === 'Home' || currentScreen === 'Cart') && (
                 <Button
-                  onClick={handleAddItem}
+                  onClick={handleCheckout}
                   className="w-full rounded-full py-4 bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]"
                 >
                   <div className="flex items-center justify-center text-white">
