@@ -401,23 +401,16 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                 </Button>
               )}
               
-              {/* Feature Flags button */}
+              {/* Divider */}
+              <div className="border-t border-white/10 pt-4"></div>
+              
+              {/* Feature button */}
               <Button
                 onClick={() => setActiveScreen('feature-flags')}
-                className={`w-full rounded-lg py-3 bg-white/10 hover:bg-white/20 active:bg-white/30 ${
-                  activeScreen === 'feature-flags' ? 'bg-white/20' : ''
-                }`}
+                className="w-full rounded-lg py-3 border border-white/10 hover:bg-white/5 active:bg-white/10"
               >
                 <div className="flex items-center justify-between text-white">
-                  <div className="flex items-center">
-                    <div className="w-6 h-6 flex items-center justify-center mr-3">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 21V7L12 3L20 7V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M12 7L4 11M12 7V15M12 7L20 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <div>Feature Flags</div>
-                  </div>
+                  <div className="text-white/80 font-medium">Features</div>
                   <img src={ChevronRightIcon} alt="arrow" width={20} height={20} />
                 </div>
               </Button>
