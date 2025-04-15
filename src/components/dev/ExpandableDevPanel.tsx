@@ -8,6 +8,7 @@ import {
   isFeatureEnabled
 } from '../../utils/featureFlags';
 import { FEATURE_FLAGS, FeatureFlag } from '../../constants/featureFlags';
+import { SCREEN_ORDER } from '../../constants/screens';
 import FilterIcon from '../../assets/images/filter.svg';
 import CloseIcon from '../../assets/images/close.svg';
 import BackIcon from '../../assets/images/back.svg';
@@ -182,16 +183,26 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   };
 
   const handleAppNext = () => {
-    // If we're on the Home screen with an empty cart, add an item before navigating
-    if (currentScreen === 'Home' && localCartItems.length === 0 && onAddItem && onNext) {
-      console.log('Empty cart detected, adding an item before navigating to Cart');
-      onAddItem(); // Add an item first
+    // Check if we're trying to navigate from Home to Cart (which would be the next screen)
+    if (currentScreen === 'Home' && onNext) {
+      const nextScreenIndex = SCREEN_ORDER.indexOf(currentScreen) + 1;
+      const isNavigatingToCart = SCREEN_ORDER[nextScreenIndex] === 'Cart';
       
-      // Wait a short moment for the state to update before navigating
-      setTimeout(() => {
-        if (onNext) onNext();
-      }, 100);
-    } else if (onNext) {
+      // If we're navigating to Cart and the cart is empty, add an item first
+      if (isNavigatingToCart && localCartItems.length === 0 && onAddItem) {
+        console.log('Navigating from Home to Cart with empty cart, adding an item first');
+        onAddItem(); // Add an item first
+        
+        // Wait a short moment for the state to update before navigating
+        setTimeout(() => {
+          if (onNext) onNext();
+        }, 100);
+        return;
+      }
+    }
+    
+    // Normal navigation for other cases
+    if (onNext) {
       onNext();
     }
   };
@@ -220,8 +231,14 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   };
 
   const handleClearCart = () => {
+    console.log('Clearing cart...');
     // Just call the parent's onClearCart
-    if (onClearCart) onClearCart();
+    if (onClearCart) {
+      onClearCart();
+      
+      // The cart is now empty, so we need to reset the local cart state as well
+      setLocalCartItems([]);
+    }
   };
 
   const handleRemoveCartItem = (id: string) => {
