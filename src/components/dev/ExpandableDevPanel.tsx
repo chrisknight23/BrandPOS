@@ -733,24 +733,24 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
 
   const renderBottomIcons = () => {
     return (
-      <div className="absolute bottom-0 left-0 right-0 p-6 space-y-4">
+      <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 pt-4 space-y-4">
         {(currentScreen === 'Home' || currentScreen === 'Cart') && (
           <Button
             onClick={handleAddItem}
-            className="w-full rounded bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
+            className="w-full rounded-full py-4 bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]"
           >
             <div className="flex items-center justify-center text-white">
-              <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <div>Add Item {localCartItems.length > 0 && `(${localCartItems.length})`}</div>
+              <div className="text-base font-medium">Add Item {localCartItems.length > 0 && `(${localCartItems.length})`}</div>
             </div>
           </Button>
         )}
 
         <Button
           onClick={() => setActiveScreen('feature-flags')}
-          className={`w-full rounded bg-white/10 hover:bg-white/20 active:bg-white/30 ${
+          className={`w-full rounded-lg py-3 bg-white/10 hover:bg-white/20 active:bg-white/30 ${
             activeScreen === 'feature-flags' ? 'bg-white/20' : ''
           }`}
         >
@@ -874,7 +874,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               <AnimatePresence custom={navDirection} initial={false}>
                 <motion.div
                   key={activeScreen}
-                  className="absolute inset-0 overflow-auto px-6 py-6"
+                  className="absolute inset-0 overflow-auto px-6 py-6 pb-32"
                   custom={navDirection}
                   initial="enter"
                   animate="center"
