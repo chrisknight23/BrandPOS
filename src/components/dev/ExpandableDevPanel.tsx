@@ -419,7 +419,12 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               {(currentScreen === 'Home' || currentScreen === 'Cart') && (
                 <Button
                   onClick={handleCheckout}
-                  className="w-full rounded-full py-4 bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]"
+                  disabled={localCartItems.length === 0}
+                  className={`w-full rounded-full py-4 ${
+                    localCartItems.length > 0 
+                      ? 'bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]' 
+                      : 'bg-gray-500 opacity-70 cursor-not-allowed'
+                  }`}
                 >
                   <div className="flex items-center justify-center text-white">
                     <div className="text-base font-medium">Checkout</div>
