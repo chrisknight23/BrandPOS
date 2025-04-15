@@ -104,6 +104,9 @@ const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
   // Get the logo size from the SVG (60px)
   const logoSize = 60;
   
+  // Add some padding around the markers and logo (in pixels)
+  const padding = 8;
+  
   // Position marker dimensions - make them exactly match the logo size (60px)
   const cornerSize = logoSize;
   const cornerInnerSize = cornerSize * 0.4; // 40% of outer size
@@ -170,7 +173,8 @@ const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
   const centerY = size / 2;
   
   // Logo area to avoid placing dots - make it exactly the same size as the logo (60px)
-  const logoAreaSize = logoSize;
+  // but add padding around it
+  const logoAreaSize = logoSize + (padding * 2);
   const logoOffset = Math.floor((size - logoAreaSize) / 2);
   
   // Process each module in the QR matrix
@@ -181,15 +185,15 @@ const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
       const posY = row * cellSize;
       
       // Skip position marker areas - using exact pixel locations to match cornerSize
-      if ((posY < cornerSize && posX < cornerSize) || // Top-left
-          (posY < cornerSize && posX > size - cornerSize) || // Top-right
-          (posY > size - cornerSize && posX < cornerSize)) { // Bottom-left
+      // Add some padding to avoid dots running into the markers
+      if ((posY < cornerSize + padding && posX < cornerSize + padding) || // Top-left with padding
+          (posY < cornerSize + padding && posX > size - cornerSize - padding) || // Top-right with padding
+          (posY > size - cornerSize - padding && posX < cornerSize + padding)) { // Bottom-left with padding
         continue;
       }
       
       // Skip center area for logo - using exact pixel locations for logo size
-      const centerX = size / 2;
-      const centerY = size / 2;
+      // Add some padding to avoid dots running into the logo
       const halfLogo = logoAreaSize / 2;
       
       if (posX > centerX - halfLogo && posX < centerX + halfLogo &&
@@ -243,6 +247,9 @@ export const generateMockQRData = (size: number): QRDot[] => {
   const positionMarkerSize = logoSize; // Set same size as logo
   const innerMarkerSize = positionMarkerSize * 0.4; // 40% of outer size
   
+  // Add some padding around the markers and logo (in pixels)
+  const padding = 8;
+  
   // Create a simple pattern that looks like a QR code
   for (let row = 0; row < gridSize; row++) {
     for (let col = 0; col < gridSize; col++) {
@@ -250,17 +257,17 @@ export const generateMockQRData = (size: number): QRDot[] => {
       const posX = col * dotSize;
       const posY = row * dotSize;
       
-      // Skip the corners for position markers
-      if ((posY < positionMarkerSize && posX < positionMarkerSize) || // Top-left
-          (posY < positionMarkerSize && posX > size - positionMarkerSize) || // Top-right
-          (posY > size - positionMarkerSize && posX < positionMarkerSize)) { // Bottom-left
+      // Skip the corners for position markers (with padding)
+      if ((posY < positionMarkerSize + padding && posX < positionMarkerSize + padding) || // Top-left with padding
+          (posY < positionMarkerSize + padding && posX > size - positionMarkerSize - padding) || // Top-right with padding
+          (posY > size - positionMarkerSize - padding && posX < positionMarkerSize + padding)) { // Bottom-left with padding
         continue;
       }
       
-      // Skip center for logo - exactly match the logo size
+      // Skip center for logo - exactly match the logo size (with padding)
       const centerX = size / 2;
       const centerY = size / 2;
-      const halfLogo = logoSize / 2;
+      const halfLogo = (logoSize + (padding * 2)) / 2;
       
       if (posX > centerX - halfLogo && posX < centerX + halfLogo &&
           posY > centerY - halfLogo && posY < centerY + halfLogo) {
