@@ -363,6 +363,24 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                     <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
                   </div>
                   <div className="space-y-3">
+                    {/* Profile button */}
+                    {!currentConfig.backButton && (
+                      <button
+                        className="w-full rounded-lg px-4 py-3 border border-white/20 text-white text-left flex items-center justify-between"
+                        onClick={() => navigateTo('profile')}
+                      >
+                        <div>
+                          <div className="font-medium">{profileData[userType].name}</div>
+                          <p className="text-white/60 text-sm">{profileData[userType].subtitle}</p>
+                        </div>
+                        {profileData[userType].avatar && (
+                          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
+                            {profileData[userType].avatar}
+                          </div>
+                        )}
+                      </button>
+                    )}
+                    
                     {/* Add item row with stroke instead of background fill */}
                     <button
                       onClick={handleAddItem}
@@ -872,26 +890,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                   {currentConfig.title}
                 </span>
               </div>
-              
-              {/* Profile section - Always visible on main screen */}
-              {!currentConfig.backButton && (
-                <div className="mb-6 mt-4">
-                  <button
-                    className="w-full p-4 bg-transparent hover:bg-white/5 active:bg-white/10 rounded-lg text-white text-left flex items-center justify-between transition-colors border border-white/20"
-                    onClick={() => navigateTo('profile')}
-                  >
-                    <div>
-                      <div className="font-medium">{profileData[userType].name}</div>
-                      <p className="text-white/60 text-sm">{profileData[userType].subtitle}</p>
-                    </div>
-                    {profileData[userType].avatar && (
-                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
-                        {profileData[userType].avatar}
-                      </div>
-                    )}
-                  </button>
-                </div>
-              )}
             </div>
 
             {/* Content with nested screen animations */}
