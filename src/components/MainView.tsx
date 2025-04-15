@@ -73,27 +73,48 @@ export const MainView = () => {
     console.log('MainView: Clearing cart');
     setCartItems([]);
     
-    // Ensure we're on the Cart screen to see the changes
-    if (currentScreen !== 'Cart') {
-      setCurrentScreen('Cart');
-    }
-  }, [currentScreen]);
+    // Navigate back to Home screen when cart is cleared
+    setCurrentScreen('Home');
+  }, []);
   
   // Handle removing a specific item from the cart
   const handleRemoveCartItem = useCallback((itemId: number) => {
     console.log(`MainView: Removing item ${itemId} from cart`);
+    
+    // Check if this is the last item
+    const isLastItem = cartItems.length === 1;
+    
+    // Remove the item
     setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
     
-    // Ensure we're on the Cart screen to see the changes
-    if (currentScreen !== 'Cart') {
+    // If it was the last item, navigate back to Home screen
+    if (isLastItem) {
+      setCurrentScreen('Home');
+    } else if (currentScreen !== 'Cart') {
+      // Otherwise ensure we're on the Cart screen to see the changes
       setCurrentScreen('Cart');
     }
-  }, [currentScreen]);
+  }, [cartItems, currentScreen]);
   
   // Handle cart updates from the Cart component
   const handleCartUpdate = useCallback((items: CartItem[]) => {
     setCartItems(items);
+    
+    // If cart becomes empty, navigate to Home screen
+    if (items.length === 0) {
+      setCurrentScreen('Home');
+    }
   }, []);
+  
+  // Add a listener to ensure cart is never empty when on Cart screen
+  useEffect(() => {
+    if (currentScreen === 'Cart' && cartItems.length === 0) {
+      // Add a default item if the cart is empty on Cart screen
+      const defaultItem = generateRandomItem(nextItemId);
+      setCartItems([defaultItem]);
+      setNextItemId(prevId => prevId + 1);
+    }
+  }, [currentScreen, cartItems.length, nextItemId]);
   
   // Handle navigation to next screen with amounts
   const handleNext = useCallback((amount?: string) => {
