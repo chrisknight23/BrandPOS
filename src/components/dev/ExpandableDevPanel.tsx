@@ -327,21 +327,36 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   const getScreenDescription = (screen: PanelScreen): string => {
     switch (screen) {
       case 'main':
-        return 'The central control hub for the current screen. Manage cart items, test user profiles, and access feature flags to configure your experience.';
+        switch (currentScreen) {
+          case 'Home':
+            return 'Home Screen: Users see the Square POS welcome screen. This is where merchants start the payment process by adding items to the cart.';
+          case 'Cart':
+            return 'Cart Screen: Users see the total price ($) at the top and a list of items below with individual prices. They can review their order before tapping to continue to payment.';
+          case 'TapToPay':
+            return 'Tap To Pay Screen: Users see a blue screen with the amount and payment notches. They tap their Cash Card or contactless payment method to complete the transaction.';
+          case 'Tipping':
+            return 'Tipping Screen: Users choose from preset tip amounts or select a custom tip. The screen alternates between "Give a Tip" and "Earn Local Cash" prompts.';
+          case 'Cashback':
+            return 'Cashback Screen: Users can select a cashback amount from preset options or choose no cashback. A Cash App card animation appears when making a selection.';
+          case 'End':
+            return 'End Screen: Users see a transaction complete message with their total amount. The payment flow is complete and they can start a new transaction.';
+          default:
+            return `${currentScreen} Screen: Control hub for this screen. Manage features and test different user experiences.`;
+        }
       case 'app-info':
-        return 'View active transaction details including base amount, tip amount, and total. Useful for verifying calculation accuracy and state management.';
+        return 'Shows financial details of the current transaction: base amount charged, tip amount selected by the customer, and the calculated total amount.';
       case 'debug':
-        return 'Developer tools showing environment details, active feature flags, and navigation history. Use to diagnose issues or understand the application state.';
+        return 'Provides technical insights about the application: current screen in view, active feature flags, app version, window size, and detailed navigation history.';
       case 'flag-details':
-        return 'Configure individual feature flags to test specific behaviors or UI elements. Each flag controls discrete functionality across the payment flow.';
+        return 'Allows toggling of specific features for the selected flag. Shows detailed information including the flag ID and which screens the flag affects.';
       case 'navigation':
-        return 'Move through the payment flow from Home → Cart → Tap to Pay → Tipping → Cashback → End. Test different paths or reset the flow at any point.';
+        return 'Controls movement through the payment flow sequence: Home → Cart → Tap to Pay → Tipping → Cashback → End. Buttons let you move forward/backward or reset.';
       case 'cart':
-        return 'Add or remove test items to simulate different purchase scenarios. Build carts of varying sizes to test the checkout experience and item management.';
+        return 'Manages the shopping cart: add single or multiple items, view current items with price details, remove individual items, or clear the entire cart.';
       case 'profile':
-        return 'Toggle between new and returning customers to test different user journeys. New users appear as unknown customers, while returning users show profile details.';
+        return 'Simulates different customer profiles: "New customer" (unknown, first-time card user) or "Returning customer" (Jane Smith, enrolled since Jan 2023).';
       case 'feature-flags':
-        return 'Enable or disable experimental features specific to this screen. Test new animations, UI components, or interaction patterns safely in isolation.';
+        return 'Enables/disables features available on the current screen. For example: animations on Cashback screen, enhanced UI on Tipping screen, or payment indicators.';
       default:
         return '';
     }
