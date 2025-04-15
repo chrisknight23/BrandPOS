@@ -97,7 +97,7 @@ const createQRDots = (matrix: boolean[][], size: number): QRDot[] => {
   const centerY = size / 2;
   
   // Add some additional breathing room around markers (in modules)
-  const markerPadding = 3; // Increased from 2 to 3 for more space
+  const markerPadding = 1; // Reduced from 3 to 1 for more subtle spacing
   
   // Logo settings
   const logoSize = 60; // Fixed 60px for logo
@@ -106,7 +106,7 @@ const createQRDots = (matrix: boolean[][], size: number): QRDot[] => {
   const logoEndModule = logoStartModule + logoModuleSize;
   
   // Add some additional breathing room around logo (in modules)
-  const logoPadding = 4; // Increased from 3 to 4 for more space
+  const logoPadding = 1; // Reduced from 4 to 1 for more subtle spacing
   
   // Create position markers
   createPositionMarker(dots, 0, 0, markerSize, markerInnerSize, centerX, centerY);
