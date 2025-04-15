@@ -17,17 +17,55 @@ interface CartItem {
   quantity: number;
 }
 
+// Add types for window object properties
+declare global {
+  interface Window {
+    cartItems?: CartItem[];
+  }
+}
+
 // Function to generate a random item
 const generateRandomItem = (id: number): CartItem => {
-  const itemNames = [
-    'Coffee', 'Sandwich', 'Salad', 'Pastry', 
-    'Smoothie', 'Burger', 'Pizza', 'Soda',
-    'Chips', 'Cookie', 'Muffin', 'Water'
+  const coffeeShopItems = [
+    { name: 'Espresso', minPrice: 3.50, maxPrice: 4.50 },
+    { name: 'Cappuccino', minPrice: 4.50, maxPrice: 5.50 },
+    { name: 'Latte', minPrice: 4.75, maxPrice: 5.75 },
+    { name: 'Mocha', minPrice: 5.25, maxPrice: 6.25 },
+    { name: 'Americano', minPrice: 3.75, maxPrice: 4.75 },
+    { name: 'Cold Brew', minPrice: 4.50, maxPrice: 5.50 },
+    { name: 'Macchiato', minPrice: 4.25, maxPrice: 5.25 },
+    { name: 'Flat White', minPrice: 4.50, maxPrice: 5.50 },
+    { name: 'Chai Latte', minPrice: 4.75, maxPrice: 5.75 },
+    { name: 'Croissant', minPrice: 3.50, maxPrice: 4.50 },
+    { name: 'Blueberry Muffin', minPrice: 3.75, maxPrice: 4.75 },
+    { name: 'Cinnamon Roll', minPrice: 4.25, maxPrice: 5.25 },
+    { name: 'Avocado Toast', minPrice: 7.50, maxPrice: 9.50 },
+    { name: 'Bagel with Cream Cheese', minPrice: 4.25, maxPrice: 5.25 },
+    { name: 'Breakfast Sandwich', minPrice: 6.50, maxPrice: 8.50 },
+    { name: 'Iced Tea', minPrice: 3.50, maxPrice: 4.50 },
+    { name: 'Hot Chocolate', minPrice: 4.25, maxPrice: 5.25 },
+    { name: 'Caramel Frappuccino', minPrice: 5.50, maxPrice: 6.50 },
+    { name: 'Biscotti', minPrice: 2.75, maxPrice: 3.75 },
+    { name: 'Banana Bread', minPrice: 3.75, maxPrice: 4.75 }
   ];
-  const name = itemNames[Math.floor(Math.random() * itemNames.length)];
-  // Random price between $3 and $25
-  const price = Math.round((Math.random() * 22 + 3) * 100) / 100;
-  return { id, name, price, quantity: 1 };
+  
+  // Get currently used item names to avoid duplicates
+  const usedNames = window.cartItems ? window.cartItems.map(item => item.name) : [];
+  
+  // Filter out items that are already in the cart
+  const availableItems = coffeeShopItems.filter(item => !usedNames.includes(item.name));
+  
+  // If all items are used, reset and allow all items again
+  const itemPool = availableItems.length > 0 ? availableItems : coffeeShopItems;
+  
+  // Choose a random item from the available pool
+  const randomItem = itemPool[Math.floor(Math.random() * itemPool.length)];
+  
+  // Generate a price within the item's price range
+  const priceRange = randomItem.maxPrice - randomItem.minPrice;
+  const price = Math.round((randomItem.minPrice + (Math.random() * priceRange)) * 100) / 100;
+  
+  return { id, name: randomItem.name, price, quantity: 1 };
 };
 
 /**
@@ -46,9 +84,14 @@ export const MainView = () => {
   
   // Cart state
   const [cartItems, setCartItems] = useState<CartItem[]>([
-    { id: 1, name: 'Coffee', price: 4.50, quantity: 1 }
+    { id: 1, name: 'Espresso', price: 3.95, quantity: 1 }
   ]);
   const [nextItemId, setNextItemId] = useState(2);
+  
+  // Make cart items available globally for the generateRandomItem function
+  useEffect(() => {
+    window.cartItems = cartItems;
+  }, [cartItems]);
   
   // Log the current screen for debugging
   useEffect(() => {
@@ -233,6 +276,36 @@ export const MainView = () => {
     </div>
   );
   
+  // Handle panel toggle notification from ExpandableDevPanel
+  const handlePanelToggle = useCallback((isOpen: boolean) => {
+    setIsPanelOpen(isOpen);
+  }, []);
+  
+  // Calculate the total from cart items
+  const calculateCartTotal = useCallback(() => {
+    if (cartItems.length === 0) return '0.00';
+    
+    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return total.toFixed(2);
+  }, [cartItems]);
+  
+  // Update the base amount when the cart items change or when navigating to TapToPay
+  useEffect(() => {
+    if (currentScreen === 'TapToPay') {
+      const cartTotal = calculateCartTotal();
+      console.log(`MainView: Setting base amount to cart total: ${cartTotal}`);
+      setBaseAmount(cartTotal);
+    }
+  }, [currentScreen, calculateCartTotal]);
+  
+  // Additional effect to update base amount when cart changes
+  useEffect(() => {
+    if (currentScreen === 'Cart') {
+      const cartTotal = calculateCartTotal();
+      setBaseAmount(cartTotal);
+    }
+  }, [cartItems, currentScreen, calculateCartTotal]);
+  
   // Get screen-specific props WITHOUT including the key
   const getScreenProps = () => {
     // Base props without key
@@ -253,14 +326,14 @@ export const MainView = () => {
     } else if (currentScreen === 'Cart') {
       return {
         ...baseProps,
-        amount: baseAmount || undefined,
+        amount: calculateCartTotal(), // Use calculated cart total
         cartItems: cartItems,
         onCartUpdate: handleCartUpdate
       };
     } else if (currentScreen === 'TapToPay') {
       return {
         ...baseProps,
-        amount: baseAmount || undefined
+        amount: baseAmount || calculateCartTotal() // Use baseAmount or cart total as fallback
       };
     } else if (currentScreen === 'Tipping') {
       return {
@@ -276,11 +349,6 @@ export const MainView = () => {
       return baseProps;
     }
   };
-  
-  // Handle panel toggle notification from ExpandableDevPanel
-  const handlePanelToggle = useCallback((isOpen: boolean) => {
-    setIsPanelOpen(isOpen);
-  }, []);
   
   return (
     <div className="flex flex-col w-screen h-screen bg-black">
