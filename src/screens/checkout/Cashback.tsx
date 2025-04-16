@@ -107,7 +107,6 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
               buttonText="Cash Out"
               onAnimationComplete={handleAnimationComplete}
               autoPlay={true}
-              animationDelay={500}
               suffixText="Back"
             />
           </motion.div>

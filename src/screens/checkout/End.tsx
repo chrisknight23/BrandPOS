@@ -110,7 +110,7 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
         >
           {/* Progress Button with layered structure */}
           <div 
-            className="relative overflow-hidden rounded-lg w-[340px] h-[96px] cursor-pointer"
+            className="relative overflow-hidden rounded-[12px] w-[340px] h-[96px] cursor-pointer"
             onClick={() => {
               // Navigate to Home screen when clicked
               if (goToScreen) {
