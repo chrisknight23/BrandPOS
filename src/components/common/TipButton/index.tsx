@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import logoSolo from '../../../assets/images/logoSolo.svg';
 
 // Simple utility function for formatting currency
 const formatCurrency = (amount: number, showDecimals: boolean = true): string => {
@@ -134,8 +135,14 @@ export const TipButton: React.FC<TipButtonProps> = ({
       <AnimatePresence mode="wait">
         {isSelected && buttonRect && (
           <motion.div
-            className="shadow-lg bg-[#00B843] text-white absolute z-50"
-            initial={getExpandedInitialStyle()}
+            className="shadow-lg text-white absolute z-50"
+            initial={{
+              ...getExpandedInitialStyle(),
+              backgroundColor: '#1189D6',
+              opacity: 1,
+              scale: 0.7,
+              borderRadius: '16px'
+            }}
             animate={{
               top: 0,
               left: 0,
@@ -143,24 +150,38 @@ export const TipButton: React.FC<TipButtonProps> = ({
               height: 500,
               borderRadius: '4px',
               opacity: 1,
-              scale: 1
+              scale: 1,
+              backgroundColor: '#00B843'
             }}
             exit={{ 
               ...getExpandedInitialStyle(),
               opacity: 0,
-              transition: { duration: 0.2, ease: "easeInOut" } 
+              backgroundColor: '#00B843',
+              transition: { duration: 0.2, ease: 'easeInOut' } 
             }}
             transition={{
-              type: "spring",
+              type: 'spring',
               stiffness: 300,
               damping: 30,
               mass: 0.8,
-              opacity: { duration: 0.15 }
+              opacity: { duration: 0.15 },
+              backgroundColor: { duration: 0.3, ease: [0.32, 0.72, 0, 1] }
             }}
             layout={false}
-            style={{ willChange: 'transform, opacity' }}
+            style={{ willChange: 'transform, opacity, background-color' }}
           >
-            {/* Empty expanded state - no content */}
+            {/* Centered logo in expanded overlay */}
+            <img 
+              src={logoSolo} 
+              alt="Logo" 
+              className="absolute left-1/2 top-1/2" 
+              style={{
+                transform: 'translate(-50%, -50%)',
+                width: 158,
+                height: 158
+              }}
+              draggable={false}
+            />
           </motion.div>
         )}
       </AnimatePresence>

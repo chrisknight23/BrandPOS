@@ -50,7 +50,7 @@ export const CustomTip = ({ onNext, goBack }: CustomTipProps) => {
 
   return (
     <BaseScreen onNext={() => {}}>
-      <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[4px] border border-white/20">
+      <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[8px] border border-[#222]">
         {/* Main container */}
         <motion.div 
           className="w-full h-full bg-black text-white p-6 flex flex-col"

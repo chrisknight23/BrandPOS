@@ -18,7 +18,7 @@ export const BaseScreen: React.FC<BaseScreenProps> = ({
   hideNextButton = false,
 }) => {
   return (
-    <div className="h-full w-full flex items-center justify-center">
+    <div className="h-full w-full flex items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.18)]">
       {children}
     </div>
   );

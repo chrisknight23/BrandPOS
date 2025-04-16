@@ -93,7 +93,7 @@ interface AuthProps {
 export const Auth = ({ onNext, amount = "10.80" }: AuthProps) => {
   return (
     <BaseScreen onNext={() => onNext(amount)}>
-      <div className="w-[800px] h-[500px] bg-[#1189D6] relative overflow-hidden flex items-center justify-center rounded-[4px]">
+      <div className="w-[800px] h-[500px] bg-[#1189D6] relative overflow-hidden flex items-center justify-center rounded-[8px]">
         {/* Pulsing dollar sign */}
         <motion.div
           className="text-white text-[110px] leading-none font-medium origin-center"

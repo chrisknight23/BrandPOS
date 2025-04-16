@@ -85,7 +85,7 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
 
   return (
     <BaseScreen onNext={onNext}>
-      <div className="w-[800px] h-[500px] bg-[#1189D6] text-white p-10 flex flex-col justify-between rounded-[4px] border border-white/20 relative">
+      <div className="w-[800px] h-[500px] bg-[#1189D6] text-white p-10 flex flex-col justify-between rounded-[8px] relative">
         <motion.div
           className="flex flex-col space-y-6"
           initial={{ opacity: 0, y: 10 }}

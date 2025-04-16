@@ -456,18 +456,45 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         return (
           <div className="space-y-4 flex flex-col h-full">
             {/* Main content section - takes up available space */}
-            <div className="flex-1">
-              {/* Only show items section on Cart screen, not on Home */}
-              {currentScreen === 'Cart' && (
-                <div className="rounded-lg">
-                  <div className="flex items-center pt-3 pb-2">
-                    <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {/* Only show cart items if there are any */}
+            <div className="flex-1" />
+            {/* Cart items now appear just above the bottom buttons, pushing up as items are added */}
+            {currentScreen === 'Cart' && (
+              <>
+                <motion.div
+                  className="flex items-center justify-between pt-3 pb-2"
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 24 }}
+                  transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1], exit: { duration: 0.18, ease: [0.32, 0.72, 0, 1] } }}
+                  layout
+                >
+                  <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
+                  <span className="text-white/50 text-base font-normal">
+                    {/* Calculate total price */}
+                    {(() => {
+                      const total = localCartItems.reduce((sum, item) => sum + parseFloat(item.price.replace(/[^\d.]/g, '')), 0);
+                      return total > 0 ? `$${total.toFixed(2)}` : '';
+                    })()}
+                  </span>
+                </motion.div>
+                <motion.div className="flex flex-col gap-2 mb-4" layout transition={{ type: 'spring', stiffness: 420, damping: 32 }}>
+                  {/* Only show cart items if there are any */}
+                  <AnimatePresence initial={false}>
                     {localCartItems.length > 0 ? (
                       localCartItems.map(item => (
-                        <div key={item.id} className="bg-white/5 rounded-lg px-4 py-3 flex items-center justify-between">
+                        <motion.div
+                          key={item.id}
+                          className="bg-white/5 rounded-lg px-4 py-3 flex items-center justify-between h-16 min-h-16"
+                          initial={{ opacity: 0, y: 24 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 24 }}
+                          transition={{
+                            duration: 0.3,
+                            ease: [0.32, 0.72, 0, 1],
+                            exit: { duration: 0.18, ease: [0.32, 0.72, 0, 1] }
+                          }}
+                          layout
+                        >
                           <div>
                             <div className="text-white font-medium">{item.name}</div>
                             <div className="text-white/60 text-sm">{item.price}</div>
@@ -480,17 +507,28 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                               <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                           </button>
-                        </div>
+                        </motion.div>
                       ))
                     ) : (
-                      <div className="text-white/40 text-center py-8">
+                      <motion.div
+                        key="empty-cart"
+                        className="text-white/40 text-center py-8"
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 24 }}
+                        transition={{
+                          duration: 0.3,
+                          ease: [0.32, 0.72, 0, 1],
+                          exit: { duration: 0.18, ease: [0.32, 0.72, 0, 1] }
+                        }}
+                      >
                         No items in cart
-                      </div>
+                      </motion.div>
                     )}
-                  </div>
-                </div>
-              )}
-            </div>
+                  </AnimatePresence>
+                </motion.div>
+              </>
+            )}
             
             {/* Bottom buttons section */}
             <div className="space-y-4 mt-auto">

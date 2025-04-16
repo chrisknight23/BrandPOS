@@ -47,9 +47,8 @@ const Arrow = ({ direction, state }: ArrowProps) => {
   );
 };
 
-const PaymentNotch = ({ position, text, animationState }: { position: 'top' | 'bottom', text: string, animationState: AnimationState }) => {
+const PaymentNotch = ({ position, text }: { position: 'top' | 'bottom', text: string }) => {
   const isTop = position === 'top';
-  const shouldPulse = animationState === 'arrowExit';
   
   return (
     <motion.div
@@ -196,7 +195,7 @@ export const Payment = ({ onNext, amount = "10.80" }: PaymentProps) => {
 
   return (
     <BaseScreen onNext={handleNext}>
-      <div className="w-[800px] h-[500px] bg-[#1189D6] relative overflow-hidden flex items-center justify-center rounded-[4px]">
+      <div className="w-[800px] h-[500px] bg-[#1189D6] relative overflow-hidden flex items-center justify-center rounded-[8px]">
         {/* Price Display */}
         <motion.div 
           className="text-white text-[110px] leading-none font-medium origin-center"
@@ -219,8 +218,8 @@ export const Payment = ({ onNext, amount = "10.80" }: PaymentProps) => {
         <AnimatePresence>
           {notchesVisible && (
             <>
-              <PaymentNotch position="top" text="Tap" animationState={animationState} />
-              <PaymentNotch position="bottom" text="Insert" animationState={animationState} />
+              <PaymentNotch position="top" text="Tap" />
+              <PaymentNotch position="bottom" text="Insert" />
             </>
           )}
         </AnimatePresence>

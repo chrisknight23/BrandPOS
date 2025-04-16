@@ -142,11 +142,7 @@ export const MainView = () => {
   // Handle cart updates from the Cart component
   const handleCartUpdate = useCallback((items: CartItem[]) => {
     setCartItems(items);
-    
-    // If cart becomes empty, navigate to Home screen
-    if (items.length === 0) {
-      setCurrentScreen('Home');
-    }
+    // No longer navigate to Home when cart is empty
   }, []);
   
   // Add a listener to ensure cart is never empty when on Cart screen
@@ -271,7 +267,7 @@ export const MainView = () => {
           className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
             currentScreen === screen 
               ? 'bg-white text-black font-medium border-white' 
-              : 'bg-transparent border-white/20 hover:border-white/40 text-white/80'
+              : 'border-white/10 bg-[#141414] hover:bg-[#232323] active:bg-white/10 text-white/80'
           }`}
           style={{ minWidth: '60px', textAlign: 'center' }}
         >
@@ -361,7 +357,14 @@ export const MainView = () => {
   };
   
   return (
-    <div className="flex flex-col w-screen h-screen bg-black">
+    <div
+      className="flex flex-col w-screen h-screen bg-black"
+      style={{
+        backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.5px, transparent 1.5px)',
+        backgroundSize: '32px 32px',
+        backgroundPosition: '0 0',
+      }}
+    >
       {/* Main content area that centers all screens */}
       <div className={`flex-1 flex items-center relative overflow-hidden ${
         isPanelOpen ? 'justify-start pl-8' : 'justify-center'
