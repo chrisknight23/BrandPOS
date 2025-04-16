@@ -343,7 +343,7 @@ export const MainView = () => {
     } else if (currentScreen === 'Auth') {
       return {
         ...baseProps,
-        customerName: "$" // Dollar sign for Auth screen
+        amount: baseAmount || calculateCartTotal() // Pass the amount from Payment to Auth
       };
     } else if (currentScreen === 'Tipping') {
       return {

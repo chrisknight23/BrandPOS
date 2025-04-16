@@ -2,20 +2,30 @@ import { useState, useEffect } from 'react';
 import { AnimatedNumber } from '../../components/common/AnimatedNumber';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type NumberFormat = 'whole' | 'hundreds' | 'thousands' | 'no-numbers';
+type NumberFormat = 'whole' | 'hundreds' | 'thousands' | 'no-numbers' | 'text' | 'mixed';
 
 const FORMAT_OPTIONS: Record<NumberFormat, string> = {
   'whole': 'Whole Numbers',
   'hundreds': 'Hundreds',
   'thousands': 'Thousands',
-  'no-numbers': 'No Numbers'
+  'no-numbers': 'No Numbers',
+  'text': 'Text Content',
+  'mixed': 'Number + Text'
 };
+
+// Predefined text options to cycle through
+const TEXT_OPTIONS = ['FREE', 'SALE', 'NEW', 'HOT', 'DEAL'];
+
+// Predefined suffix text options for mixed format
+const SUFFIX_OPTIONS = ['OFF', 'BONUS', 'CASH BACK', 'CREDIT', 'REWARD'];
 
 export const AnimatingNumberExperiment = () => {
   const [value, setValue] = useState(0);
   const [format, setFormat] = useState<NumberFormat>('whole');
   const [isOpen, setIsOpen] = useState(false);
   const [showDecimals, setShowDecimals] = useState(false);
+  const [textIndex, setTextIndex] = useState(0);
+  const [suffixIndex, setSuffixIndex] = useState(0);
 
   // Ensure initial state reflects the showDecimals toggle
   useEffect(() => {
@@ -63,8 +73,19 @@ export const AnimatingNumberExperiment = () => {
         randomValue = Math.round(((Math.floor(Math.random() * 9) + 1) + Math.random()) * 100) / 100;
         break;
       case 'no-numbers':
-        // Set to 0 for showOnlyDollarSign mode
+      case 'text':
+        // Set to 0 for showOnlyDollarSign mode or text mode
         randomValue = 0;
+        // For text mode, cycle to the next text option
+        if (format === 'text') {
+          setTextIndex(prev => (prev + 1) % TEXT_OPTIONS.length);
+        }
+        break;
+      case 'mixed':
+        // Generate a small number between 1 and 25 for mixed format
+        randomValue = Math.floor(Math.random() * 25) + 1;
+        // Cycle to the next suffix option
+        setSuffixIndex(prev => (prev + 1) % SUFFIX_OPTIONS.length);
         break;
       default:
         randomValue = Math.round((Math.random() * 99) * 100) / 100;
@@ -194,6 +215,8 @@ export const AnimatingNumberExperiment = () => {
           showFormattedZero={true}  // Always use formatted zero to ensure 0.00 displays properly
           showOnlyDollarSign={format === 'no-numbers'}
           className="text-[100px]"
+          textContent={format === 'text' ? TEXT_OPTIONS[textIndex] : undefined}
+          suffixText={format === 'mixed' ? SUFFIX_OPTIONS[suffixIndex] : undefined}
         />
       </div>
     </div>

@@ -104,9 +104,6 @@ const formatNumber = (num: number, showDecimals: boolean, showFormattedZero: boo
   const str = showDecimals ? num.toFixed(2) : Math.round(num).toString();
   const [whole, decimal] = str.split('.');
   
-  // Add commas to whole number part
-  const withCommas = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  
   // Split into digits and find separator positions
   const digits = showDecimals 
     ? (whole + decimal).split('').map(Number)
@@ -588,7 +585,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
           layoutId="suffix-text-container"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, transition: { duration: 0 } }}
           transition={{
             duration: 0.75, // Match with main animation duration
             ease: [0.32, 0.72, 0, 1],

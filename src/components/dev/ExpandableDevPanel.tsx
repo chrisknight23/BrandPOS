@@ -1,21 +1,24 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// Globals for browser and Node.js
+/* global console, setTimeout, process, window */
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Screen } from '../../types/screen';
 import { 
   getFeatureFlags, 
   toggleFeatureFlag, 
-  resetFeatureFlags,
-  isFeatureEnabled
+  resetFeatureFlags
 } from '../../utils/featureFlags';
 import { FEATURE_FLAGS, FeatureFlag } from '../../constants/featureFlags';
 import { SCREEN_ORDER } from '../../constants/screens';
 import FilterIcon from '../../assets/images/filter.svg';
 import CloseIcon from '../../assets/images/close.svg';
 import BackIcon from '../../assets/images/back.svg';
-import LeftNavIcon from '../../assets/images/leftNav.svg';
-import RightNavIcon from '../../assets/images/rightNav.svg';
-import MoreIcon from '../../assets/images/more.svg';
-import ChevronRightIcon from '../../assets/images/chevron-right.svg';
+// import LeftNavIcon from '../../assets/images/leftNav.svg';
+// import RightNavIcon from '../../assets/images/rightNav.svg';
+// import MoreIcon from '../../assets/images/more.svg';
+// import ChevronRightIcon from '../../assets/images/chevron-right.svg';
 import ControlIcon from '../../assets/images/16/control.svg';
 import AvatarIcon from '../../assets/images/16/avatar.svg';
 import { Button } from '../../components/ui/button';
@@ -910,25 +913,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                     className="w-5 h-5" 
                   />
                 </button>
-                
-                {!currentConfig.backButton && (
-                  <div className="flex space-x-2">
-                    <button
-                      className="text-white/60 hover:text-white"
-                      onClick={handleAppBack}
-                      disabled={!onBack}
-                    >
-                      <img src={LeftNavIcon} alt="Previous" className="w-8 h-8" />
-                    </button>
-                    <button
-                      className="text-white/60 hover:text-white"
-                      onClick={handleAppNext}
-                      disabled={!onNext}
-                    >
-                      <img src={RightNavIcon} alt="Next" className="w-8 h-8" />
-                    </button>
-                  </div>
-                )}
               </div>
               
               <div className="mb-2">

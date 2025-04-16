@@ -1,18 +1,66 @@
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
-// Mock data - in real app this would come from props or context
-const cartData = {
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+// Initial cart data
+const initialCartData = {
   items: [
-    { name: 'Item name', price: 10.80, quantity: 1 }
+    { id: 1, name: 'Item name', price: 10.80, quantity: 1 }
   ],
   taxRate: 0.00
 };
 
-export const Cart = ({ onNext }: { onNext: (amount?: string) => void }) => {
-  const total = cartData.items.reduce((sum, item) => sum + item.price, 0);
-  const tax = total * cartData.taxRate;
-  const finalTotal = total + tax;
+// Generate a random item name and price
+// const generateRandomItem = (id: number): CartItem => {
+//   const itemNames = [
+//     'Coffee', 'Sandwich', 'Salad', 'Pastry', 
+//     'Smoothie', 'Burger', 'Pizza', 'Soda',
+//     'Chips', 'Cookie', 'Muffin', 'Water'
+//   ];
+//   const name = itemNames[Math.floor(Math.random() * itemNames.length)];
+//   // Random price between $3 and $25
+//   const price = Math.round((Math.random() * 22 + 3) * 100) / 100;
+//   return { id, name, price, quantity: 1 };
+// };
+
+export const Cart = ({ 
+  onNext,
+  cartItems,
+  onCartUpdate
+}: { 
+  onNext: (amount?: string) => void;
+  cartItems?: CartItem[];
+  onCartUpdate?: (items: CartItem[]) => void;
+}) => {
+  // Use provided cart items or default to initial data
+  const [items, setItems] = useState<CartItem[]>(cartItems || initialCartData.items);
+  const taxRate = initialCartData.taxRate;
+  
+  // Calculate totals
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const tax = subtotal * taxRate;
+  const finalTotal = subtotal + tax;
+
+  // Notify parent of cart changes
+  useEffect(() => {
+    if (onCartUpdate) {
+      onCartUpdate(items);
+    }
+  }, [items, onCartUpdate]);
+
+  // Update items if cartItems prop changes
+  useEffect(() => {
+    if (cartItems) {
+      setItems(cartItems);
+    }
+  }, [cartItems]);
 
   const handleNext = () => {
     onNext(finalTotal.toFixed(2));
@@ -39,18 +87,28 @@ export const Cart = ({ onNext }: { onNext: (amount?: string) => void }) => {
 
         {/* Items List - Scrollable */}
         <div className="flex-1 overflow-y-auto">
-          {cartData.items.map((item, index) => (
-            <motion.div 
-              key={index}
-              className="flex justify-between items-center mb-6"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
+          {items.length > 0 ? (
+            items.map((item, index) => (
+              <motion.div 
+                key={item.id}
+                className="flex justify-between items-center mb-6"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <span className="text-2xl">{item.name}</span>
+                <span className="text-2xl">${item.price.toFixed(2)}</span>
+              </motion.div>
+            ))
+          ) : (
+            <motion.div
+              className="text-center py-10 text-white/60 text-2xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
             >
-              <span className="text-2xl">{item.name}</span>
-              <span className="text-2xl">${item.price.toFixed(2)}</span>
+              Cart is empty
             </motion.div>
-          ))}
+          )}
         </div>
 
         {/* Tax Section */}
@@ -64,7 +122,7 @@ export const Cart = ({ onNext }: { onNext: (amount?: string) => void }) => {
             <span className="text-2xl">${tax.toFixed(2)}</span>
           </div>
           <div className="text-white/60">
-            Sales tax (${cartData.taxRate.toFixed(2)})
+            Sales tax (${taxRate.toFixed(2)})
           </div>
         </motion.div>
       </div>

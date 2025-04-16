@@ -14,7 +14,6 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
   const [selectedAmount, setSelectedAmount] = useState<string | null>(null);
   const [isExiting, setIsExiting] = useState(false);
   const [activeText, setActiveText] = useState(0); // 0 for "Give a Tip", 1 for "Local Cash"
-  const [textFade, setTextFade] = useState(false); // Track fade state
   const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textChangeInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -32,12 +31,12 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
     
     textChangeInterval.current = setInterval(() => {
       // First fade out
-      setTextFade(true);
+      // setTextFade(true);
       
       // After fade out, change text and fade back in
-      fadeTimeout = setTimeout(() => {
+      setTimeout(() => {
         setActiveText(prev => (prev === 0 ? 1 : 0));
-        setTextFade(false);
+        // setTextFade(false);
       }, 300); // Time to fade out
       
     }, 3000); // Switch every 3 seconds
@@ -289,7 +288,7 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
                 key={`container-${amount}`} 
                 className={`
                   transition-opacity duration-300
-                  ${selectedAmount && selectedAmount !== amount ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+                  ${selectedAmount && selectedAmount !== amount ? 'invisible pointer-events-none' : 'opacity-100'}
                 `}
                 // Apply button entrance animation from variants
                 // Each button will animate in sequence based on index

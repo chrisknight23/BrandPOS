@@ -1,5 +1,5 @@
 import { LocalPass, CardState } from '../../components/common/LocalPass';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import cashBackAnimation from '../../assets/CashBackLogo.json';
 import CashAppLogo from '../../assets/images/CashApplogo.svg';
@@ -11,6 +11,9 @@ interface CashbackProps {
 }
 
 export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
+  // Format the amount to ensure it's a whole number for the display
+  const formattedAmount = Math.round(parseFloat(amount)).toString();
+  
   const [cardState, setCardState] = useState<CardState>('expanded');
   // Track whether we're currently transitioning states
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -91,7 +94,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
           {/* Original LocalPass card component */}
           <motion.div>
             <LocalPass
-              amount={amount}
+              amount={formattedAmount}
               initialState={cardState}
               isExpanded={cardState === 'expanded'}
               onClick={handleNextClick}
@@ -105,6 +108,7 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
               onAnimationComplete={handleAnimationComplete}
               autoPlay={true}
               animationDelay={500}
+              suffixText="Back"
             />
           </motion.div>
           

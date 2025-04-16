@@ -1,6 +1,6 @@
 # AnimatedNumber Component
 
-A React component that provides smooth, animated transitions for numerical values. Supports single digits, full prices with decimals, and various animation patterns.
+A React component that provides smooth, animated transitions for numerical values. Supports single digits, full prices with decimals, and various animation patterns. Now also supports displaying text strings instead of numbers, or combining numbers with text.
 
 ## Features
 
@@ -12,6 +12,8 @@ A React component that provides smooth, animated transitions for numerical value
 - ⚡️ Optimized animations using Framer Motion
 - 🎨 Customizable styling via className prop
 - 0️⃣ Configurable zero formatting with decimals
+- 📝 Support for text strings instead of numbers
+- 🔠 Support for combining numbers with text suffixes
 
 ## Common Use Cases
 
@@ -44,11 +46,46 @@ A React component that provides smooth, animated transitions for numerical value
 />
 ```
 
+### 4. Text Content Display
+```tsx
+// Shows: $FREE
+<AnimatedNumber 
+  value={0}
+  textContent="FREE"
+/>
+
+// Shows: FREE (without dollar sign)
+<AnimatedNumber 
+  value={0}
+  textContent="FREE"
+  showDollarSign={false}
+/>
+```
+
+### 5. Number with Text Suffix
+```tsx
+// Shows: $5 OFF
+<AnimatedNumber 
+  value={5}
+  suffixText="OFF"
+  showDecimals={false}
+/>
+
+// Shows: $10 CASH BACK
+<AnimatedNumber 
+  value={10}
+  suffixText="CASH BACK"
+  showDecimals={false}
+/>
+```
+
 ## Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | value | number | (required) | The numeric value to display and animate |
+| textContent | string | undefined | Optional text string to display instead of the numeric value |
+| suffixText | string | undefined | Optional text string to display after the numeric value (only used when textContent is not provided) |
 | showDollarSign | boolean | true | Controls dollar sign visibility |
 | showDecimals | boolean | true | Controls decimal places visibility |
 | showFormattedZero | boolean | false | Controls whether zero shows with decimals (0.00) |
@@ -91,7 +128,32 @@ A React component that provides smooth, animated transitions for numerical value
 />
 ```
 
-### 4. Custom Styling
+### 4. Text Display
+```tsx
+// Best for:
+// - Special pricing states (e.g., "FREE", "SALE")
+// - Non-numeric values in a price display
+// - Status indicators
+<AnimatedNumber 
+  value={0}
+  textContent="FREE"
+/>
+```
+
+### 5. Mixed Number and Text
+```tsx
+// Best for:
+// - Discounts (e.g., "$10 OFF")
+// - Rewards (e.g., "$5 CASH BACK")
+// - Special offers (e.g., "$25 BONUS")
+<AnimatedNumber 
+  value={10}
+  suffixText="OFF"
+  showDecimals={false}
+/>
+```
+
+### 6. Custom Styling
 ```tsx
 // Example with custom size and color
 <AnimatedNumber 
@@ -133,11 +195,29 @@ A React component that provides smooth, animated transitions for numerical value
   - Useful for indicating currency context before revealing the amount
   - Overrides other formatting options for digits
 
+### Text Content
+- When `textContent` is provided:
+  - Displays the provided text string instead of numeric value
+  - Can be combined with `showDollarSign` to show "$FREE" formatting
+  - Animates with a fade and slide animation
+  - Uses the same font styling as numeric values for consistency
+  - Overrides all numeric formatting options
+
+### Suffix Text
+- When `suffixText` is provided:
+  - Displays numeric value with the text string appended after it
+  - Number portion uses digit rolling animation
+  - Text portion uses fade and slide animation
+  - Automatically adds spacing between number and text
+  - Only applies when `textContent` is not provided
+
 ### Animation Sequence
 1. Initial mount: Value appears with proper formatting
 2. Value changes: Smooth rolling animation
 3. New digits: Fade in and roll up from zero
 4. Removed digits: Fade out
+5. Text content: Fade in with slight upward motion
+6. Suffix text: Fade in with slight rightward motion
 
 ## Technical Requirements
 
@@ -169,6 +249,14 @@ The component uses these Tailwind classes:
    // For prices and monetary values
    showDecimals={true}
    showFormattedZero={true} // For consistent decimal display with zero
+   
+   // For special pricing states
+   textContent="FREE"
+   
+   // For discounts or special offers
+   value={10}
+   suffixText="OFF"
+   showDecimals={false}
    ```
 
 2. **Animation Timing**
@@ -196,6 +284,16 @@ Works in all modern browsers that support:
 - Web Animations API 
 
 ## Changelog
+
+### v1.3.0
+- Added `suffixText` prop to support displaying text strings after numeric values
+- Updated documentation with examples for combined number-text usage
+- Optimized animations for suffix text 
+
+### v1.2.0
+- Added `textContent` prop to support displaying text strings instead of numbers
+- Added text animation with smooth transitions
+- Updated documentation with examples for text content usage
 
 ### v1.1.0
 - Added `showFormattedZero` prop to control how zeros are displayed with decimal places

@@ -5,6 +5,7 @@ export type Screen =
   | 'Home'
   | 'Cart'
   | 'Payment'
+  | 'Auth'
   | 'Tipping'
   | 'Cashback'
   | 'CustomTip'

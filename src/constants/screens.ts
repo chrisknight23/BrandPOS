@@ -4,6 +4,7 @@ export const SCREEN_ORDER: Screen[] = [
   'Home',
   'Cart',
   'Payment',
+  'Auth',
   'Tipping',
   'Cashback',
   'End'
