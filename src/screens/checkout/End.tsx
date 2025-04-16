@@ -6,7 +6,7 @@ import { Screen } from '../../types/screen';
 interface EndProps {
   onNext: () => void;
   amount?: string;       // Total amount (may be pre-calculated)
-  baseAmount?: string;   // Base amount from Cart/TapToPay
+  baseAmount?: string;   // Base amount from Cart/Payment
   tipAmount?: string;    // Tip amount from Tipping screen
   goToScreen?: (screen: Screen) => void; // Add prop for direct navigation
 }

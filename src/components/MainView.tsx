@@ -7,7 +7,7 @@ import { Screen } from '../types/screen';
 import * as screens from '../screens/checkout';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Cart', 'TapToPay', 'Tipping', 'Cashback', 'End'];
+const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Tipping', 'Cashback', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -164,8 +164,8 @@ export const MainView = () => {
     logNavigation('MainView:handleNext', `Navigate from ${currentScreen}`, { amount });
     
     if (amount) {
-      // If coming from Cart or TapToPay, set as base amount
-      if (currentScreen === 'Cart' || currentScreen === 'TapToPay') {
+      // If coming from Cart or Payment, set as base amount
+      if (currentScreen === 'Cart' || currentScreen === 'Payment') {
         console.log(`MainView: Setting base amount to ${amount}`);
         setBaseAmount(amount);
       }
@@ -289,9 +289,9 @@ export const MainView = () => {
     return total.toFixed(2);
   }, [cartItems]);
   
-  // Update the base amount when the cart items change or when navigating to TapToPay
+  // Update the base amount when the cart items change or when navigating to Payment
   useEffect(() => {
-    if (currentScreen === 'TapToPay') {
+    if (currentScreen === 'Payment') {
       const cartTotal = calculateCartTotal();
       console.log(`MainView: Setting base amount to cart total: ${cartTotal}`);
       setBaseAmount(cartTotal);
@@ -330,7 +330,7 @@ export const MainView = () => {
         cartItems: cartItems,
         onCartUpdate: handleCartUpdate
       };
-    } else if (currentScreen === 'TapToPay') {
+    } else if (currentScreen === 'Payment') {
       return {
         ...baseProps,
         amount: baseAmount || calculateCartTotal() // Use baseAmount or cart total as fallback

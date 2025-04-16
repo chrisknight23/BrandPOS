@@ -158,12 +158,12 @@ const PaymentNotch = ({ position, text, animationState }: { position: 'top' | 'b
   );
 };
 
-interface TapToPayProps {
+interface PaymentProps {
   onNext: (amount?: string) => void;
   amount?: string;
 }
 
-export const TapToPay = ({ onNext, amount = "10.80" }: TapToPayProps) => {
+export const Payment = ({ onNext, amount = "10.80" }: PaymentProps) => {
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
   const [notchesVisible, setNotchesVisible] = useState(false);
   const [showCardCursor, setShowCardCursor] = useState(true);

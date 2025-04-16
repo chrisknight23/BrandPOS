@@ -276,15 +276,15 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
     }
   };
 
-  // Handle checkout - Navigate to TapToPay screen
+  // Handle checkout - Navigate to Payment screen
   const handleCheckout = () => {
     if (onNext && currentScreen === 'Cart') {
-      // If we're on the Cart screen, navigate to TapToPay
+      // If we're on the Cart screen, navigate to Payment
       onNext();
     } else if (currentScreen === 'Home' && onNext) {
-      // If we're on Home, we need to go to Cart first, then to TapToPay
+      // If we're on Home, we need to go to Cart first, then to Payment
       onNext();
-      // Add a small delay before navigating to TapToPay to allow for screen transition
+      // Add a small delay before navigating to Payment to allow for screen transition
       setTimeout(() => {
         if (onNext) onNext();
       }, 100);
@@ -350,8 +350,8 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             return 'Home Screen: Users see the Square POS welcome screen. This is where merchants start the payment process by adding items to the cart.';
           case 'Cart':
             return 'Cart Screen: Users see the total price ($) at the top and a list of items below with individual prices. They can review their order before tapping to continue to payment.';
-          case 'TapToPay':
-            return 'Tap To Pay Screen: Users see a blue screen with the amount and payment notches. They tap their Cash Card or contactless payment method to complete the transaction.';
+          case 'Payment':
+            return 'Payment Screen: Users see a blue screen with the amount and payment notches. They tap their Cash Card or contactless payment method to complete the transaction.';
           case 'Tipping':
             return 'Tipping Screen: Users choose from preset tip amounts or select a custom tip. The screen alternates between "Give a Tip" and "Earn Local Cash" prompts.';
           case 'Cashback':

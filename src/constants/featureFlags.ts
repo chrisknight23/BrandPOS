@@ -43,7 +43,7 @@ export const FEATURE_FLAGS: FeatureFlag[] = [
     name: 'Pay Indicators',
     description: 'Show animated payment direction indicators on the payment screen',
     defaultValue: true,
-    availableOn: ['TapToPay']
+    availableOn: ['Payment']
   }
 ];
 

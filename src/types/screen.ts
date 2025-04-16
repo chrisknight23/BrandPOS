@@ -4,7 +4,7 @@
 export type Screen = 
   | 'Home'
   | 'Cart'
-  | 'TapToPay'
+  | 'Payment'
   | 'Tipping'
   | 'Cashback'
   | 'CustomTip'
