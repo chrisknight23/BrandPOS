@@ -569,9 +569,11 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     // Reset timer when button is clicked
     setProgressTimer(100);
     
-    // Flip the card instead of cycling states
-    setIsFlipped(!isFlipped);
-    if (onFlip) onFlip(!isFlipped);
+    // Only flip the card if not in expanded state
+    if (animationState !== 'expanded') {
+      setIsFlipped(!isFlipped);
+      if (onFlip) onFlip(!isFlipped);
+    }
     
     // Call onButtonClick if provided
     if (onButtonClick) {
@@ -618,14 +620,17 @@ export const LocalPass: React.FC<LocalPassProps> = ({
         layoutId={layoutId}
         animate={controls}
         initial={{ scale: animationState === 'expanded' ? CARD_SCALES.EXPANDED : CARD_SCALES.NORMAL }}
-        className="w-[344px] h-[444px] relative cursor-pointer"
+        className={`w-[344px] h-[444px] relative ${animationState === 'expanded' ? 'cursor-default' : 'cursor-pointer'}`}
         style={{
           transformOrigin: 'center center',
           perspective: '1200px'
         }}
         onClick={() => {
-          setIsFlipped(!isFlipped);
-          if (onFlip) onFlip(!isFlipped);
+          // Only allow flipping when not in expanded state
+          if (animationState !== 'expanded') {
+            setIsFlipped(!isFlipped);
+            if (onFlip) onFlip(!isFlipped);
+          }
         }}
       >
         <motion.div
