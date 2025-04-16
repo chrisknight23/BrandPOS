@@ -7,7 +7,7 @@ import { Screen } from '../types/screen';
 import * as screens from '../screens/checkout';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Tipping', 'Cashback', 'End'];
+const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -259,16 +259,21 @@ export const MainView = () => {
   
   // Render screen navigation buttons for quick debugging
   const renderScreenNav = () => (
-    <div className="fixed bottom-4 left-4 flex gap-2 z-[9999] pointer-events-auto">
+    <div className={`fixed bottom-12 z-[9999] pointer-events-auto flex gap-1.5 ${
+      isPanelOpen 
+        ? 'left-[calc(50%-180px)] -translate-x-1/2' // Center when drawer is open (shift left to counter the drawer)
+        : 'left-1/2 -translate-x-1/2' // Center when drawer is closed
+    }`}>
       {SCREEN_ORDER.map(screen => (
         <button
           key={screen}
           onClick={() => goToScreen(screen)}
-          className={`px-2 py-1 rounded-md text-xs ${
+          className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
             currentScreen === screen 
-              ? 'bg-white text-black' 
-              : 'bg-white/20 hover:bg-white/30 text-white'
+              ? 'bg-white text-black font-medium border-white' 
+              : 'bg-transparent border-white/20 hover:border-white/40 text-white/80'
           }`}
+          style={{ minWidth: '60px', textAlign: 'center' }}
         >
           {screen}
         </button>
@@ -334,6 +339,11 @@ export const MainView = () => {
       return {
         ...baseProps,
         amount: baseAmount || calculateCartTotal() // Use baseAmount or cart total as fallback
+      };
+    } else if (currentScreen === 'Auth') {
+      return {
+        ...baseProps,
+        customerName: "$" // Dollar sign for Auth screen
       };
     } else if (currentScreen === 'Tipping') {
       return {

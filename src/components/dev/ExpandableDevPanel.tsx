@@ -941,18 +941,13 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             {/* Screen description - hide for profile screen */}
             {activeScreen !== 'profile' && getScreenDescription(activeScreen) && (
               <div className="px-6 pb-2">
-                <div className="relative">
+                <div 
+                  className="relative cursor-pointer" 
+                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                >
                   <p className={`text-white/60 text-sm ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
                     {getScreenDescription(activeScreen)}
                   </p>
-                  {getScreenDescription(activeScreen).length > 120 && (
-                    <button 
-                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                      className="text-xs text-white/40 hover:text-white/60 mt-1"
-                    >
-                      {isDescriptionExpanded ? 'Show less' : 'Read more'}
-                    </button>
-                  )}
                 </div>
               </div>
             )}
@@ -1071,21 +1066,13 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             </div>
           </div>
         ) : (
-          // Collapsed button - no animations
+          // Collapsed button - rounded (circular)
           <div 
-            className="bg-[#141414] rounded-[24px] overflow-hidden shadow-lg border border-white/10 cursor-pointer"
+            className="bg-[#141414] rounded-full overflow-hidden shadow-lg border border-white/10 cursor-pointer h-12 w-12 flex items-center justify-center"
             onClick={togglePanel}
           >
-            <div className="flex items-center justify-between pl-6 pr-4 py-3">
-              <div className="flex-1 flex items-center justify-center">
-                <span className="text-white font-medium">
-                  {currentScreen}
-                </span>
-              </div>
-              
-              <div className="p-2 text-white/60">
-                <img src={FilterIcon} alt="Filter" className="w-5 h-5" />
-              </div>
+            <div className="text-white/60">
+              <img src={FilterIcon} alt="Filter" className="w-5 h-5" />
             </div>
           </div>
         )}
