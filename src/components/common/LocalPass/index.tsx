@@ -100,6 +100,12 @@ export interface LocalPassProps {
   children?: React.ReactNode;
   /** Disable all animations (for backward compatibility) */
   noAnimation?: boolean;
+  
+  /** Text content to display instead of a numeric amount */
+  textAmount?: string;
+  
+  /** Text to display after the numeric amount */
+  suffixText?: string;
 }
 
 // ============= Constants =============
@@ -206,6 +212,8 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   autoPlay = true,
   className = '',
   animationDelay = 0,
+  textAmount,
+  suffixText,
   
   // Original LocalPass props
   layoutId,
@@ -412,6 +420,15 @@ export const LocalPass: React.FC<LocalPassProps> = ({
       }
     } else if (prevAnimationState.current === 'expanded' && animationState !== 'expanded') {
       // Keep number visible when leaving expanded state
+      // Ensure smooth transition by triggering a re-render of the animated number
+      if (showNumber) {
+        // Slightly modify the amount to force a re-render and clean animation
+        const currentAmount = cashbackAmount;
+        setCashbackAmount(0.00001);
+        setTimeout(() => {
+          setCashbackAmount(currentAmount);
+        }, 50);
+      }
     } else if (animationState === 'dropped' || animationState === 'initial') {
       // Ensure number remains visible when switching between normal and compact states
       if (showNumber && cashbackAmount > 0) {
@@ -592,6 +609,9 @@ export const LocalPass: React.FC<LocalPassProps> = ({
     setIsFlipped(false);
   }, []);
 
+  // Display text value if provided, otherwise use numeric amount
+  const displayAmount = textAmount || amount;
+
   return (
     <div className={`w-full h-full flex items-center justify-center ${className}`}>
       <motion.div
@@ -707,8 +727,12 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                       >
                         <div className="flex items-center">
                           <AnimatedNumber 
-                            value={cashbackAmount}
-                            showDecimals={animationState === 'expanded' && cashbackAmount > 0}
+                            value={parseFloat(displayAmount || '0')}
+                            showDollarSign={true}
+                            textContent={textAmount}
+                            suffixText={animationState === 'expanded' ? suffixText : undefined}
+                            suffixTextDelay={200} 
+                            showDecimals={animationState === 'expanded' && cashbackAmount > 0 && !suffixText}
                             showFormattedZero={false}
                             showOnlyDollarSign={animationState === 'dropped' || cashbackAmount === 0}
                             className="text-[50px] text-white antialiased"

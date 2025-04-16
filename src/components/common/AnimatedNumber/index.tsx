@@ -7,6 +7,22 @@ interface AnimatedNumberProps {
    */
   value: number;
   /**
+   * Optional text string to display instead of a number
+   * When provided, this overrides the numeric value display
+   */
+  textContent?: string;
+  /**
+   * Optional text string to display after the number
+   * Only applies when textContent is not provided
+   */
+  suffixText?: string;
+  /**
+   * Optional delay (in milliseconds) before showing the suffix text
+   * Allows suffix text to appear after number animation
+   * @default 0
+   */
+  suffixTextDelay?: number;
+  /**
    * Whether to show the dollar sign
    * @default true
    */
@@ -275,8 +291,40 @@ const Separator = React.forwardRef<HTMLDivElement, { char: string, layoutId: str
 
 Separator.displayName = 'Separator';
 
+// Component for rendering textual content
+const TextContent: React.FC<{ 
+  text: string,
+  className?: string
+}> = ({ 
+  text,
+  className = ''
+}) => {
+  return (
+    <motion.div
+      className={`flex items-center h-[120px] font-cash font-medium text-[100px] ${className}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ 
+        duration: 0.75,
+        ease: [0.32, 0.72, 0, 1],
+        type: "tween"
+      }}
+      style={{
+        transformOrigin: 'left center',
+        willChange: 'transform, opacity'
+      }}
+    >
+      {text}
+    </motion.div>
+  );
+};
+
 export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ 
   value,
+  textContent,
+  suffixText,
+  suffixTextDelay = 0,
   showDollarSign = true,
   showDecimals = true,
   className = '',
@@ -324,6 +372,39 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
       setPrevValue(value);
     }
   }, [value]);
+
+  // If textContent is provided, render it directly
+  if (textContent) {
+    return (
+      <div className={`flex items-center justify-center ${className}`}>
+        <motion.div 
+          className="flex items-center relative"
+          layout
+          transition={{ 
+            duration: 0.75,
+            ease: [0.32, 0.72, 0, 1]
+          }}
+        >
+          <AnimatePresence mode="popLayout" initial={false}>
+            {showDollarSign && (
+              <motion.span 
+                key="dollar-sign"
+                className="flex items-center h-[120px] font-cash font-medium text-[100px]"
+                layout
+                style={{ 
+                  marginRight: 10,
+                  transition: 'margin-right 0.75s cubic-bezier(0.32, 0.72, 0, 1)'
+                }}
+              >
+                $
+              </motion.span>
+            )}
+            <TextContent key="text-content" text={textContent} />
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    );
+  }
 
   const renderContent = () => {
     let content: JSX.Element[] = [];
@@ -494,6 +575,37 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
           className="flex items-center"
         >
           {decimalContent}
+        </motion.div>
+      );
+    }
+
+    // If we have a suffix text, add it after the number content
+    if (suffixText) {
+      content.push(
+        <motion.div
+          key="suffix-text"
+          className="flex items-center"
+          layoutId="suffix-text-container"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            duration: 0.75, // Match with main animation duration
+            ease: [0.32, 0.72, 0, 1],
+            delay: suffixTextDelay / 1000 // Convert ms to seconds
+          }}
+          style={{ 
+            marginLeft: 16, 
+            transformOrigin: 'left center',
+            willChange: 'transform, opacity'
+          }}
+        >
+          <div className="w-[180px] overflow-visible"> {/* Fixed width container */}
+            <TextContent 
+              text={suffixText} 
+              className="whitespace-nowrap" // Prevent text wrapping
+            />
+          </div>
         </motion.div>
       );
     }
