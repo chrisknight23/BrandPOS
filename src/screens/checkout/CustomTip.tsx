@@ -1,37 +1,46 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
+import ClearIcon from '../../assets/images/clear.svg';
 
 interface CustomTipProps {
   onNext: (amount: string) => void;
   goBack?: () => void;
+  baseAmount?: string;
 }
 
-export const CustomTip = ({ onNext, goBack }: CustomTipProps) => {
-  const [amount, setAmount] = useState<string>('0');
+export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) => {
+  const [cents, setCents] = useState<number>(0);
+  const amount = (cents / 100).toFixed(2);
+  const [shake, setShake] = useState<boolean>(false);
+  // include tax at 8.75% on base + tip
+  const subtotal = parseFloat(baseAmount) + cents / 100;
+  const total = (subtotal * 1.0875).toFixed(2);
   
   const handleNumberPress = (num: string) => {
-    // Only allow one decimal point
-    if (num === '.' && amount.includes('.')) return;
-    
-    // Logic to handle display of amount
-    if (amount === '0' && num !== '.') {
-      setAmount(num);
-    } else {
-      setAmount(prev => prev + num);
-    }
+    // Only digits; ignore decimal input
+    if (num === '.') return;
+    const digit = parseInt(num, 10);
+    if (isNaN(digit)) return;
+    setCents(prev => prev * 10 + digit);
   };
   
   const handleBackspace = () => {
-    if (amount.length <= 1) {
-      setAmount('0');
-    } else {
-      setAmount(prev => prev.slice(0, -1));
+    // Shake if at zero
+    if (cents === 0) {
+      setShake(true);
+      return;
     }
+    // Remove last digit
+    setCents(prev => Math.floor(prev / 10));
   };
   
   const handleAddTip = () => {
-    onNext(amount);
+    if (cents === 0) {
+      setShake(true);
+      return;
+    }
+    onNext(total);
   };
   
   const handleCancel = () => {
@@ -53,53 +62,59 @@ export const CustomTip = ({ onNext, goBack }: CustomTipProps) => {
       <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[8px] border border-[#222]">
         {/* Main container */}
         <motion.div 
-          className="w-full h-full bg-black text-white p-6 flex flex-col"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          className="w-full h-full bg-black text-white p-8 flex flex-col"
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-cash">Add a tip ${amount} total</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-[24px] font-cash font-medium">
+              Custom tip <span className="font-cash font-normal text-white/40">
+                ${total} {cents > 0 ? 'with tip' : 'total'}
+              </span>
+            </h2>
             <button 
               onClick={handleCancel}
-              className="text-2xl font-cash"
+              className="text-[24px] font-cash font-medium"
             >
               Cancel
             </button>
           </div>
           
           {/* Current amount display */}
-          <div className="flex items-center justify-start mb-8">
-            <span className="text-8xl font-bold font-cash">${amount}</span>
+          <div className="flex items-center justify-start mb-4">
+            <motion.span
+              className="text-[72px] font-semibold font-cash"
+              animate={shake ? { x: [0, -8, 8, -8, 8, 0] } : {}}
+              transition={{ duration: 0.3 }}
+              onAnimationComplete={() => setShake(false)}
+            >
+              ${amount}
+            </motion.span>
           </div>
           
           {/* Keypad and Add Tip button */}
-          <div className="flex gap-6 flex-1">
+          <div className="flex gap-4 flex-1">
             {/* Keypad grid */}
-            <div className="grid grid-cols-3 gap-3 flex-1">
+            <div className="grid grid-cols-3 gap-2 flex-1">
               {keypadItems.map((item) => (
                 <button
                   key={item}
                   onClick={() => item === 'del' ? handleBackspace() : handleNumberPress(item)}
-                  className="bg-[#222222] rounded-xl flex items-center justify-center text-3xl font-medium font-cash active:bg-[#333333] transition-colors"
+                  className="bg-[#222222] rounded-[12px] flex items-center justify-center text-[24px] font-medium font-cash active:bg-[#333333] transition-colors"
                 >
                   {item === 'del' ? (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="white" strokeWidth="2"/>
-                      <path d="M8 12H16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
+                    <img src={ClearIcon} alt="Clear input" className="w-6 h-6" />
                   ) : item}
                 </button>
               ))}
             </div>
             
             {/* Add tip button */}
-            <div className="w-[400px]">
+            <div className="w-[350px]">
               <button
                 onClick={handleAddTip}
-                className="w-full h-full bg-[#1189D6] rounded-xl flex items-center justify-center text-4xl font-cash active:bg-[#0D7BC3] transition-colors"
+                className="w-full h-full bg-[#1189D6] rounded-2xl flex items-center justify-center text-[32px] font-cash font-medium active:bg-[#0D7BC3] transition-colors"
               >
                 Add tip
               </button>

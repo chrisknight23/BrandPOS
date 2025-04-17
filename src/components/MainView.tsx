@@ -8,7 +8,7 @@ import * as screens from '../screens/checkout';
 import { MiniDrawButton } from './dev/mini-draw';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'End'];
+const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -68,6 +68,9 @@ const generateRandomItem = (id: number): CartItem => {
   
   return { id, name: randomItem.name, price, quantity: 1 };
 };
+
+// Add a constant for the tax rate
+const TAX_RATE = 0.0875;
 
 /**
  * Main application view that manages screen transitions and state.
@@ -323,7 +326,8 @@ export const MainView = () => {
         baseAmount: baseAmount || undefined,
         tipAmount: tipAmount || undefined,
         goToScreen: goToScreen,  // Pass direct navigation function to End
-        resetToHome: handleReset  // Also pass reset function as an alternative
+        resetToHome: handleReset,  // Also pass reset function as an alternative
+        taxRate: TAX_RATE
       };
     } else if (currentScreen === 'Cart') {
       return {
@@ -335,7 +339,8 @@ export const MainView = () => {
     } else if (currentScreen === 'Payment') {
       return {
         ...baseProps,
-        amount: baseAmount || calculateCartTotal() // Use baseAmount or cart total as fallback
+        amount: baseAmount || calculateCartTotal(), // Use baseAmount or cart total as fallback
+        taxRate: TAX_RATE
       };
     } else if (currentScreen === 'Auth') {
       return {
@@ -351,6 +356,12 @@ export const MainView = () => {
       return {
         ...baseProps,
         amount: tipAmount || "1" // Pass the tip amount to Cashback screen
+      };
+    } else if (currentScreen === 'CustomTip') {
+      return {
+        ...baseProps,
+        baseAmount: baseAmount || '0',
+        goBack: () => goToScreen('Tipping')
       };
     } else {
       return baseProps;
