@@ -19,6 +19,10 @@ type TipButtonProps = {
   index?: number;
   // Whether to show percentages and decimal points
   showPercentage?: boolean;
+  /**
+   * Called when the selected state (expanded overlay) finishes its animation
+   */
+  onAnimationComplete?: () => void;
 };
 
 export const TipButton: React.FC<TipButtonProps> = ({ 
@@ -32,7 +36,8 @@ export const TipButton: React.FC<TipButtonProps> = ({
   // Animation order
   index = 0,
   // Display options
-  showPercentage = false
+  showPercentage = false,
+  onAnimationComplete
 }) => {
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -169,6 +174,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
             }}
             layout={false}
             style={{ willChange: 'transform, opacity, background-color' }}
+            onAnimationComplete={onAnimationComplete}
           >
             {/* Centered logo in expanded overlay */}
             <img 

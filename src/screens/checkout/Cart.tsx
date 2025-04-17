@@ -14,7 +14,7 @@ const initialCartData = {
   items: [
     { id: 1, name: 'Item name', price: 10.80, quantity: 1 }
   ],
-  taxRate: 0.00
+  taxRate: 0.0875 // 8.75% typical US sales tax
 };
 
 // Generate a random item name and price
@@ -69,7 +69,7 @@ export const Cart = ({
   return (
     <BaseScreen onNext={handleNext}>
       <div 
-        className="w-[800px] h-[500px] bg-black text-white p-8 flex flex-col cursor-pointer rounded-[8px] border border-[#222] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)]"
+        className="w-[800px] h-[500px] bg-black text-white px-10 pt-[100px] pb-8 flex flex-col cursor-pointer rounded-[8px] border border-[#222] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)]"
         onClick={handleNext}
         role="button"
         tabIndex={0}
@@ -78,28 +78,41 @@ export const Cart = ({
       >
         {/* Total Header - Fixed */}
         <motion.div 
-          className="text-6xl font-normal mb-12"
+          className="text-[72px] font-cash font-medium mb-12"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           ${finalTotal.toFixed(2)}
         </motion.div>
 
-        {/* Items List - Scrollable */}
+        {/* Items List - Scrollable, now also contains the tax section */}
         <div className="flex-1 overflow-y-auto">
           {items.length > 0 ? (
-            items.map((item, index) => (
+            <>
+              {items.map((item, index) => (
+                <motion.div 
+                  key={item.id}
+                  className="flex justify-between items-center mb-6"
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <span className="text-[36px] font-cash">{item.name}</span>
+                  <span className="text-[36px] font-cash">${item.price.toFixed(2)}</span>
+                </motion.div>
+              ))}
+              {/* Tax Section - now inside the same container as items */}
               <motion.div 
-                key={item.id}
-                className="flex justify-between items-center mb-6"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <span className="text-2xl">{item.name}</span>
-                <span className="text-2xl">${item.price.toFixed(2)}</span>
+                className="mt-2"
+                // No initial/animate for instant appearance
+                >
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-2xl">Tax</span>
+                  <span className="text-2xl">${tax.toFixed(2)}</span>
+                </div>
+                <div className="text-white/60">
+                  Sales tax (${taxRate.toFixed(2)})
+                </div>
               </motion.div>
-            ))
+            </>
           ) : (
             <motion.div
               className="text-center py-10 text-white/60 text-2xl"
@@ -110,21 +123,6 @@ export const Cart = ({
             </motion.div>
           )}
         </div>
-
-        {/* Tax Section */}
-        <motion.div 
-          className="mt-6 border-t border-white/20 pt-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-2xl">Tax</span>
-            <span className="text-2xl">${tax.toFixed(2)}</span>
-          </div>
-          <div className="text-white/60">
-            Sales tax (${taxRate.toFixed(2)})
-          </div>
-        </motion.div>
       </div>
     </BaseScreen>
   );

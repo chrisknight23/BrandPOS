@@ -67,19 +67,14 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
   }, []);
 
   const handleAmountClick = (amount: string) => {
-    // Cancel any existing navigation timers
-    if (navigationTimer.current) {
-      clearTimeout(navigationTimer.current);
-    }
-    
-    // First set the selected amount to trigger the animation
     setSelectedAmount(amount);
-    
-    // Simple single timeout for navigation
-    navigationTimer.current = setTimeout(() => {
-      // Navigate to next screen
-      onNext(amount);
-    }, 500); // Delay enough to see animation start but not flicker
+  };
+
+  // Called when the selected TipButton finishes its expand animation
+  const handleSelectedAnimationComplete = () => {
+    if (selectedAmount) {
+      onNext(selectedAmount);
+    }
   };
 
   const handleCustomOrNoTip = () => {
@@ -299,8 +294,8 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
                   amount={amount}
                   onClick={() => handleAmountClick(amount)}
                   isSelected={selectedAmount === amount && !isExiting}
-                  // Apply additional entrance animation directly to the button
-                  // This helps create a more stable animation
+                  // Only pass the animation complete callback to the selected button
+                  onAnimationComplete={selectedAmount === amount ? handleSelectedAnimationComplete : undefined}
                   {...buttonEntranceAnimation}
                 />
               </motion.div>

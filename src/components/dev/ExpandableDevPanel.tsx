@@ -20,8 +20,9 @@ import BackIcon from '../../assets/images/back.svg';
 // import MoreIcon from '../../assets/images/more.svg';
 // import ChevronRightIcon from '../../assets/images/chevron-right.svg';
 import ControlIcon from '../../assets/images/16/control.svg';
-import AvatarIcon from '../../assets/images/16/avatar.svg';
+import avatarIcon from '../../assets/images/avatar.svg';
 import { Button } from '../../components/ui/button';
+import { MiniDrawButton } from './mini-draw';
 
 interface ExpandableDevPanelProps {
   currentScreen: Screen;
@@ -120,9 +121,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   const [navDirection, setNavDirection] = useState<'forward' | 'backward'>('forward');
   const [selectedFlag, setSelectedFlag] = useState<FeatureFlag | null>(null);
   
-  // User type state for segmented control
-  const [userType, setUserType] = useState<UserType>('new');
-  
   // Flags state
   const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>({});
   const [relevantFlags, setRelevantFlags] = useState<FeatureFlag[]>([]);
@@ -192,13 +190,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   const handleResetFlags = () => {
     const defaultFlags = resetFeatureFlags();
     setFeatureFlags(defaultFlags);
-  };
-
-  // Handle user type selection
-  const handleUserTypeChange = (type: UserType) => {
-    setUserType(type);
-    // You could add additional logic here to update feature flags based on user type
-    console.log(`User type changed to: ${type}`);
   };
 
   // Handle app navigation functions
@@ -461,7 +452,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             {currentScreen === 'Cart' && (
               <>
                 <motion.div
-                  className="flex items-center justify-between pt-3 pb-2"
+                  className="flex items-center justify-between mt-6 pb-2"
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 24 }}
@@ -469,13 +460,15 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                   layout
                 >
                   <h3 className="text-white font-medium">Items ({localCartItems.length})</h3>
-                  <span className="text-white/50 text-base font-normal">
-                    {/* Calculate total price */}
-                    {(() => {
-                      const total = localCartItems.reduce((sum, item) => sum + parseFloat(item.price.replace(/[^\d.]/g, '')), 0);
-                      return total > 0 ? `$${total.toFixed(2)}` : '';
-                    })()}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={handleClearCart}
+                    className="text-white/50 text-base font-medium hover:text-white transition-colors"
+                    disabled={localCartItems.length === 0}
+                    aria-label="Clear cart"
+                  >
+                    Clear
+                  </button>
                 </motion.div>
                 <motion.div className="flex flex-col gap-2 mb-4" layout transition={{ type: 'spring', stiffness: 420, damping: 32 }}>
                   {/* Only show cart items if there are any */}
@@ -509,24 +502,11 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                           </button>
                         </motion.div>
                       ))
-                    ) : (
-                      <motion.div
-                        key="empty-cart"
-                        className="text-white/40 text-center py-8"
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 24 }}
-                        transition={{
-                          duration: 0.3,
-                          ease: [0.32, 0.72, 0, 1],
-                          exit: { duration: 0.18, ease: [0.32, 0.72, 0, 1] }
-                        }}
-                      >
-                        No items in cart
-                      </motion.div>
-                    )}
+                    ) : null}
                   </AnimatePresence>
                 </motion.div>
+                {/* Spacer between cart rows and bottom buttons */}
+                <div className="mt-10" />
               </>
             )}
             
@@ -534,11 +514,11 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             <div className="space-y-4 mt-auto">
               {/* Buttons only shown on Home or Cart screens */}
               {(currentScreen === 'Home' || currentScreen === 'Cart') && (
-                <>
+                <div className={`flex ${currentScreen === 'Cart' ? 'flex-row gap-3' : 'flex-col gap-4'}`}>
                   {/* Add item button */}
                   <button
                     onClick={handleAddItem}
-                    className="w-full rounded-full py-4 border border-white/20 flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors"
+                    className={`rounded-full py-4 flex-1 flex items-center justify-center bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors ${currentScreen === 'Cart' ? '' : 'w-full'}`}
                   >
                     <div className="flex items-center justify-center text-white">
                       <svg className="w-4 h-4 text-white/80 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -547,13 +527,12 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                       <div className="text-base font-medium text-white/80">Add item</div>
                     </div>
                   </button>
-                  
                   {/* Only show Checkout button on Cart screen */}
                   {currentScreen === 'Cart' && (
                     <Button
                       onClick={handleCheckout}
                       disabled={localCartItems.length === 0}
-                      className={`w-full rounded-full py-4 ${
+                      className={`rounded-full py-4 flex-1 ${
                         localCartItems.length > 0 
                           ? 'bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]' 
                           : 'bg-white/10 cursor-not-allowed'
@@ -564,7 +543,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                       </div>
                     </Button>
                   )}
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -878,50 +857,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
           </div>
         );
       
-      case 'profile':
-        return (
-          <div className="space-y-6">
-            {/* Profile card */}
-            <div className="bg-white/5 rounded-2xl overflow-hidden">
-              {/* Avatar and name section */}
-              <div className="flex flex-col items-center pt-8 pb-6">
-                <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-5xl mb-4">
-                  {profileData[userType].avatar}
-                </div>
-                <h3 className="text-white text-xl font-medium">
-                  {profileData[userType].name}
-                </h3>
-                <p className="text-white/60 text-sm mt-1">
-                  {profileData[userType].subtitle}
-                </p>
-              </div>
-              
-              {/* Bio section */}
-              <div className="px-4 pb-5">
-                <div className="border-t border-white/10 pt-5">
-                  <h4 className="text-white/60 uppercase text-xs font-medium mb-2">BIO</h4>
-                  <p className="text-white text-sm">
-                    {profileData[userType].bio}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Additional details */}
-            <div className="bg-white/5 rounded-lg p-4">
-              <h4 className="text-white/60 uppercase text-xs font-medium mb-3">Profile Details</h4>
-              <div className="space-y-2">
-                {profileData[userType].details.map((detail, index) => (
-                  <div key={index} className="flex justify-between">
-                    <span className="text-white/60 text-sm">{detail.label}:</span>
-                    <span className="text-white text-sm font-medium">{detail.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      
       default:
         return null;
     }
@@ -931,38 +866,65 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
 
   return (
     <LayoutGroup>
-      <div className="fixed top-0 right-0 p-4 z-[10000]">
+      {/* New top-left button, only visible when expanded */}
+      {isExpanded && (
+        <div className="fixed top-0 right-[392px] p-6 z-[10001]">
+          <MiniDrawButton 
+            title="Customer" 
+            rowLabels={["New customer", "Returning customer", "Cash Local customer"]} 
+          />
+        </div>
+      )}
+      <div className={isExpanded ? "fixed top-0 right-0 z-[10000]" : "fixed top-0 right-0 p-6 z-[10000]"} style={isExpanded ? { paddingTop: 18, paddingRight: 18, paddingBottom: 18, paddingLeft: 0 } : {}}>
         {isExpanded ? (
           // Expanded panel - no animations
           <div 
-            className="bg-[#141414] rounded-[24px] overflow-hidden shadow-lg border border-white/10 w-[calc(100vw-32px)] h-[calc(100vh-32px)] max-w-[360px] flex flex-col"
+            className="bg-[#141414] rounded-[24px] overflow-hidden shadow-lg border border-white/10 flex flex-col"
+            style={{ width: 'calc(100vw - 36px)', height: 'calc(100vh - 36px)', maxWidth: 360 }}
             ref={buttonRef}
           >
             {/* Header area */}
             <div className="px-6 pt-4">
               <div className="flex justify-between items-center mb-4">
+                {/* Back button on the left, if present */}
+                {currentConfig.backButton ? (
+                  <button
+                    className="p-2 text-white/60 hover:text-white"
+                    onClick={navigateBack}
+                    aria-label="Back"
+                  >
+                    <img 
+                      src={BackIcon} 
+                      alt="Back" 
+                      className="w-5 h-5" 
+                    />
+                  </button>
+                ) : (
+                  <div className="w-9" />
+                )}
+                {/* Spacer for title or alignment, if needed */}
+                <div />
+                {/* Close button always on the right */}
                 <button
-                  className="p-2 -ml-2 text-white/60 hover:text-white"
-                  onClick={currentConfig.backButton ? navigateBack : togglePanel}
+                  className="p-2 text-white/60 hover:text-white"
+                  onClick={togglePanel}
+                  aria-label="Close"
                 >
                   <img 
-                    src={currentConfig.backButton ? BackIcon : CloseIcon} 
-                    alt={currentConfig.backButton ? "Back" : "Close"} 
+                    src={CloseIcon} 
+                    alt="Close" 
                     className="w-5 h-5" 
                   />
                 </button>
               </div>
-              
-              <div className="mb-2">
-                <span className="text-white font-medium text-2xl">
-                  {currentConfig.title}
-                </span>
-              </div>
             </div>
 
-            {/* Screen description - hide for profile screen */}
+            {/* Main title reflects the current screen name, sub copy is the screen description */}
             {activeScreen !== 'profile' && getScreenDescription(activeScreen) && (
               <div className="px-6 pb-2">
+                <h2 className="text-white text-[24px] font-cash font-semibold mb-2">
+                  {currentConfig.title}
+                </h2>
                 <div 
                   className="relative cursor-pointer" 
                   onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
@@ -970,44 +932,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                   <p className={`text-white/60 text-sm ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
                     {getScreenDescription(activeScreen)}
                   </p>
-                </div>
-              </div>
-            )}
-
-            {/* Segmented control for profile selection - only visible on profile screen */}
-            {activeScreen === 'profile' && (
-              <div className="px-6 pb-4 pt-1">
-                <div className="flex bg-white/5 p-1 rounded-full">
-                  <button
-                    className={`flex-1 py-2 px-3 rounded-full text-sm font-medium ${
-                      userType === 'new' 
-                        ? 'bg-white text-black' 
-                        : 'text-white/80'
-                    }`}
-                    onClick={() => handleUserTypeChange('new')}
-                  >
-                    New
-                  </button>
-                  <button
-                    className={`flex-1 py-2 px-3 rounded-full text-sm font-medium ${
-                      userType === 'returning' 
-                        ? 'bg-white text-black' 
-                        : 'text-white/80'
-                    }`}
-                    onClick={() => handleUserTypeChange('returning')}
-                  >
-                    Returning
-                  </button>
-                  <button
-                    className={`flex-1 py-2 px-3 rounded-full text-sm font-medium ${
-                      userType === 'enrolled' 
-                        ? 'bg-white text-black' 
-                        : 'text-white/80'
-                    }`}
-                    onClick={() => handleUserTypeChange('enrolled')}
-                  >
-                    Enrolled
-                  </button>
                 </div>
               </div>
             )}
@@ -1030,35 +954,19 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             </div>
             
             {/* Buttons moved above footer */}
-            <div className="px-6 pb-1">
+            <div className="px-6 pb-6">
               {/* Divider line above buttons */}
               <div className="border-t border-white/10 mb-5"></div>
               
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <button 
-                    onClick={() => activeScreen === 'profile' ? setActiveScreen('main') : navigateTo('profile')}
-                    className={`h-10 px-3 rounded-full border ${
-                      activeScreen === 'profile' 
-                        ? 'bg-white border-white text-black' 
-                        : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 text-white/80'
-                    } flex items-center space-x-2`}
-                  >
-                    <img 
-                      src={AvatarIcon} 
-                      alt="Profile" 
-                      width={16} 
-                      height={16} 
-                      className={activeScreen === 'profile' ? 'brightness-0' : 'opacity-80'} 
-                    />
-                    <span className={`text-sm ${activeScreen === 'profile' ? 'text-black' : 'text-white/80'}`}>
-                      {userType === 'new' 
-                        ? 'New' 
-                        : userType === 'returning'
-                          ? 'Returning'
-                          : 'Enrolled'
-                      }
-                    </span>
+                  {/* New round button 1 */}
+                  <button className="w-10 h-10 rounded-full border border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 text-white/80 flex items-center justify-center">
+                    <span className="text-xl font-bold">+</span>
+                  </button>
+                  {/* New round button 2 */}
+                  <button className="w-10 h-10 rounded-full border border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 text-white/80 flex items-center justify-center">
+                    <span className="text-xl font-bold">?</span>
                   </button>
                 </div>
                 <div className="flex space-x-2">
@@ -1080,11 +988,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                   </button>
                 </div>
               </div>
-            </div>
-            
-            {/* Footer with version number only */}
-            <div className="px-6 py-2 flex flex-col">
-              <div className="text-[12px] text-white/30 font-medium text-center">Version number V0</div>
             </div>
           </div>
         ) : (

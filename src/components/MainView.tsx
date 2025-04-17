@@ -5,6 +5,7 @@ import { logNavigation } from '../utils/debug';
 import { SCREEN_ORDER } from '../constants/screens';
 import { Screen } from '../types/screen';
 import * as screens from '../screens/checkout';
+import { MiniDrawButton } from './dev/mini-draw';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'End'];
@@ -365,6 +366,10 @@ export const MainView = () => {
         backgroundPosition: '0 0',
       }}
     >
+      {/* MiniDrawButton in the top left corner */}
+      <div className="fixed top-6 left-6 z-[10002]">
+        <MiniDrawButton title="Device" rowLabels={["Register", "Terminal", "Stand", "Kiosk", "Reader"]} />
+      </div>
       {/* Main content area that centers all screens */}
       <div className={`flex-1 flex items-center relative overflow-hidden ${
         isPanelOpen ? 'justify-start pl-8' : 'justify-center'
