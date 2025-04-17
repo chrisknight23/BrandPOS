@@ -14,9 +14,10 @@ import avatarIcon from '../../assets/images/avatar.svg';
 interface MiniDrawButtonProps {
   rowLabels?: string[];
   title?: string;
+  iconSrc?: string; // optional custom icon source
 }
 
-export const MiniDrawButton: React.FC<MiniDrawButtonProps> = ({ rowLabels, title }) => {
+export const MiniDrawButton: React.FC<MiniDrawButtonProps> = ({ rowLabels, title, iconSrc }) => {
   // Controls open/close state of the mini drawer
   const [open, setOpen] = useState(false);
   // Tracks which row is selected (1-based index)
@@ -43,8 +44,8 @@ export const MiniDrawButton: React.FC<MiniDrawButtonProps> = ({ rowLabels, title
         <div className="p-3">
           <div className="w-6 h-6">
             <img
-              src={avatarIcon}
-              alt="User avatar"
+              src={iconSrc || avatarIcon}
+              alt={title ? `${title} icon` : 'Drawer icon'}
               className=""
               style={{ display: 'block' }}
             />

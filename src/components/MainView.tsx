@@ -6,6 +6,7 @@ import { SCREEN_ORDER } from '../constants/screens';
 import { Screen } from '../types/screen';
 import * as screens from '../screens/checkout';
 import { MiniDrawButton } from './dev/mini-draw';
+import DesktopIcon from '../assets/images/Desktop.svg';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'End'];
@@ -164,19 +165,21 @@ export const MainView = () => {
     logNavigation('MainView:handleNext', `Navigate from ${currentScreen}`, { amount });
     
     if (amount) {
-      // If coming from Cart or Payment, set as base amount
       if (currentScreen === 'Cart' || currentScreen === 'Payment') {
-        console.log(`MainView: Setting base amount to ${amount}`);
         setBaseAmount(amount);
-      }
-      // If coming from Tipping, set as tip amount
-      else if (currentScreen === 'Tipping') {
-        console.log(`MainView: Setting tip amount to ${amount}`);
+      } else if (currentScreen === 'Tipping') {
         setTipAmount(amount);
+      } else if (currentScreen === 'CustomTip') {
+        setTipAmount(amount);
+        setCurrentScreen('End');
+        return;
       }
     }
-    
-    handleScreenNext();
+    // Navigate to next screen by order
+    const idx = SCREEN_ORDER.indexOf(currentScreen);
+    if (idx < SCREEN_ORDER.length - 1) {
+      setCurrentScreen(SCREEN_ORDER[idx + 1]);
+    }
   }, [currentScreen]);
   
   // Handle back navigation
@@ -370,7 +373,7 @@ export const MainView = () => {
   
   return (
     <div
-      className="flex flex-col w-screen h-screen bg-black"
+      className="flex flex-col w-screen h-screen bg-[#050505]"
       style={{
         backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.5px, transparent 1.5px)',
         backgroundSize: '32px 32px',
@@ -379,7 +382,11 @@ export const MainView = () => {
     >
       {/* MiniDrawButton in the top left corner */}
       <div className="fixed top-6 left-6 z-[10002]">
-        <MiniDrawButton title="Device" rowLabels={["Register", "Terminal", "Stand", "Kiosk", "Reader"]} />
+        <MiniDrawButton
+          title="Device"
+          rowLabels={["Register", "Terminal", "Stand", "Kiosk", "Reader"]}
+          iconSrc={DesktopIcon}
+        />
       </div>
       {/* Main content area that centers all screens */}
       <div className={`flex-1 flex items-center relative overflow-hidden ${
