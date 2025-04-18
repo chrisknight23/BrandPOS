@@ -4,6 +4,8 @@ import LocalCashIcon from '../../assets/images/Local-Cash-32px.svg';
 import TipButton from '../../components/common/TipButton';
 import { useState, useEffect, useRef } from 'react';
 import { Screen } from '../../types/screen';
+import { useUserType } from '../../context/UserTypeContext';
+import AnimatedLocalCashButton from '../../components/common/AnimatedLocalCashButton';
 
 interface TippingProps {
   onNext: (amount: string) => void;
@@ -16,6 +18,7 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
   const [activeText, setActiveText] = useState(0); // 0 for "Give a Tip", 1 for "Local Cash"
   const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textChangeInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { userType } = useUserType();
 
   // Text options to cycle through - using simple strings now
   const textOptions = ["Give a Tip", "Earn Local Cash"];
@@ -204,67 +207,17 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
 
                 {/* Right side: Local Cash Button */}
                 <div className="relative">
-                  {/* Expandable button container with right-justified icon */}
-                  <motion.div 
-                    className="flex items-center justify-between bg-black border border-white/20 rounded-full overflow-hidden"
-                    // Initial animation for entering the screen
-                    initial={{ width: "56px" }}
-                    // Use consistent width for both text options
-                    animate={{ 
-                      width: "220px",
-                    }}
-                    // Use custom width values with specific transition for width
-                    transition={{
-                      width: {
-                        type: "spring",
-                        stiffness: 50,
-                        damping: 15,
-                        mass: 1.2,
-                        duration: 1.5
-                      }
-                    }}
-                  >
-                    {/* Text container with consistent 16px left padding */}
-                    <div className="h-[30px] pl-4 relative overflow-hidden">
-                      <div className="ml-4">
-                      {/* AnimatePresence with consistent timing for both animations */}
-                      <AnimatePresence mode="popLayout" initial={false}>
-                        <motion.div
-                          key={`text-${activeText}`}
-                          className="text-[18px] font-medium font-cash whitespace-nowrap"
-                          initial={{ y: 30, opacity: 0 }}
-                          animate={{ 
-                            y: activeText === 0 ? 0 : 1, // Slight adjustment for "Get Cash Back" to close gap at bottom
-                            opacity: 1
-                          }}
-                          exit={{ y: -30, opacity: 0 }}
-                          // Consistent timing settings for both text options
-                          transition={{
-                            type: "spring",
-                            stiffness: 120,  // Lower stiffness for slower movement
-                            damping: 20,     // Consistent damping
-                            mass: 1.0,       // Standard mass
-                            duration: 1.0    // Same duration for both
-                          }}
-                        >
-                          {activeText === 0 ? (
-                            <>
-                              <span className="text-[#1189D6] mr-1">NEW</span>
-                              {textOptions[0]}
-                            </>
-                          ) : (
-                            textOptions[1]
-                          )}
-                        </motion.div>
-                      </AnimatePresence>
-                      </div>
-                    </div>
-                    
-                    {/* Local Cash icon - tightened spacing */}
-                    <div className="py-4 pr-4 flex-shrink-0">
-                      <img src={LocalCashIcon} alt="Local Cash" className="w-8 h-8" />
-                    </div>
-                  </motion.div>
+                  <AnimatedLocalCashButton
+                    staticText={userType === 'cash-local'}
+                    texts={userType === 'cash-local' ? [
+                      <span style={{ color: '#fff' }}>Local Cash</span>
+                    ] : ["Give a Tip", "Earn Local Cash"]}
+                    iconSrc={LocalCashIcon}
+                    userType={userType}
+                    suffix={userType === 'cash-local' ? (
+                      <span style={{ color: '#00B843', fontWeight: 400 }}>On</span>
+                    ) : undefined}
+                  />
                 </div>
               </motion.div>
             )}
@@ -297,6 +250,7 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
                   // Only pass the animation complete callback to the selected button
                   onAnimationComplete={selectedAmount === amount ? handleSelectedAnimationComplete : undefined}
                   {...buttonEntranceAnimation}
+                  color={userType === 'cash-local' ? 'green' : 'blue'}
                 />
               </motion.div>
             ))}

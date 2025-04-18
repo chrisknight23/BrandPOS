@@ -26,6 +26,7 @@ import { MiniDrawButton } from './mini-draw';
 import CategoryEntertainmentIcon from '../../assets/images/16/category-entertainment.svg';
 import InvestingIcon from '../../assets/images/16/investing.svg';
 import DocumentIcon from '../../assets/images/16/document.svg';
+import { useUserType } from '../../context/UserTypeContext';
 
 interface ExpandableDevPanelProps {
   currentScreen: Screen;
@@ -133,6 +134,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   
   // Description state
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  
+  // User type context
+  const { setUserType } = useUserType();
   
   // Convert parent cart items to internal format
   useEffect(() => {
@@ -511,6 +515,26 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               </>
             )}
             
+            {/* --- Add QR Scan Simulation Button for Cashback Screen --- */}
+            {currentScreen === 'Cashback' && (
+              <div className="mb-4">
+                <button
+                  className="w-full py-3 px-4 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-base transition-colors shadow"
+                  onClick={() => {
+                    // Always dispatch a custom event for MainView to handle
+                    if (typeof window.dispatchEvent === 'function') {
+                      window.dispatchEvent(new CustomEvent('dev-simulate-qr-cashout'));
+                    } else {
+                      alert('Navigation to CashoutSuccess not implemented!');
+                    }
+                  }}
+                  style={{ marginTop: 12 }}
+                >
+                  Simulate QR Code Scan (Go to CashoutSuccess)
+                </button>
+              </div>
+            )}
+            
             {/* Bottom buttons section */}
             <div className="space-y-4 mt-auto">
               {/* Buttons only shown on Home or Cart screens */}
@@ -867,15 +891,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
 
   return (
     <LayoutGroup>
-      {/* New top-left button, only visible when expanded */}
-      {isExpanded && (
-        <div className="fixed top-0 right-[392px] p-6 z-[10001]">
-          <MiniDrawButton 
-            title="Customer" 
-            rowLabels={["New customer", "Returning customer", "Cash Local customer"]} 
-          />
-        </div>
-      )}
       <div className={isExpanded ? "fixed top-0 right-0 z-[10000]" : "fixed top-0 right-0 p-6 z-[10000]"} style={isExpanded ? { paddingTop: 18, paddingRight: 18, paddingBottom: 18, paddingLeft: 0 } : {}}>
         {isExpanded ? (
           // Expanded panel - no animations

@@ -8,6 +8,7 @@ export type Screen =
   | 'Auth'
   | 'Tipping'
   | 'Cashback'
+  | 'CashoutSuccess'
   | 'CustomTip'
   | 'End';
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import ClearIcon from '../../assets/images/clear.svg';
+import { useUserType } from '../../context/UserTypeContext';
 
 interface CustomTipProps {
   onNext: (amount: string) => void;
@@ -19,6 +20,8 @@ export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) 
   const displayTotal = (preTaxTotal * 1.0875).toFixed(2);
   // format the typed tip only (cents)
   const amount = tipAmount.toFixed(2);
+  
+  const { userType } = useUserType();
   
   const handleNumberPress = (num: string) => {
     // Only digits; ignore decimal input
@@ -118,7 +121,11 @@ export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) 
             <div className="w-[350px]">
               <button
                 onClick={handleAddTip}
-                className="w-full h-full bg-[#1189D6] rounded-2xl flex items-center justify-center text-[32px] font-cash font-medium active:bg-[#0D7BC3] transition-colors"
+                className={`w-full h-full rounded-2xl flex items-center justify-center text-[32px] font-cash font-medium transition-colors
+                  ${userType === 'cash-local' 
+                    ? 'bg-[#00B843] active:bg-[#009C36]' 
+                    : 'bg-[#1189D6] active:bg-[#0D7BC3]'}
+                `}
               >
                 Add tip
               </button>

@@ -7,6 +7,7 @@ import { Screen } from '../types/screen';
 import * as screens from '../screens/checkout';
 import { MiniDrawButton } from './dev/mini-draw';
 import DesktopIcon from '../assets/images/Desktop.svg';
+import { useUserType } from '../context/UserTypeContext';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'End'];
@@ -267,7 +268,7 @@ export const MainView = () => {
         ? 'left-[calc(50%-180px)] -translate-x-1/2' // Center when drawer is open (shift left to counter the drawer)
         : 'left-1/2 -translate-x-1/2' // Center when drawer is closed
     }`}>
-      {SCREEN_ORDER.map(screen => (
+      {SCREEN_ORDER.filter(screen => screen !== 'CustomTip').map(screen => (
         <button
           key={screen}
           onClick={() => goToScreen(screen)}
@@ -371,6 +372,19 @@ export const MainView = () => {
     }
   };
   
+  const { setUserType } = useUserType();
+  
+  useEffect(() => {
+    // Listen for dev QR scan simulation event
+    const handleDevSimulateQr = () => {
+      setCurrentScreen('CashoutSuccess');
+    };
+    window.addEventListener('dev-simulate-qr-cashout', handleDevSimulateQr);
+    return () => {
+      window.removeEventListener('dev-simulate-qr-cashout', handleDevSimulateQr);
+    };
+  }, []);
+  
   return (
     <div
       className="flex flex-col w-screen h-screen bg-[#050505]"
@@ -384,8 +398,25 @@ export const MainView = () => {
       <div className="fixed top-6 left-6 z-[10002]">
         <MiniDrawButton
           title="Device"
-          rowLabels={["Register", "Terminal", "Stand", "Kiosk", "Reader"]}
+          rowLabels={["New customer", "Returning customer", "Cash Local customer"]}
           iconSrc={DesktopIcon}
+          onRowSelect={(rowIndex) => {
+            if (rowIndex === 1) setUserType('new');
+            else if (rowIndex === 2) setUserType('returning');
+            else if (rowIndex === 3) setUserType('cash-local');
+          }}
+        />
+      </div>
+      {/* User profile MiniDrawButton on the right side, shifts left when dev panel is open (24px gap) */}
+      <div className={`fixed top-6 z-[10002] transition-all duration-300 ${isPanelOpen ? 'right-[404px]' : 'right-20'}`}>
+        <MiniDrawButton
+          title="Customer"
+          rowLabels={["New customer", "Returning customer", "Cash Local customer"]}
+          onRowSelect={(rowIndex) => {
+            if (rowIndex === 1) setUserType('new');
+            else if (rowIndex === 2) setUserType('returning');
+            else if (rowIndex === 3) setUserType('cash-local');
+          }}
         />
       </div>
       {/* Main content area that centers all screens */}

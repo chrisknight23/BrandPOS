@@ -116,13 +116,16 @@ export const MiniDrawButton: React.FC<MiniDrawButtonProps> = ({
 
   // Animate between collapsed and expanded states
   return (
-    <button
-      className={open
-        ? `${getBackgroundClasses()} flex flex-col items-start overflow-hidden focus:outline-none relative z-[10001] w-[${expandedWidth}px] rounded-[16px] shadow-lg pt-3 pr-4 pb-4 pl-4`
-        : `${getBackgroundClasses()} flex flex-col items-${iconPosition} justify-center overflow-hidden focus:outline-none relative z-[10001] w-[${collapsedSize}px] h-[${collapsedSize}px] rounded-full shadow-md p-3`}
+    <div
+      role="button"
+      tabIndex={0}
       onClick={handleToggle}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleToggle(e as any); }}
       aria-label={ariaLabel}
       aria-expanded={open}
+      className={open
+        ? `${getBackgroundClasses()} flex flex-col items-start overflow-hidden focus:outline-none relative z-[10001] w-[${expandedWidth}px] rounded-[16px] shadow-lg pt-3 pr-4 pb-4 pl-4`
+        : `${getBackgroundClasses()} flex flex-col items-${iconPosition} justify-center overflow-hidden focus:outline-none relative z-[10001] w-[${collapsedSize}px] h-[${collapsedSize}px] rounded-full shadow-md`}
       style={{
         backgroundColor: `${themeStyles.background}${Math.round(themeStyles.fillOpacity).toString(16).padStart(2, '0')}`,
       }}
@@ -164,6 +167,6 @@ export const MiniDrawButton: React.FC<MiniDrawButtonProps> = ({
           </div>
         )}
       </div>
-    </button>
+    </div>
   );
 }; 

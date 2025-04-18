@@ -6,6 +6,7 @@ import { Tipping } from './Tipping';
 import { Cashback } from './Cashback';
 import { CustomTip } from './CustomTip';
 import { End } from './End';
+import { CashoutSuccess } from './CashoutSuccess';
 
 export {
   Home,
@@ -15,5 +16,6 @@ export {
   Tipping,
   Cashback,
   CustomTip,
+  CashoutSuccess,
   End,
 }; 

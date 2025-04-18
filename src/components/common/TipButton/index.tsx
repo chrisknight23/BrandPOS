@@ -23,6 +23,7 @@ type TipButtonProps = {
    * Called when the selected state (expanded overlay) finishes its animation
    */
   onAnimationComplete?: () => void;
+  color?: 'blue' | 'green'; // New color prop
 };
 
 export const TipButton: React.FC<TipButtonProps> = ({ 
@@ -37,7 +38,8 @@ export const TipButton: React.FC<TipButtonProps> = ({
   index = 0,
   // Display options
   showPercentage = false,
-  onAnimationComplete
+  onAnimationComplete,
+  color = 'blue', // Default to blue
 }) => {
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -88,6 +90,9 @@ export const TipButton: React.FC<TipButtonProps> = ({
     };
   };
 
+  // Color logic
+  const mainColor = color === 'green' ? '#00B843' : '#1189D6';
+
   return (
     <>
       {/* Regular button that's visible when not selected */}
@@ -96,8 +101,8 @@ export const TipButton: React.FC<TipButtonProps> = ({
         className={`
           flex flex-col items-center justify-center
           ${isSelected 
-            ? 'bg-[#1189D6] text-white' 
-            : 'bg-[#1189D6] text-white'
+            ? `bg-[${mainColor}] text-white` 
+            : `bg-[${mainColor}] text-white`
           }
           cursor-pointer shadow-sm rounded-[16px]
         `}
@@ -143,7 +148,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
             className="shadow-lg text-white absolute z-50"
             initial={{
               ...getExpandedInitialStyle(),
-              backgroundColor: '#1189D6',
+              backgroundColor: mainColor,
               opacity: 1,
               scale: 0.7,
               borderRadius: '16px'
@@ -156,12 +161,12 @@ export const TipButton: React.FC<TipButtonProps> = ({
               borderRadius: '4px',
               opacity: 1,
               scale: 1,
-              backgroundColor: '#00B843'
+              backgroundColor: mainColor
             }}
             exit={{ 
               ...getExpandedInitialStyle(),
               opacity: 0,
-              backgroundColor: '#00B843',
+              backgroundColor: mainColor,
               transition: { duration: 0.2, ease: 'easeInOut' } 
             }}
             transition={{

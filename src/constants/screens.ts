@@ -7,5 +7,7 @@ export const SCREEN_ORDER: Screen[] = [
   'Auth',
   'Tipping',
   'Cashback',
+  'CashoutSuccess',
+  'CustomTip',
   'End'
 ]; 
