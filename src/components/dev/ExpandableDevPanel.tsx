@@ -23,6 +23,9 @@ import ControlIcon from '../../assets/images/16/control.svg';
 import avatarIcon from '../../assets/images/avatar.svg';
 import { Button } from '../../components/ui/button';
 import { MiniDrawButton } from './mini-draw';
+import CategoryEntertainmentIcon from '../../assets/images/16/category-entertainment.svg';
+import InvestingIcon from '../../assets/images/16/investing.svg';
+import DocumentIcon from '../../assets/images/16/document.svg';
 
 interface ExpandableDevPanelProps {
   currentScreen: Screen;
@@ -478,8 +481,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                         <motion.div
                           key={item.id}
                           className="bg-white/5 rounded-lg px-4 py-3 flex items-center justify-between h-16 min-h-16"
-                          initial={{ opacity: 0, y: 24 }}
-                          animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 24 }}
                           transition={{
                             duration: 0.3,
@@ -960,13 +961,17 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
               
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  {/* New round button 1 */}
-                  <button className="w-10 h-10 rounded-full border border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 text-white/80 flex items-center justify-center">
-                    <span className="text-xl font-bold">+</span>
+                  {/* New round button 1 (active) */}
+                  <button className="w-10 h-10 rounded-full border border-white bg-white flex items-center justify-center">
+                    <img src={CategoryEntertainmentIcon} alt="Entertainment" className="w-4 h-4" width="16" height="16" style={{ filter: 'invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%)' }} />
                   </button>
                   {/* New round button 2 */}
                   <button className="w-10 h-10 rounded-full border border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 text-white/80 flex items-center justify-center">
-                    <span className="text-xl font-bold">?</span>
+                    <img src={InvestingIcon} alt="Investing" className="w-4 h-4" width="16" height="16" />
+                  </button>
+                  {/* New round button 3 */}
+                  <button className="w-10 h-10 rounded-full border border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10 text-white/80 flex items-center justify-center">
+                    <img src={DocumentIcon} alt="Document" className="w-4 h-4" width="16" height="16" />
                   </button>
                 </div>
                 <div className="flex space-x-2">

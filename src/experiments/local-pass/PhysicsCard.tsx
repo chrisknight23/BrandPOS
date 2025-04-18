@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import lottie from 'lottie-web';
 import cashBackAnimation from '../../assets/CashBackLogo.json';
 import { AnimatedNumber } from '../../components/common/AnimatedNumber';
+import LocalCashIcon from '../../assets/images/Local-Cash-24px.svg';
 
 // ============= Types =============
 type CardState = 'expanded' | 'initial' | 'dropped';
@@ -392,13 +393,6 @@ export const PhysicsCard = () => {
                       WebkitFontSmoothing: 'antialiased',
                       MozOsxFontSmoothing: 'grayscale'
                     }}>Local Cash</div>
-                    <div className="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                      <span className="text-white text-xl antialiased" style={{
-                        textRendering: 'optimizeLegibility',
-                        WebkitFontSmoothing: 'antialiased',
-                        MozOsxFontSmoothing: 'grayscale'
-                      }}>$</span>
-                    </div>
                   </div>
                   
                   {/* Small text under header - only visible in normal state */}

@@ -160,12 +160,18 @@ const PaymentNotch = ({ position, text }: { position: 'top' | 'bottom', text: st
 interface PaymentProps {
   onNext: (amount?: string) => void;
   amount?: string;
+  taxRate?: number;
 }
 
-export const Payment = ({ onNext, amount = "10.80" }: PaymentProps) => {
+export const Payment = ({ onNext, amount = "10.80", taxRate = 0.0875 }: PaymentProps) => {
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
   const [notchesVisible, setNotchesVisible] = useState(false);
   const [showCardCursor, setShowCardCursor] = useState(true);
+
+  // Calculate tax and total
+  const base = parseFloat(amount);
+  const tax = base * taxRate;
+  const totalWithTax = base + tax;
 
   useEffect(() => {
     // Start all animations immediately
@@ -207,7 +213,7 @@ export const Payment = ({ onNext, amount = "10.80" }: PaymentProps) => {
             ease: [0.32, 0.72, 0, 1]
           }}
         >
-          ${parseFloat(amount).toFixed(2)}
+          ${totalWithTax.toFixed(2)}
         </motion.div>
 
         {/* Arrows */}

@@ -26,7 +26,7 @@ const ExperimentsRoot = () => {
   const [isPhysicsOpen, setIsPhysicsOpen] = useState(false);
 
   return (
-    <div className="relative w-screen h-screen bg-[#001707]">
+    <div className="relative w-screen h-screen bg-[#050505]">
       {/* Top bar with simple structure */}
       <div className="fixed top-4 right-4 flex gap-4 z-50">
         {/* Physics Mode selector only shown for LocalPass */}

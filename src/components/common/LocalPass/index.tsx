@@ -3,6 +3,7 @@ import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import lottie from 'lottie-web';
 import { AnimatedNumber } from '../AnimatedNumber';
 import { AnimatedQRCode } from '../AnimatedQRCode';
+import LocalCashIcon from '../../../assets/images/Local-Cash-24px.svg';
 
 /**
  * A card component that can expand to show additional content with animations.
@@ -671,12 +672,8 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                         WebkitFontSmoothing: 'antialiased',
                         MozOsxFontSmoothing: 'grayscale'
                       }}>{headerText}</div>
-                      <div className="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                        <span className="text-white text-xl antialiased" style={{
-                          textRendering: 'optimizeLegibility',
-                          WebkitFontSmoothing: 'antialiased',
-                          MozOsxFontSmoothing: 'grayscale'
-                        }}>$</span>
+                      <div className="w-8 h-8 flex items-center justify-center">
+                        <img src={LocalCashIcon} alt="Local Cash" className="w-6 h-6" />
                       </div>
                     </div>
                     

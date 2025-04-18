@@ -77,13 +77,9 @@ export const Cart = ({
         aria-label="Review cart and continue to payment"
       >
         {/* Total Header - Fixed */}
-        <motion.div 
-          className="text-[72px] font-cash font-medium mb-12"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <div className="text-[72px] font-cash font-medium mb-12">
           ${finalTotal.toFixed(2)}
-        </motion.div>
+        </div>
 
         {/* Items List - Scrollable, now also contains the tax section */}
         <div className="flex-1 overflow-y-auto">

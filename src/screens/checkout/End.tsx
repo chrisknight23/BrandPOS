@@ -9,9 +9,10 @@ interface EndProps {
   baseAmount?: string;   // Base amount from Cart/Payment
   tipAmount?: string;    // Tip amount from Tipping screen
   goToScreen?: (screen: Screen) => void; // Add prop for direct navigation
+  taxRate?: number;
 }
 
-export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goToScreen }: EndProps) => {
+export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goToScreen, taxRate = 0.0875 }: EndProps) => {
   const [total, setTotal] = useState(amount || baseAmount);
   const [progress, setProgress] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
@@ -22,26 +23,16 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
   const timerInterval = 50; // Update every 50ms for smooth animation
   const initialDelay = 1500; // 1.5 second delay before timer starts
 
-  // Calculate the total with tip when props change
+  // Calculate the total (base + tip) then apply tax to that subtotal
   useEffect(() => {
-    // If amount is provided directly, use it
-    if (amount) {
-      setTotal(amount);
-      // Determine if there's a tip by checking tipAmount
-      setHasTip(tipAmount !== undefined && tipAmount !== null && parseFloat(tipAmount) > 0);
-      return;
-    }
-    
-    // Otherwise calculate from base and tip
-    if (baseAmount) {
-      const base = parseFloat(baseAmount);
-      const tip = tipAmount ? parseFloat(tipAmount) : 0;
-      const totalWithTip = base + tip;
-      setTotal(totalWithTip.toFixed(2));
-      // Set hasTip based on whether tip is greater than 0
-      setHasTip(tip > 0);
-    }
-  }, [amount, baseAmount, tipAmount]);
+    // Determine the subtotal: either amount prop (base+tip) or derive from baseAmount and tipAmount
+    const subtotal = amount
+      ? parseFloat(amount)
+      : (parseFloat(baseAmount) + (tipAmount ? parseFloat(tipAmount) : 0));
+    const tax = subtotal * taxRate;
+    setTotal((subtotal + tax).toFixed(2));
+    setHasTip((tipAmount ? parseFloat(tipAmount) : 0) > 0);
+  }, [amount, baseAmount, tipAmount, taxRate]);
   
   // Set up timer effect with initial delay
   useEffect(() => {

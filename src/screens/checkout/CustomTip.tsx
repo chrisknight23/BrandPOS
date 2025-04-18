@@ -11,11 +11,14 @@ interface CustomTipProps {
 
 export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) => {
   const [cents, setCents] = useState<number>(0);
-  const amount = (cents / 100).toFixed(2);
   const [shake, setShake] = useState<boolean>(false);
-  // include tax at 8.75% on base + tip
-  const subtotal = parseFloat(baseAmount) + cents / 100;
-  const total = (subtotal * 1.0875).toFixed(2);
+  const tipAmount = cents / 100;
+  // subtotal (base + tip) before tax
+  const preTaxTotal = parseFloat(baseAmount) + tipAmount;
+  // total including 8.75% tax for display
+  const displayTotal = (preTaxTotal * 1.0875).toFixed(2);
+  // format the typed tip only (cents)
+  const amount = tipAmount.toFixed(2);
   
   const handleNumberPress = (num: string) => {
     // Only digits; ignore decimal input
@@ -40,7 +43,8 @@ export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) 
       setShake(true);
       return;
     }
-    onNext(total);
+    // pass only the tip amount (no tax) to onNext
+    onNext(amount);
   };
   
   const handleCancel = () => {
@@ -70,7 +74,7 @@ export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) 
           <div className="flex justify-between items-center">
             <h2 className="text-[24px] font-cash font-medium">
               Custom tip <span className="font-cash font-normal text-white/40">
-                ${total} {cents > 0 ? 'with tip' : 'total'}
+                ${displayTotal} {cents > 0 ? 'with tip' : 'total'}
               </span>
             </h2>
             <button 
@@ -84,7 +88,7 @@ export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) 
           {/* Current amount display */}
           <div className="flex items-center justify-start mb-4">
             <motion.span
-              className="text-[72px] font-semibold font-cash"
+              className="text-[72px] font-medium font-cash"
               animate={shake ? { x: [0, -8, 8, -8, 8, 0] } : {}}
               transition={{ duration: 0.3 }}
               onAnimationComplete={() => setShake(false)}
