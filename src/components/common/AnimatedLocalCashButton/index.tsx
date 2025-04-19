@@ -4,7 +4,7 @@ import { UserType } from '../../../context/UserTypeContext';
 
 interface AnimatedLocalCashButtonProps {
   texts: (string | React.ReactNode)[];
-  iconSrc: string;
+  icon: React.ReactNode;
   userType: UserType;
   onClick?: () => void;
   animationTiming?: {
@@ -17,7 +17,7 @@ interface AnimatedLocalCashButtonProps {
 
 export const AnimatedLocalCashButton: React.FC<AnimatedLocalCashButtonProps> = ({
   texts,
-  iconSrc,
+  icon,
   userType,
   onClick,
   animationTiming = { interval: 3000, fade: 300 },
@@ -165,7 +165,7 @@ export const AnimatedLocalCashButton: React.FC<AnimatedLocalCashButtonProps> = (
       </motion.div>
       {/* Fixed right (icon) side */}
       <div className="w-10 h-10 flex items-center justify-center">
-        <img src={iconSrc} alt="Local Cash" className="w-8 h-8" />
+        {icon}
       </div>
     </motion.button>
   );

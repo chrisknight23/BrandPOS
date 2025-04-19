@@ -1,6 +1,5 @@
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { motion, AnimatePresence } from 'framer-motion';
-import LocalCashIcon from '../../assets/images/Local-Cash-32px.svg';
 import TipButton from '../../components/common/TipButton';
 import { useState, useEffect, useRef } from 'react';
 import { Screen } from '../../types/screen';
@@ -175,6 +174,8 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
     }
   };
 
+  const iconColor = userType === 'cash-local' ? '#00B843' : 'white';
+
   return (
     <BaseScreen onNext={() => {}}>
       <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[8px] border border-[#222]">
@@ -186,9 +187,9 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          {/* Header Container - Conditionally hide if a button is selected */}
+          {/* Header Container - Conditionally hide if a button is selected, except for cash-local */}
           <AnimatePresence>
-            {!selectedAmount && (
+            {(!selectedAmount || userType === 'cash-local') && (
               <motion.div 
                 className="flex items-center justify-between mb-6 px-4 mt-2 h-16"
                 // Use the same animation timing as the buttons, but only fade
@@ -212,10 +213,17 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
                     texts={userType === 'cash-local' ? [
                       <span style={{ color: '#fff' }}>Local Cash</span>
                     ] : ["Give a Tip", "Earn Local Cash"]}
-                    iconSrc={LocalCashIcon}
+                    icon={
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                          <circle cx="16" cy="16" r="14.7" stroke={iconColor} strokeWidth="2.6" />
+                          <path fillRule="evenodd" clipRule="evenodd" d="M22.2766 11.6901L20.7048 12.9751C20.562 13.0919 20.3673 13.0659 20.2635 12.9232C19.4588 11.9367 18.2114 11.3786 16.8486 11.3786C15.3287 11.3786 14.3812 12.0406 14.3812 12.9751C14.3552 13.7538 15.0951 14.1692 17.3678 14.6624C20.2375 15.2724 21.5485 16.4665 21.5485 18.4784C21.5485 20.9964 19.4964 22.8524 16.2892 23.0601L15.9777 24.5527C15.9517 24.6955 15.8219 24.7993 15.6662 24.7993H13.1988C12.9911 24.7993 12.8483 24.6047 12.8873 24.41L13.2767 22.7486C11.6919 22.2943 10.4069 21.4117 9.66707 20.3344C9.57621 20.1916 9.60217 20.0099 9.73197 19.9061L11.4466 18.5692C11.5893 18.4524 11.797 18.4913 11.9008 18.6341C12.8094 19.9061 14.2125 20.6589 15.9011 20.6589C17.421 20.6589 18.5632 19.9191 18.5632 18.8548C18.5632 18.0371 17.9921 17.6607 16.0569 17.2583C12.7588 16.5444 11.4466 15.3244 11.4466 13.3125C11.4466 10.9762 13.4077 9.22401 16.3684 8.99038L16.6928 7.44583C16.7188 7.30305 16.8486 7.19922 17.0044 7.19922H19.4328C19.6275 7.19922 19.7833 7.38093 19.7443 7.57562L19.3679 9.30189C20.6399 9.69127 21.6795 10.3922 22.3285 11.2618C22.4324 11.3916 22.4064 11.5863 22.2766 11.6901Z" fill={iconColor} />
+                        </g>
+                      </svg>
+                    }
                     userType={userType}
                     suffix={userType === 'cash-local' ? (
-                      <span style={{ color: '#00B843', fontWeight: 400 }}>On</span>
+                      <span style={{ color: iconColor, fontWeight: 400 }}>On</span>
                     ) : undefined}
                   />
                 </div>
@@ -236,7 +244,7 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
                 key={`container-${amount}`} 
                 className={`
                   transition-opacity duration-300
-                  ${selectedAmount && selectedAmount !== amount ? 'invisible pointer-events-none' : 'opacity-100'}
+                  ${userType !== 'cash-local' && selectedAmount && selectedAmount !== amount ? 'invisible pointer-events-none' : 'opacity-100'}
                 `}
                 // Apply button entrance animation from variants
                 // Each button will animate in sequence based on index
@@ -251,14 +259,15 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
                   onAnimationComplete={selectedAmount === amount ? handleSelectedAnimationComplete : undefined}
                   {...buttonEntranceAnimation}
                   color={userType === 'cash-local' ? 'green' : 'blue'}
+                  disableExpand={userType === 'cash-local'}
                 />
               </motion.div>
             ))}
           </motion.div>
 
-          {/* Bottom Buttons - Only show when no tip is selected */}
+          {/* Bottom Buttons - Only show when no tip is selected, except for cash-local */}
           <AnimatePresence>
-            {!selectedAmount && (
+            {(!selectedAmount || userType === 'cash-local') && (
               <motion.div 
                 className="grid grid-cols-2 gap-3 mt-auto"
                 // Slide up from bottom with fade in

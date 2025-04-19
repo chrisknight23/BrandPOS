@@ -207,27 +207,6 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps> = ({
         overflow: 'hidden' // Prevent any content from spilling outside
       }}
     >
-      {/* Debug button for development */}
-      {!isAnimating && process.env.NODE_ENV !== 'production' && (
-        <button 
-          onClick={startAnimation}
-          style={{
-            position: 'absolute',
-            top: 5,
-            right: 5,
-            zIndex: 100,
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            padding: '4px 8px',
-            fontSize: '10px'
-          }}
-        >
-          Start Animation
-        </button>
-      )}
-      
       {/* Loading state */}
       {isLoading && (
         <div 

@@ -24,6 +24,7 @@ type TipButtonProps = {
    */
   onAnimationComplete?: () => void;
   color?: 'blue' | 'green'; // New color prop
+  disableExpand?: boolean; // New prop to disable expansion
 };
 
 export const TipButton: React.FC<TipButtonProps> = ({ 
@@ -40,6 +41,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
   showPercentage = false,
   onAnimationComplete,
   color = 'blue', // Default to blue
+  disableExpand = false, // Default to false
 }) => {
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -108,7 +110,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
         `}
         style={{ 
           height: '248px',
-          visibility: isSelected ? 'hidden' : 'visible',
+          visibility: disableExpand ? 'visible' : (isSelected ? 'hidden' : 'visible'),
           willChange: 'transform'
         }}
         onClick={onClick}
@@ -143,7 +145,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
 
       {/* Expanded version that appears when selected */}
       <AnimatePresence mode="wait">
-        {isSelected && buttonRect && (
+        {isSelected && !disableExpand && buttonRect && (
           <motion.div
             className="shadow-lg text-white absolute z-50"
             initial={{

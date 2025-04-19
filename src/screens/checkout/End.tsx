@@ -1,7 +1,9 @@
 import { BaseScreen } from '../../components/common/BaseScreen';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Screen } from '../../types/screen';
+import { useUserType } from '../../context/UserTypeContext';
+import LocalCustomer from '../../components/common/LocalCustomer';
 
 interface EndProps {
   onNext: () => void;
@@ -17,11 +19,22 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
   const [progress, setProgress] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
   const [hasTip, setHasTip] = useState(false);
+  const { userType } = useUserType();
   
   // Timer constants
   const timerDuration = 12000; // 12 seconds total (increased from 10 seconds)
   const timerInterval = 50; // Update every 50ms for smooth animation
   const initialDelay = 1500; // 1.5 second delay before timer starts
+
+  // Generate a random cash value under $30 for the local customer, persisted in sessionStorage for the session
+  const randomCashValue = useMemo(() => {
+    const key = 'localCustomerCashValue';
+    const stored = sessionStorage.getItem(key);
+    if (stored) return stored;
+    const value = (Math.random() * 30).toFixed(2);
+    sessionStorage.setItem(key, value);
+    return value;
+  }, []);
 
   // Calculate the total (base + tip) then apply tax to that subtotal
   useEffect(() => {
@@ -74,23 +87,40 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
     return () => clearInterval(timer);
   }, [onNext, timerDuration, timerInterval, timerStarted, goToScreen]);
 
+  // Set background color based on userType
+  const bgColor = userType === 'cash-local' ? '#00B843' : '#1189D6';
+  const showReceiptButton = userType !== 'cash-local';
+
   return (
     <BaseScreen onNext={onNext}>
-      <div className="w-[800px] h-[500px] bg-[#1189D6] text-white p-10 flex flex-col justify-between rounded-[8px] relative">
+      <div className="w-[800px] h-[500px] text-white p-10 flex flex-col justify-between rounded-[8px] relative"
+        style={{ backgroundColor: bgColor }}
+      >
         <motion.div
-          className="flex flex-col space-y-6"
+          className="flex flex-row items-start justify-between mb-6 px-4 mt-2 h-16"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <h2 className="text-2xl font-cash font-medium">
-            Paid ${total} {hasTip && <span className="font-normal text-white/60">with tip</span>}
-          </h2>
-          
-          <h1 className="text-[56px] font-cash font-semibold leading-[48px] tracking-[-0.04em]">
-            Thanks for<br />
-            shopping local
-          </h1>
+          {/* Left: Paid text and thanks */}
+          <div className="flex flex-col space-y-6">
+            <h2 className="text-2xl font-cash font-medium">
+              Paid ${total} {hasTip && <span className="font-normal text-white/60">with tip</span>}
+            </h2>
+            <h1 className="text-[56px] font-cash font-semibold leading-[48px] tracking-[-0.04em]">
+              Thanks for<br />
+              shopping local
+            </h1>
+          </div>
+          {/* Right: LocalCustomer profile */}
+          {userType === 'cash-local' && (
+            <div className="flex items-center">
+              <LocalCustomer
+                cashValue={randomCashValue}
+                profileImage={"https://randomuser.me/api/portraits/men/32.jpg"}
+              />
+            </div>
+          )}
         </motion.div>
         
         <motion.div
@@ -99,41 +129,42 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          {/* Progress Button with layered structure */}
-          <div 
-            className="relative overflow-hidden rounded-[12px] w-[340px] h-[96px] cursor-pointer"
-            onClick={() => {
-              // Navigate to Home screen when clicked
-              if (goToScreen) {
-                goToScreen('Home');
-              } else {
-                onNext();
-              }
-            }}
-          >
-            {/* Base button background - original styling */}
-            <div className="absolute inset-0 bg-black/15" />
-            
-            {/* Progress bar - drains from left to right */}
-            <div className="absolute inset-0 overflow-hidden">
-              <motion.div 
-                className="absolute inset-0 bg-black/[0.10]" 
-                initial={{ x: 0 }}
-                animate={{ x: -progress * 100 + '%' }}
-                transition={{ 
-                  ease: "linear", 
-                  duration: 0.05
-                }}
-              />
+          {showReceiptButton && (
+            <div 
+              className="relative overflow-hidden rounded-[12px] w-[340px] h-[96px] cursor-pointer"
+              onClick={() => {
+                // Navigate to Home screen when clicked
+                if (goToScreen) {
+                  goToScreen('Home');
+                } else {
+                  onNext();
+                }
+              }}
+            >
+              {/* Base button background - original styling */}
+              <div className="absolute inset-0 bg-black/15" />
+              
+              {/* Progress bar - drains from left to right */}
+              <div className="absolute inset-0 overflow-hidden">
+                <motion.div 
+                  className="absolute inset-0 bg-black/[0.10]" 
+                  initial={{ x: 0 }}
+                  animate={{ x: -progress * 100 + '%' }}
+                  transition={{ 
+                    ease: "linear", 
+                    duration: 0.05
+                  }}
+                />
+              </div>
+              
+              {/* Button text - stays on top */}
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <span className="text-[32px] font-cash font-medium text-white">
+                  Get receipt
+                </span>
+              </div>
             </div>
-            
-            {/* Button text - stays on top */}
-            <div className="relative z-10 flex items-center justify-center h-full">
-              <span className="text-[32px] font-cash font-medium text-white">
-                Get receipt
-              </span>
-            </div>
-          </div>
+          )}
         </motion.div>
       </div>
     </BaseScreen>

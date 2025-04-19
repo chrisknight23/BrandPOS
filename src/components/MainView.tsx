@@ -10,7 +10,7 @@ import DesktopIcon from '../assets/images/Desktop.svg';
 import { useUserType } from '../context/UserTypeContext';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'End'];
+const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'CashoutSuccess', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -268,20 +268,28 @@ export const MainView = () => {
         ? 'left-[calc(50%-180px)] -translate-x-1/2' // Center when drawer is open (shift left to counter the drawer)
         : 'left-1/2 -translate-x-1/2' // Center when drawer is closed
     }`}>
-      {SCREEN_ORDER.filter(screen => screen !== 'CustomTip').map(screen => (
-        <button
-          key={screen}
-          onClick={() => goToScreen(screen)}
-          className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
-            currentScreen === screen 
-              ? 'bg-white text-black font-medium border-white' 
-              : 'border-white/10 bg-[#141414] hover:bg-[#232323] active:bg-white/10 text-white/80'
-          }`}
-          style={{ minWidth: '60px', textAlign: 'center' }}
-        >
-          {screen}
-        </button>
-      ))}
+      {SCREEN_ORDER
+        .filter(screen => screen !== 'CustomTip')
+        .filter(screen => {
+          if (userType === 'cash-local') {
+            return screen !== 'Cashback' && screen !== 'CashoutSuccess';
+          }
+          return true;
+        })
+        .map(screen => (
+          <button
+            key={screen}
+            onClick={() => goToScreen(screen)}
+            className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
+              currentScreen === screen 
+                ? 'bg-white text-black font-medium border-white' 
+                : 'border-white/10 bg-[#141414] hover:bg-[#232323] active:bg-white/10 text-white/80'
+            }`}
+            style={{ minWidth: '60px', textAlign: 'center' }}
+          >
+            {screen}
+          </button>
+        ))}
     </div>
   );
   
@@ -372,7 +380,7 @@ export const MainView = () => {
     }
   };
   
-  const { setUserType } = useUserType();
+  const { userType, setUserType } = useUserType();
   
   useEffect(() => {
     // Listen for dev QR scan simulation event
