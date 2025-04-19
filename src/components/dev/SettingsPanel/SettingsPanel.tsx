@@ -19,7 +19,6 @@ import BackIcon from '../../../assets/images/back.svg';
 // import RightNavIcon from '../../assets/images/rightNav.svg';
 // import MoreIcon from '../../assets/images/more.svg';
 // import ChevronRightIcon from '../../assets/images/chevron-right.svg';
-import ControlIcon from '../../../assets/images/16/control.svg';
 import avatarIcon from '../../../assets/images/avatar.svg';
 import { Button } from '../../ui/button';
 import { MiniDrawButton } from '../mini-draw';
@@ -32,6 +31,7 @@ import InteractionView from './views/InteractionView';
 import AnalyticsView from './views/AnalyticsView';
 import ChangelogView from './views/ChangelogView';
 import SettingsView from './views/SettingsView';
+import ControlIcon from '../../../assets/images/16/control.svg';
 
 interface ExpandableDevPanelProps {
   currentScreen: Screen;
@@ -437,6 +437,8 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         return <AnalyticsView currentScreen={currentScreen} baseAmount={baseAmount} tipAmount={tipAmount} onBack={onBack} onNext={onNext} onRefresh={onRefresh} onReset={onReset} />;
       case 'changelog':
         return <ChangelogView />;
+      case 'settings':
+        return <SettingsView />;
       default:
         return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} />;
     }
@@ -452,7 +454,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
           <div>
             <div className="flex justify-between items-center">
               {/* Back button on the left, if present */}
-              {currentConfig.backButton ? (
+              {currentConfig.backButton && activeTab !== 'settings' && activeTab !== 'feature-flags' ? (
                 <button
                   className="p-2 text-white/60 hover:text-white"
                   onClick={navigateBack}
@@ -486,7 +488,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         </div>
 
         {/* Main title reflects the current screen name, sub copy is the screen description */}
-        {activeTab !== 'profile' && getScreenDescription((activeTab as any)) && (
+        {activeTab !== 'profile' && activeTab !== 'feature-flags' && getScreenDescription((activeTab as any)) && (
           <div className="pt-0 pl-0 pr-0">
             <h2 className="text-white text-[24px] font-cash font-semibold mb-2">
               {currentConfig.title}
@@ -497,6 +499,18 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             >
               <p className={`text-white/60 text-sm ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
                 {getScreenDescription((activeTab as any))}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Custom header for the settings (feature-flags) tab */}
+        {activeTab === 'feature-flags' && (
+          <div className="pt-0 pl-0 pr-0 mb-4">
+            <h2 className="text-white text-[24px] font-cash font-semibold mb-2">Settings</h2>
+            <div>
+              <p className="text-white/60 text-sm line-clamp-3">
+                Enable or disable experimental features and UI options for this app. These settings affect the current screen and may change your experience.
               </p>
             </div>
           </div>
@@ -526,7 +540,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                 onClick={() => setActiveTab('analytics')}
                 aria-label="Analytics"
               >
-                <img src={InvestingIcon} alt="Analytics" className="w-4 h-4" width="16" height="16" />
+                <img src={InvestingIcon} alt="Analytics" className="w-4 h-4" width="16" height="16" style={{ filter: activeTab === 'analytics' ? 'brightness(0%)' : undefined }} />
               </button>
               {/* Tab: Changelog */}
               <button
@@ -534,24 +548,25 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
                 onClick={() => setActiveTab('changelog')}
                 aria-label="Changelog"
               >
-                <img src={DocumentIcon} alt="Changelog" className="w-4 h-4" width="16" height="16" />
+                <img src={DocumentIcon} alt="Changelog" className="w-4 h-4" width="16" height="16" style={{ filter: activeTab === 'changelog' ? 'brightness(0%)' : undefined }} />
               </button>
             </div>
             <div className="flex space-x-2">
               <button 
-                onClick={() => activeTab === 'feature-flags' ? setActiveTab('main') : setActiveTab('feature-flags')}
+                onClick={() => setActiveTab('settings')}
                 className={`w-10 h-10 rounded-full border ${
-                  activeTab === 'feature-flags' 
+                  activeTab === 'settings' 
                     ? 'bg-white border-white' 
                     : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'
                 } flex items-center justify-center`}
+                aria-label="Settings"
               >
                 <img 
                   src={ControlIcon} 
-                  alt="Features" 
+                  alt="Settings" 
                   width={16} 
                   height={16}
-                  className={activeTab === 'feature-flags' ? 'brightness-0' : 'opacity-80'} 
+                  className={activeTab === 'settings' ? 'brightness-0' : 'opacity-80'} 
                 />
               </button>
             </div>
