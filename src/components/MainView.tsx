@@ -8,6 +8,8 @@ import * as screens from '../screens/checkout';
 import { MiniDrawButton } from './dev/mini-draw';
 import DesktopIcon from '../assets/images/Desktop.svg';
 import { useUserType } from '../context/UserTypeContext';
+import SettingsPanel from './dev/SettingsPanel';
+import FilterIcon from '../assets/images/filter.svg';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'CashoutSuccess', 'End'];
@@ -293,11 +295,6 @@ export const MainView = () => {
     </div>
   );
   
-  // Handle panel toggle notification from ExpandableDevPanel
-  const handlePanelToggle = useCallback((isOpen: boolean) => {
-    setIsPanelOpen(isOpen);
-  }, []);
-  
   // Calculate the total from cart items
   const calculateCartTotal = useCallback(() => {
     if (cartItems.length === 0) return '0.00';
@@ -367,7 +364,8 @@ export const MainView = () => {
     } else if (currentScreen === 'Cashback') {
       return {
         ...baseProps,
-        amount: tipAmount || "1" // Pass the tip amount to Cashback screen
+        amount: tipAmount || "1", // Pass the tip amount to Cashback screen
+        userType // Pass userType to Cashback
       };
     } else if (currentScreen === 'CustomTip') {
       return {
@@ -402,6 +400,53 @@ export const MainView = () => {
         backgroundPosition: '0 0',
       }}
     >
+      {/* Unified Settings Panel Container (collapsed/expanded) */}
+      <motion.div
+        className={`fixed top-6 right-6 z-[10003] bg-[#181818]/80 backdrop-blur-md border border-white/10 rounded-[24px] shadow-lg overflow-hidden flex flex-col items-center justify-center`}
+        style={{ maxWidth: '100vw', minHeight: '48px' }}
+        animate={{
+          width: isPanelOpen ? 360 : 48,
+          height: isPanelOpen ? 'calc(100vh - 48px)' : 48,
+          opacity: 1,
+        }}
+        initial={false}
+        transition={{
+          width: { type: 'spring', stiffness: 300, damping: 30 },
+          height: { type: 'spring', stiffness: 300, damping: 30 },
+          opacity: { duration: 0.2 }
+        }}
+      >
+        {/* Collapsed: show icon only */}
+        {!isPanelOpen && (
+          <button
+            className="w-full h-full flex items-center justify-center focus:outline-none bg-[#181818]/80 backdrop-blur-md border border-white/10"
+            aria-label="Open Settings Panel"
+            onClick={() => setIsPanelOpen(true)}
+            tabIndex={0}
+          >
+            <img src={FilterIcon} alt="Settings" className="w-6 h-6" />
+          </button>
+        )}
+        {/* Expanded: show panel content only */}
+        {isPanelOpen && (
+          <div className="w-full h-full flex flex-col">
+            <SettingsPanel
+              currentScreen={currentScreen}
+              baseAmount={baseAmount}
+              tipAmount={tipAmount}
+              cartItems={cartItems}
+              onAddItem={handleAddItem}
+              onClearCart={handleClearCart}
+              onRemoveCartItem={handleRemoveCartItem}
+              onBack={handleBack}
+              onNext={handleDevNavNext}
+              onRefresh={handleRefresh}
+              onReset={handleReset}
+              onPanelToggle={setIsPanelOpen}
+            />
+          </div>
+        )}
+      </motion.div>
       {/* MiniDrawButton in the top left corner */}
       <div className="fixed top-6 left-6 z-[10002]">
         <MiniDrawButton
@@ -468,22 +513,6 @@ export const MainView = () => {
       
       {/* Debug navigation */}
       {renderScreenNav()}
-      
-      {/* New Expandable Dev Panel */}
-      <ExpandableDevPanel 
-        currentScreen={currentScreen} 
-        baseAmount={baseAmount} 
-        tipAmount={tipAmount} 
-        cartItems={cartItems}
-        onBack={handleBack}
-        onNext={handleDevNavNext}
-        onRefresh={handleRefresh}
-        onReset={handleReset}
-        onPanelToggle={handlePanelToggle}
-        onAddItem={handleAddItem}
-        onClearCart={handleClearCart}
-        onRemoveCartItem={handleRemoveCartItem}
-      />
     </div>
   );
 }; 
