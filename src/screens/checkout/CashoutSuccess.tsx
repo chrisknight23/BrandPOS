@@ -9,7 +9,7 @@ interface CashoutSuccessProps {
 export const CashoutSuccess = ({ amount = '3', onComplete }: CashoutSuccessProps) => {
   return (
     <BaseScreen onNext={onComplete}>
-      <div className="w-[800px] h-[500px] bg-black flex items-center justify-center relative overflow-hidden rounded-2xl">
+      <div className="w-[800px] h-[500px] bg-black flex items-center justify-center relative overflow-hidden rounded-[16px]">
         <LocalPass initialState="initial" />
       </div>
     </BaseScreen>

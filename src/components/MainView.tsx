@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ExpandableDevPanel } from './dev/ExpandableDevPanel';
 import { logNavigation } from '../utils/debug';
@@ -76,6 +76,14 @@ const generateRandomItem = (id: number): CartItem => {
 // Add a constant for the tax rate
 const TAX_RATE = 0.0875;
 
+// Add this near the top of the MainView component, after imports:
+const drawerMotion = {
+  type: 'spring',
+  stiffness: 400,
+  damping: 35,
+  duration: 0.4
+};
+
 /**
  * Main application view that manages screen transitions and state.
  * Handles the flow between different screens and maintains selected amount state.
@@ -89,6 +97,13 @@ export const MainView = () => {
   const [baseAmount, setBaseAmount] = useState<string | null>(null);
   const [tipAmount, setTipAmount] = useState<string | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  
+  // Track previous isPanelOpen to determine open/close direction
+  const prevPanelOpenRef = useRef(isPanelOpen);
+  const isOpening = !prevPanelOpenRef.current && isPanelOpen;
+  useEffect(() => {
+    prevPanelOpenRef.current = isPanelOpen;
+  }, [isPanelOpen]);
   
   // Cart state
   const [cartItems, setCartItems] = useState<CartItem[]>([
@@ -265,11 +280,7 @@ export const MainView = () => {
   
   // Render screen navigation buttons for quick debugging
   const renderScreenNav = () => (
-    <div className={`fixed bottom-12 z-[9999] pointer-events-auto flex gap-1.5 ${
-      isPanelOpen 
-        ? 'left-[calc(50%-180px)] -translate-x-1/2' // Center when drawer is open (shift left to counter the drawer)
-        : 'left-1/2 -translate-x-1/2' // Center when drawer is closed
-    }`}>
+    <div className="flex gap-1.5">
       {SCREEN_ORDER
         .filter(screen => screen !== 'CustomTip')
         .filter(screen => {
@@ -402,7 +413,7 @@ export const MainView = () => {
     >
       {/* Unified Settings Panel Container (collapsed/expanded) */}
       <motion.div
-        className={`fixed top-6 right-6 z-[10003] bg-[#181818]/80 backdrop-blur-md border border-white/10 rounded-[24px] shadow-lg overflow-hidden flex flex-col items-center justify-center`}
+        className={`box-content fixed top-6 right-6 z-[10003] bg-[#181818]/80 backdrop-blur-md border border-white/10 ${isPanelOpen ? 'rounded-[24px]' : 'rounded-[32px]'} shadow-lg overflow-hidden flex flex-col items-center justify-center`}
         style={{ maxWidth: '100vw', minHeight: '48px' }}
         animate={{
           width: isPanelOpen ? 360 : 48,
@@ -410,16 +421,24 @@ export const MainView = () => {
           opacity: 1,
         }}
         initial={false}
-        transition={{
-          width: { type: 'spring', stiffness: 300, damping: 30 },
-          height: { type: 'spring', stiffness: 300, damping: 30 },
-          opacity: { duration: 0.2 }
-        }}
+        transition={
+          isOpening
+            ? {
+                width: { type: 'spring', stiffness: 300, damping: 30 },
+                height: { type: 'spring', stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 }
+              }
+            : {
+                width: { type: 'spring', stiffness: 500, damping: 40 },
+                height: { type: 'spring', stiffness: 500, damping: 40 },
+                opacity: { duration: 0.2 }
+              }
+        }
       >
         {/* Collapsed: show icon only */}
         {!isPanelOpen && (
           <button
-            className="w-full h-full flex items-center justify-center focus:outline-none bg-[#181818]/80 backdrop-blur-md border border-white/10"
+            className="w-full h-full flex items-center justify-center rounded-full focus:outline-none"
             aria-label="Open Settings Panel"
             onClick={() => setIsPanelOpen(true)}
             tabIndex={0}
@@ -461,7 +480,12 @@ export const MainView = () => {
         />
       </div>
       {/* User profile MiniDrawButton on the right side, shifts left when dev panel is open (24px gap) */}
-      <div className={`fixed top-6 z-[10002] transition-all duration-300 ${isPanelOpen ? 'right-[404px]' : 'right-20'}`}>
+      <motion.div
+        className="fixed top-6 z-[10002]"
+        initial={{ right: 80 }}
+        animate={{ right: isPanelOpen ? 404 : 80 }}
+        transition={drawerMotion}
+      >
         <MiniDrawButton
           title="Customer"
           rowLabels={["New customer", "Returning customer", "Cash Local customer"]}
@@ -471,11 +495,13 @@ export const MainView = () => {
             else if (rowIndex === 3) setUserType('cash-local');
           }}
         />
-      </div>
+      </motion.div>
       {/* Main content area that centers all screens */}
-      <div className={`flex-1 flex items-center relative overflow-hidden ${
-        isPanelOpen ? 'justify-start pl-8' : 'justify-center'
-      }`}>
+      <motion.div
+        className="flex-1 flex items-center relative overflow-hidden justify-center"
+        animate={{ x: isPanelOpen ? -180 : 0 }}
+        transition={drawerMotion}
+      >
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={`${currentScreen}-${refreshKey}`}
@@ -495,24 +521,20 @@ export const MainView = () => {
               opacity: isInstantTransition ? 1 : 0.8,
               transition: { duration: 0.15 }
             }}
-            transition={{
-              type: "spring",
-              stiffness: 400,
-              damping: 35,
-              duration: isInstantTransition ? 0 : 0.2
-            }}
+            transition={drawerMotion}
           >
             {/* Apply key directly to component, not through spread */}
             <CurrentScreenComponent 
               key={`screen-${currentScreen}-${refreshKey}`} 
               {...getScreenProps()} 
             />
+            {/* Centered screen navigation at the bottom of the device frame */}
+            <div className="absolute bottom-12 left-0 w-full flex justify-center z-20">
+              {renderScreenNav()}
+            </div>
           </motion.div>
         </AnimatePresence>
-      </div>
-      
-      {/* Debug navigation */}
-      {renderScreenNav()}
+      </motion.div>
     </div>
   );
 }; 

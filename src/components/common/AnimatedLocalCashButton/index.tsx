@@ -32,7 +32,8 @@ export const AnimatedLocalCashButton: React.FC<AnimatedLocalCashButtonProps> = (
 
   // Fixed word changes instantly based on activeText
   const fixedWords = ['New', 'Earn'];
-  const fixedWord = fixedWords[activeText] || 'New';
+  const showFixedWord = (staticText && userType === 'returning') || (!staticText);
+  const fixedWord = staticText && userType === 'returning' ? 'Earn' : fixedWords[activeText] || 'New';
 
   // Measure text width on every text/suffix change
   useEffect(() => {
@@ -53,6 +54,13 @@ export const AnimatedLocalCashButton: React.FC<AnimatedLocalCashButtonProps> = (
       if (textChangeInterval.current) clearInterval(textChangeInterval.current);
     };
   }, [texts.length, animationTiming.interval, animationTiming.fade, staticText]);
+
+  // When switching to staticText for returning customer, force prefix to 'Earn'
+  useEffect(() => {
+    if (staticText && userType === 'returning') {
+      setActiveText(1); // 1 = 'Earn'
+    }
+  }, [staticText, userType]);
 
   // Text color: always white
   const textColor = '#fff';
@@ -108,12 +116,12 @@ export const AnimatedLocalCashButton: React.FC<AnimatedLocalCashButtonProps> = (
         {/* Hidden measurer for both static and animated variants */}
         <div
           ref={measurerRef}
-          className={`absolute left-0 top-0 pointer-events-none opacity-0 whitespace-nowrap flex items-center${!staticText ? ' gap-1' : ''}`}
+          className={`absolute left-0 top-0 pointer-events-none opacity-0 whitespace-nowrap flex items-center gap-1`}
           style={{ visibility: 'hidden', position: 'absolute' }}
           aria-hidden="true"
         >
-          {/* Animated: fixed word + animated text + suffix; Static: just static text + suffix */}
-          {!staticText && (
+          {/* Show the fixed word only for animated or returning-customer staticText */}
+          {showFixedWord && (
             <span className="text-[18px] font-normal font-cash whitespace-nowrap" style={{ color: fixedWordColor }}>
               {fixedWord}
             </span>
@@ -129,9 +137,9 @@ export const AnimatedLocalCashButton: React.FC<AnimatedLocalCashButtonProps> = (
           )}
         </div>
         {/* Left side: fixed word and animated text */}
-        <div className={`flex items-center min-w-0 h-[30px]${!staticText ? ' gap-1' : ''}`}>
-          {/* Only show the fixed word if not staticText */}
-          {!staticText && (
+        <div className={`flex items-center min-w-0 h-[30px] gap-1`}>
+          {/* Show the fixed word only for animated or returning-customer staticText */}
+          {showFixedWord && (
             <span className="text-[18px] font-normal font-cash whitespace-nowrap" style={{ color: fixedWordColor }}>
               {fixedWord}
             </span>

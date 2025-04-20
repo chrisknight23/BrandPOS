@@ -895,7 +895,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         {isExpanded ? (
           // Expanded panel - no animations
           <div 
-            className="bg-[#141414] rounded-[24px] overflow-hidden shadow-lg border border-white/10 flex flex-col"
+            className="bg-[#ff0000] rounded-[24px] overflow-hidden shadow-lg border border-white/10 flex flex-col"
             style={{ width: 'calc(100vw - 36px)', height: 'calc(100vh - 36px)', maxWidth: 360 }}
             ref={buttonRef}
           >

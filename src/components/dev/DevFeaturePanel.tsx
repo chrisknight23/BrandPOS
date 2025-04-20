@@ -1,3 +1,5 @@
+// This file has been migrated to SettingsPanel/views/SettingsView.tsx and should no longer be used.
+
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 

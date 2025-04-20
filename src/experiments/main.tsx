@@ -5,12 +5,13 @@ import { AnimatingNumberExperiment } from './animating-number/AnimatingNumberExp
 import { motion, AnimatePresence } from 'framer-motion';
 import './index.css';
 
-type ExperimentType = 'local-pass' | 'animating-number';
+type ExperimentType = 'local-pass' | 'animating-number' | 'the-spirit';
 type PhysicsMode = 'framer' | 'three' | 'matter';
 
 const EXPERIMENTS: Record<ExperimentType, string> = {
   'local-pass': 'Local Pass',
-  'animating-number': 'Animating Number'
+  'animating-number': 'Animating Number',
+  'the-spirit': 'The Spirit'
 };
 
 const MODES: Record<PhysicsMode, string> = {
@@ -112,20 +113,35 @@ const ExperimentsRoot = () => {
                 transition={{ duration: 0.2 }}
                 className="absolute top-full right-0 mt-2 bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden min-w-full"
               >
-                {Object.entries(EXPERIMENTS).map(([key, label]) => (
-                  <button
-                    key={key}
-                    className={`w-full px-6 py-3 text-left transition-colors hover:bg-white/5 cursor-pointer ${
-                      currentExperiment === key ? 'text-[#00D64F]' : 'text-white'
-                    }`}
-                    onClick={() => {
-                      setCurrentExperiment(key as ExperimentType);
-                      setIsExperimentOpen(false);
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
+                {Object.entries(EXPERIMENTS).map(([key, label]) =>
+                  key === 'the-spirit' ? (
+                    <a
+                      key={key}
+                      href="/experiments/The-Spirit-master/app/index.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`w-full px-6 py-3 text-left transition-colors hover:bg-white/5 cursor-pointer ${
+                        currentExperiment === key ? 'text-[#00D64F]' : 'text-white'
+                      } block`}
+                      style={{ textDecoration: 'none' }}
+                    >
+                      {label}
+                    </a>
+                  ) : (
+                    <button
+                      key={key}
+                      className={`w-full px-6 py-3 text-left transition-colors hover:bg-white/5 cursor-pointer ${
+                        currentExperiment === key ? 'text-[#00D64F]' : 'text-white'
+                      }`}
+                      onClick={() => {
+                        setCurrentExperiment(key as ExperimentType);
+                        setIsExperimentOpen(false);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  )
+                )}
               </motion.div>
             )}
           </AnimatePresence>

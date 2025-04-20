@@ -51,7 +51,7 @@ const InteractionView: React.FC<{
           {currentScreen}
         </h2>
         <div className="relative">
-          <p className="text-white/60 text-sm">
+          <p className="text-white/60 text-sm line-clamp-3">
             {getScreenDescription(currentScreen)}
           </p>
         </div>

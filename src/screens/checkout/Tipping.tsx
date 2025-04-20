@@ -178,7 +178,7 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
 
   return (
     <BaseScreen onNext={() => {}}>
-      <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[8px] border border-[#222]">
+      <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[16px] border border-[#222]">
         {/* Main screen container with fade-in animation */}
         <motion.div 
           className="w-full h-full bg-black text-white p-6 flex flex-col"
@@ -209,8 +209,8 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
                 {/* Right side: Local Cash Button */}
                 <div className="relative">
                   <AnimatedLocalCashButton
-                    staticText={userType === 'cash-local'}
-                    texts={userType === 'cash-local' ? [
+                    staticText={userType === 'returning' || userType === 'cash-local'}
+                    texts={userType === 'returning' ? ["Local Cash"] : userType === 'cash-local' ? [
                       <span style={{ color: '#fff' }}>Local Cash</span>
                     ] : ["Give a Tip", "Earn Local Cash"]}
                     icon={

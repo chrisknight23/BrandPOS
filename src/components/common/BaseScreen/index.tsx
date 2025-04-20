@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { DeviceFrame } from '../DeviceFrame';
 
 interface BaseScreenProps {
   children: ReactNode;
@@ -18,8 +19,10 @@ export const BaseScreen: React.FC<BaseScreenProps> = ({
   hideNextButton = false,
 }) => {
   return (
-    <div className="h-full w-full flex items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.18)]">
-      {children}
+    <div className="min-h-screen min-w-full flex items-center justify-center">
+      <DeviceFrame>
+        {children}
+      </DeviceFrame>
     </div>
   );
 }; 

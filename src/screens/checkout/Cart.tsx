@@ -69,7 +69,7 @@ export const Cart = ({
   return (
     <BaseScreen onNext={handleNext}>
       <div 
-        className="w-[800px] h-[500px] bg-black text-white px-10 pt-[100px] pb-8 flex flex-col cursor-pointer rounded-[8px] border border-[#222] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)]"
+        className="w-[800px] h-[500px] bg-black text-white px-10 pt-[100px] pb-8 flex flex-col cursor-pointer rounded-[16px] border border-[#222] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)]"
         onClick={handleNext}
         role="button"
         tabIndex={0}

@@ -8,11 +8,33 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface CashbackProps {
   onNext: (amount?: string) => void;
   amount?: string;
+  userType?: string;
 }
 
-export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
-  // Format the amount to ensure it's a whole number for the display
-  const formattedAmount = Math.round(parseFloat(amount)).toString();
+export const Cashback = ({ onNext, amount = "1", userType }: CashbackProps) => {
+  // Determine the base value for returning customers
+  const [baseReturningAmount, setBaseReturningAmount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (userType === 'returning') {
+      // Generate a random value under $30 for returning customers
+      const randomValue = Math.floor(Math.random() * 2900 + 100) / 100; // $1.00 to $29.99
+      setBaseReturningAmount(randomValue);
+    } else {
+      setBaseReturningAmount(null);
+    }
+  }, [userType]);
+
+  // Calculate the display amount
+  let displayAmount: number;
+  if (userType === 'returning' && baseReturningAmount !== null) {
+    // Add the tip amount (from props.amount) to the base value
+    const tip = parseFloat(amount) || 0;
+    displayAmount = Math.round((baseReturningAmount + tip) * 100) / 100;
+  } else {
+    displayAmount = Math.round(parseFloat(amount)) || 1;
+  }
+  const formattedAmount = displayAmount.toString();
   
   const [cardState, setCardState] = useState<CardState>('expanded');
   // Track whether we're currently transitioning states
@@ -74,11 +96,19 @@ export const Cashback = ({ onNext, amount = "1" }: CashbackProps) => {
     console.log(`Current card state: ${cardState}, transitioning: ${isTransitioning}, logo: ${showLogo}`);
   }, [cardState, isTransitioning, showLogo]);
 
+  // Example: log or render something special for returning customers
+  useEffect(() => {
+    if (userType === 'returning') {
+      console.log('Cashback: Returning customer detected');
+      // You can add more logic here for returning customers
+    }
+  }, [userType]);
+
   return (
     <BaseScreen onNext={onNext}>
       {/* Main container for the device frame - everything must stay within this boundary */}
       <motion.div 
-        className="w-[800px] h-[500px] relative overflow-hidden rounded-[8px] border border-[#222]"
+        className="w-[800px] h-[500px] relative overflow-hidden rounded-[16px] border border-[#222]"
         initial={{ opacity: 1 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 1 }}
