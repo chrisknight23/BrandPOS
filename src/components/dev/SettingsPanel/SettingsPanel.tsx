@@ -21,7 +21,7 @@ import BackIcon from '../../../assets/images/back.svg';
 // import ChevronRightIcon from '../../assets/images/chevron-right.svg';
 import avatarIcon from '../../../assets/images/avatar.svg';
 import { Button } from '../../ui/button';
-import { MiniDrawButton } from '../mini-draw';
+import { DropMenu } from '../dropMenu';
 import CategoryEntertainmentIcon from '../../../assets/images/16/category-entertainment.svg';
 import InvestingIcon from '../../../assets/images/16/investing.svg';
 import DocumentIcon from '../../../assets/images/16/document.svg';

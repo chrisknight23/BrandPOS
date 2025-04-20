@@ -1,15 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ExpandableDevPanel } from './dev/ExpandableDevPanel';
 import { logNavigation } from '../utils/debug';
 import { SCREEN_ORDER } from '../constants/screens';
 import { Screen } from '../types/screen';
 import * as screens from '../screens/checkout';
-import { MiniDrawButton } from './dev/mini-draw';
 import DesktopIcon from '../assets/images/Desktop.svg';
 import { useUserType } from '../context/UserTypeContext';
 import SettingsPanel from './dev/SettingsPanel';
 import FilterIcon from '../assets/images/filter.svg';
+import { DropMenu } from './dev/dropMenu';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'CashoutSuccess', 'End'];
@@ -466,33 +465,33 @@ export const MainView = () => {
           </div>
         )}
       </motion.div>
-      {/* MiniDrawButton in the top left corner */}
+      {/* Device DropMenu in the top left corner */}
       <div className="fixed top-6 left-6 z-[10002]">
-        <MiniDrawButton
+        <DropMenu
           title="Device"
-          rowLabels={["New customer", "Returning customer", "Cash Local customer"]}
+          rowLabels={["Register", "Stand", "Reader"]}
           iconSrc={DesktopIcon}
           onRowSelect={(rowIndex) => {
-            if (rowIndex === 1) setUserType('new');
-            else if (rowIndex === 2) setUserType('returning');
-            else if (rowIndex === 3) setUserType('cash-local');
+            if (rowIndex === 0) setUserType('new');
+            else if (rowIndex === 1) setUserType('returning');
+            else if (rowIndex === 2) setUserType('cash-local');
           }}
         />
       </div>
-      {/* User profile MiniDrawButton on the right side, shifts left when dev panel is open (24px gap) */}
+      {/* User profile DropMenu on the right side, shifts left when dev panel is open (24px gap) */}
       <motion.div
         className="fixed top-6 z-[10002]"
         initial={{ right: 80 }}
         animate={{ right: isPanelOpen ? 404 : 80 }}
         transition={drawerMotion}
       >
-        <MiniDrawButton
+        <DropMenu
           title="Customer"
           rowLabels={["New customer", "Returning customer", "Cash Local customer"]}
           onRowSelect={(rowIndex) => {
-            if (rowIndex === 1) setUserType('new');
-            else if (rowIndex === 2) setUserType('returning');
-            else if (rowIndex === 3) setUserType('cash-local');
+            if (rowIndex === 0) setUserType('new');
+            else if (rowIndex === 1) setUserType('returning');
+            else if (rowIndex === 2) setUserType('cash-local');
           }}
         />
       </motion.div>

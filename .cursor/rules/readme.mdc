@@ -1,0 +1,52 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+ # README Documentation Rule
+
+## Purpose
+Ensure every component, feature, or major directory has a clear, up-to-date README file. This helps all contributors (and your future self) quickly understand usage, props, and recent changes.
+
+## When to Update the README
+- When creating a new component, feature, or directory
+- After any significant code change, new feature, or API update
+- When changing or deprecating props, usage, or behavior
+- Whenever you find the README is unclear or out of date
+
+## What to Include
+- **Description:** What does this component/feature do? What problem does it solve?
+- **Usage Example:** Show a minimal, real-world usage snippet
+- **Props/API:** List and describe all props, options, or configuration
+- **Customization:** Note any theming, slots, or advanced usage
+- **Changelog (optional):** Summarize recent changes if helpful
+- **TODOs (optional):** Note planned improvements or missing docs
+
+## Style Guidelines
+- Be concise, but clear and complete
+- Use code blocks for examples
+- Use lists or tables for props
+- Use plain language—assume the reader is new to the codebase
+- Keep the README as the single source of truth for usage
+
+## Example Structure
+```
+# ComponentName
+
+A short description of what this component does.
+
+## Usage
+```tsx
+<ComponentName prop1="foo" />
+```
+
+## Props
+- `prop1`: string — Description
+- `prop2`: boolean — Description
+
+## Changelog
+- 2024-06-10: Added new prop `foo`
+
+---
+
+_Keep this README up to date with all changes!_ 
