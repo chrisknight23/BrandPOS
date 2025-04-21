@@ -14,7 +14,7 @@ const AnalyticsView: React.FC<{
     : baseAmount || '';
 
   return (
-    <div className="w-full h-full text-white flex flex-col">
+    <div className="flex flex-col h-full w-full">
       {/* Header title and sub copy */}
       <div className="pb-1">
         <h2 className="text-white text-[24px] font-cash font-semibold mb-2">
@@ -26,6 +26,12 @@ const AnalyticsView: React.FC<{
           </p>
         </div>
       </div>
+      <div className="flex-1" />
+      <button
+        className="w-full rounded-full py-4 flex items-center justify-center bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors text-white font-medium mt-auto"
+      >
+        View all
+      </button>
     </div>
   );
 };

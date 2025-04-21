@@ -12,14 +12,13 @@ import {
 } from '../../../utils/featureFlags';
 import { FEATURE_FLAGS, FeatureFlag } from '../../../constants/featureFlags';
 import { SCREEN_ORDER } from '../../../constants/screens';
-import FilterIcon from '../../../assets/images/filter.svg';
 import CloseIcon from '../../../assets/images/close.svg';
 import BackIcon from '../../../assets/images/back.svg';
 // import LeftNavIcon from '../../assets/images/leftNav.svg';
 // import RightNavIcon from '../../assets/images/rightNav.svg';
 // import MoreIcon from '../../assets/images/more.svg';
 // import ChevronRightIcon from '../../assets/images/chevron-right.svg';
-import avatarIcon from '../../../assets/images/avatar.svg';
+import controlIcon from '../../../assets/images/control.svg';
 import { Button } from '../../ui/button';
 import { DropMenu } from '../dropMenu';
 import CategoryEntertainmentIcon from '../../../assets/images/16/category-entertainment.svg';
@@ -32,8 +31,15 @@ import AnalyticsView from './views/AnalyticsView';
 import ChangelogView from './views/ChangelogView';
 import SettingsView from './views/SettingsView';
 import ControlIcon from '../../../assets/images/16/control.svg';
+import ResearchView from './views/ResearchView';
+import UtilitiesIcon from '../../../assets/images/16/utilities.svg';
+import APIsView from './views/APIsView';
+import PlugIcon from '../../../assets/images/16/plug.svg';
+import TechnologyIcon from '../../../assets/images/16/technology.svg';
 
 interface ExpandableDevPanelProps {
+  isOpen: boolean;
+  onPanelToggle: (open: boolean) => void;
   currentScreen: Screen;
   baseAmount: string | null;
   tipAmount: string | null;
@@ -42,14 +48,13 @@ interface ExpandableDevPanelProps {
   onNext?: () => void;
   onRefresh?: () => void;
   onReset?: () => void;
-  onPanelToggle?: (isOpen: boolean) => void;
   onAddItem?: () => void;
   onClearCart?: () => void;
   onRemoveCartItem?: (itemId: number) => void;
 }
 
 // Define the navigation screens that can be shown in the panel
-type PanelScreen = 'main' | 'app-info' | 'debug' | 'flag-details' | 'navigation' | 'cart' | 'profile' | 'feature-flags';
+type PanelScreen = 'main' | 'app-info' | 'debug' | 'flag-details' | 'navigation' | 'cart' | 'profile' | 'feature-flags' | 'research' | 'apis';
 
 // Define user types for the segmented control
 type UserType = 'new' | 'returning' | 'enrolled';
@@ -108,6 +113,8 @@ interface InternalCartItem {
 }
 
 export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
+  isOpen,
+  onPanelToggle,
   currentScreen,
   baseAmount,
   tipAmount,
@@ -116,14 +123,10 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   onNext,
   onRefresh,
   onReset,
-  onPanelToggle,
   onAddItem,
   onClearCart,
   onRemoveCartItem
 }) => {
-  // Panel state
-  const [isExpanded, setIsExpanded] = useState(true);
-  
   // Tab context
   const { activeTab, setActiveTab } = useTab();
   // Ensure 'interaction' is the default view when the drawer opens
@@ -178,19 +181,9 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   // Notify parent of panel state changes
   useEffect(() => {
     if (onPanelToggle) {
-      onPanelToggle(isExpanded);
+      onPanelToggle(isOpen);
     }
-  }, [isExpanded, onPanelToggle]);
-
-  // Toggle panel open/closed
-  const togglePanel = () => {
-    setIsExpanded(prev => !prev);
-    
-    // Reset to main screen when opening
-    if (!isExpanded) {
-      setActiveTab('interaction');
-    }
-  };
+  }, [isOpen, onPanelToggle]);
 
   // Handle toggling a feature flag
   const handleToggleFlag = (flagId: string) => {
@@ -308,7 +301,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
     if (activeTab === 'main') {
       // If we're at the root level, close the panel
       console.log('At root level, closing panel');
-      togglePanel();
+      onPanelToggle(false);
       return;
     }
     setActiveTab('interaction');
@@ -333,6 +326,10 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         return { title: 'Customer Selection', backButton: true };
       case 'feature-flags':
         return { title: `${currentScreen} Features`, backButton: true };
+      case 'research':
+        return { title: 'Neuro net', backButton: true };
+      case 'apis':
+        return { title: 'APIs', backButton: true };
       default:
         return { title: currentScreen, backButton: false };
     }
@@ -372,6 +369,10 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         return ''; // Remove description for profile screen
       case 'feature-flags':
         return 'Enables/disables features available on the current screen. For example: animations on Cashback screen, enhanced UI on Tipping screen, or payment indicators.';
+      case 'research':
+        return 'This is the AI brain that controls product learning across different teams.';
+      case 'apis':
+        return 'APIs allow you to plug external services and data sources directly into this interface. Use APIs to extend functionality, enable integrations with third-party platforms, and create custom workflows tailored to your business needs.';
       default:
         return '';
     }
@@ -435,10 +436,12 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
         return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} />;
       case 'analytics':
         return <AnalyticsView currentScreen={currentScreen} baseAmount={baseAmount} tipAmount={tipAmount} onBack={onBack} onNext={onNext} onRefresh={onRefresh} onReset={onReset} />;
-      case 'changelog':
-        return <ChangelogView />;
       case 'settings':
         return <SettingsView />;
+      case 'research':
+        return <ResearchView />;
+      case 'apis':
+        return <APIsView />;
       default:
         return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} />;
     }
@@ -447,133 +450,162 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   const currentConfig = getScreenConfig((activeTab as any));
 
   return (
-    <LayoutGroup>
-      <div className="w-full h-full flex flex-col min-h-0 min-w-0 overflow-hidden p-6" ref={buttonRef}>
-        {/* Header area */}
-        <div>
+    <motion.div
+      className={`box-content fixed top-6 bottom-6 right-6 z-[10003] bg-[#181818]/80 backdrop-blur-md border border-white/10 ${isOpen ? 'rounded-[24px] p-6' : 'rounded-[32px]'} shadow-lg overflow-hidden flex flex-col items-center justify-center`}
+      style={{ maxWidth: '100vw', minHeight: '48px' }}
+      animate={{
+        width: isOpen ? 360 : 48,
+        height: isOpen ? 'auto' : 48,
+        opacity: 1,
+      }}
+      initial={false}
+      transition={
+        isOpen
+          ? {
+              width: { type: 'spring', stiffness: 300, damping: 30 },
+              height: { type: 'spring', stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 }
+            }
+          : {
+              width: { duration: 0.28, ease: [0.32, 0.72, 0, 1] },
+              height: { duration: 0.28, ease: [0.32, 0.72, 0, 1] },
+              opacity: { duration: 0.2, ease: 'easeInOut' }
+            }
+      }
+    >
+      {/* Collapsed: show icon only */}
+      {!isOpen && (
+        <div
+          className="w-12 h-12 flex items-center justify-center rounded-full p-3 cursor-pointer select-none"
+          aria-label="Open Settings Panel"
+          tabIndex={0}
+          role="button"
+          onClick={() => onPanelToggle(true)}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onPanelToggle(true); }}
+        >
+          <img src={controlIcon} alt="Control" className="w-6 h-6 block" />
+        </div>
+      )}
+      {/* Expanded: show panel content only */}
+      {isOpen && (
+        <div className="w-full h-full flex flex-col">
+          {/* Header area */}
           <div>
-            <div className="flex justify-between items-center">
-              {/* Back button on the left, if present */}
-              {currentConfig.backButton && activeTab !== 'settings' && activeTab !== 'feature-flags' ? (
+            <div>
+              <div className="flex justify-between items-center">
+                {/* Only render the close button, right-aligned */}
+                <div className="flex-1" />
                 <button
                   className="p-2 text-white/60 hover:text-white"
-                  onClick={navigateBack}
-                  aria-label="Back"
+                  onClick={() => onPanelToggle(false)}
+                  aria-label="Close"
                 >
                   <img 
-                    src={BackIcon} 
-                    alt="Back" 
+                    src={CloseIcon} 
+                    alt="Close" 
                     className="w-5 h-5" 
                   />
                 </button>
-              ) : (
-                <div className="w-9" />
-              )}
-              {/* Spacer for title or alignment, if needed */}
-              <div />
-              {/* Close button always on the right */}
-              <button
-                className="p-2 text-white/60 hover:text-white"
-                onClick={togglePanel}
-                aria-label="Close"
+              </div>
+            </div>
+          </div>
+
+          {/* Main title reflects the current screen name, sub copy is the screen description */}
+          {activeTab !== 'profile' && activeTab !== 'feature-flags' && getScreenDescription((activeTab as any)) && (
+            <div className="pt-0 pl-0 pr-0">
+              <h2 className="text-white text-[24px] font-cash font-semibold mb-2">
+                {currentConfig.title}
+              </h2>
+              <div 
+                className="relative cursor-pointer" 
+                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
               >
-                <img 
-                  src={CloseIcon} 
-                  alt="Close" 
-                  className="w-5 h-5" 
-                />
-              </button>
+                <p className={`text-white/60 text-sm ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
+                  {getScreenDescription((activeTab as any))}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Custom header for the settings (feature-flags) tab */}
+          {activeTab === 'feature-flags' && (
+            <div className="pt-0 pl-0 pr-0 mb-4">
+              <h2 className="text-white text-[24px] font-cash font-semibold mb-2">Settings</h2>
+              <div>
+                <p className="text-white/60 text-sm line-clamp-3">
+                  Enable or disable experimental features and UI options for this app. These settings affect the current screen and may change your experience.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Content area for tab views */}
+          <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-auto p-0">
+            {renderTabContent()}
+          </div>
+          {/* Divider between content and footer */}
+          <div className="border-t border-white/10 my-4 w-full" />
+          {/* Footer navigation */}
+          <div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                {/* Tab: Interaction */}
+                <button
+                  className={`w-10 h-10 rounded-full border ${activeTab === 'interaction' ? 'border-white bg-white' : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'} flex items-center justify-center`}
+                  onClick={() => setActiveTab('interaction')}
+                  aria-label="Interaction"
+                >
+                  <img src={CategoryEntertainmentIcon} alt="Interaction" className="w-4 h-4" width="16" height="16" style={{ filter: activeTab === 'interaction' ? 'invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%)' : undefined }} />
+                </button>
+                {/* Tab: Analytics */}
+                <button
+                  className={`w-10 h-10 rounded-full border ${activeTab === 'analytics' ? 'border-white bg-white' : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'} flex items-center justify-center`}
+                  onClick={() => setActiveTab('analytics')}
+                  aria-label="Analytics"
+                >
+                  <img src={InvestingIcon} alt="Analytics" className="w-4 h-4" width="16" height="16" style={{ filter: activeTab === 'analytics' ? 'brightness(0%)' : undefined }} />
+                </button>
+                {/* Tab: APIs */}
+                <button
+                  className={`w-10 h-10 rounded-full border ${activeTab === 'apis' ? 'border-white bg-white' : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'} flex items-center justify-center`}
+                  onClick={() => setActiveTab('apis')}
+                  aria-label="APIs"
+                >
+                  <img src={UtilitiesIcon} alt="APIs" className="w-4 h-4" width="16" height="16" style={{ filter: activeTab === 'apis' ? 'brightness(0%)' : undefined }} />
+                </button>
+                {/* Tab: Research (Neuronet) */}
+                <button
+                  className={`w-10 h-10 rounded-full border ${activeTab === 'research' ? 'border-white bg-white' : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'} flex items-center justify-center`}
+                  onClick={() => setActiveTab('research')}
+                  aria-label="Neuronet"
+                >
+                  <img src={TechnologyIcon} alt="Neuronet" className="w-4 h-4" width="16" height="16" style={{ filter: activeTab === 'research' ? 'brightness(0%)' : undefined }} />
+                </button>
+              </div>
+              <div className="flex space-x-2">
+                <button 
+                  onClick={() => setActiveTab('settings')}
+                  className={`w-10 h-10 rounded-full border ${
+                    activeTab === 'settings' 
+                      ? 'bg-white border-white' 
+                      : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'
+                  } flex items-center justify-center`}
+                  aria-label="Settings"
+                >
+                  <img 
+                    src={ControlIcon} 
+                    alt="Settings" 
+                    width={16} 
+                    height={16}
+                    className={activeTab === 'settings' ? 'brightness-0' : 'opacity-80'} 
+                  />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Main title reflects the current screen name, sub copy is the screen description */}
-        {activeTab !== 'profile' && activeTab !== 'feature-flags' && getScreenDescription((activeTab as any)) && (
-          <div className="pt-0 pl-0 pr-0">
-            <h2 className="text-white text-[24px] font-cash font-semibold mb-2">
-              {currentConfig.title}
-            </h2>
-            <div 
-              className="relative cursor-pointer" 
-              onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-            >
-              <p className={`text-white/60 text-sm ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
-                {getScreenDescription((activeTab as any))}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Custom header for the settings (feature-flags) tab */}
-        {activeTab === 'feature-flags' && (
-          <div className="pt-0 pl-0 pr-0 mb-4">
-            <h2 className="text-white text-[24px] font-cash font-semibold mb-2">Settings</h2>
-            <div>
-              <p className="text-white/60 text-sm line-clamp-3">
-                Enable or disable experimental features and UI options for this app. These settings affect the current screen and may change your experience.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Content area for tab views */}
-        <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-auto p-0">
-          {renderTabContent()}
-        </div>
-        {/* Divider between content and footer */}
-        <div className="border-t border-white/10 my-4 w-full" />
-        {/* Footer navigation */}
-        <div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              {/* Tab: Interaction */}
-              <button
-                className={`w-10 h-10 rounded-full border ${activeTab === 'interaction' ? 'border-white bg-white' : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'} flex items-center justify-center`}
-                onClick={() => setActiveTab('interaction')}
-                aria-label="Interaction"
-              >
-                <img src={CategoryEntertainmentIcon} alt="Interaction" className="w-4 h-4" width="16" height="16" style={{ filter: activeTab === 'interaction' ? 'invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%)' : undefined }} />
-              </button>
-              {/* Tab: Analytics */}
-              <button
-                className={`w-10 h-10 rounded-full border ${activeTab === 'analytics' ? 'border-white bg-white' : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'} flex items-center justify-center`}
-                onClick={() => setActiveTab('analytics')}
-                aria-label="Analytics"
-              >
-                <img src={InvestingIcon} alt="Analytics" className="w-4 h-4" width="16" height="16" style={{ filter: activeTab === 'analytics' ? 'brightness(0%)' : undefined }} />
-              </button>
-              {/* Tab: Changelog */}
-              <button
-                className={`w-10 h-10 rounded-full border ${activeTab === 'changelog' ? 'border-white bg-white' : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'} flex items-center justify-center`}
-                onClick={() => setActiveTab('changelog')}
-                aria-label="Changelog"
-              >
-                <img src={DocumentIcon} alt="Changelog" className="w-4 h-4" width="16" height="16" style={{ filter: activeTab === 'changelog' ? 'brightness(0%)' : undefined }} />
-              </button>
-            </div>
-            <div className="flex space-x-2">
-              <button 
-                onClick={() => setActiveTab('settings')}
-                className={`w-10 h-10 rounded-full border ${
-                  activeTab === 'settings' 
-                    ? 'bg-white border-white' 
-                    : 'border-white/20 bg-transparent hover:bg-white/5 active:bg-white/10'
-                } flex items-center justify-center`}
-                aria-label="Settings"
-              >
-                <img 
-                  src={ControlIcon} 
-                  alt="Settings" 
-                  width={16} 
-                  height={16}
-                  className={activeTab === 'settings' ? 'brightness-0' : 'opacity-80'} 
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </LayoutGroup>
+      )}
+    </motion.div>
   );
 };
 

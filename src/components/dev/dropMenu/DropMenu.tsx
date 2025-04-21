@@ -68,6 +68,7 @@ export const DropMenu: React.FC<DropMenuProps> = ({
   const prevOpen = useRef(open);
   const [iconOpacity, setIconOpacity] = useState(1);
   const collapseTimeout = useRef<NodeJS.Timeout | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Apply theme with defaults
   const themeStyles = {
@@ -78,24 +79,16 @@ export const DropMenu: React.FC<DropMenuProps> = ({
     selectedTextColor: theme.selectedTextColor || 'text-black',
     hoverTextColor: theme.hoverTextColor || 'text-white',
     backdropBlur: theme.backdropBlur !== undefined ? theme.backdropBlur : true,
-    fillOpacity: theme.fillOpacity !== undefined ? theme.fillOpacity : 100,
+    fillOpacity: theme.fillOpacity !== undefined ? theme.fillOpacity : 80, // 80% opacity to match /80
   };
 
   // Generate background style based on theme
   const getBackgroundClasses = () => {
     const classes = [];
-    
-    // Add fill color with opacity
-    classes.push(`bg-[${themeStyles.background}]`);
-    
-    // Add backdrop blur if enabled
-    if (themeStyles.backdropBlur) {
-      classes.push('backdrop-blur-md');
-    }
-    
-    // Add border
-    classes.push(themeStyles.border);
-    
+    // Always use the settings panel style by default
+    classes.push('bg-[#181818]/80');
+    classes.push('backdrop-blur-md');
+    classes.push('border border-white/10');
     return classes.join(' ');
   };
 
@@ -183,9 +176,23 @@ export const DropMenu: React.FC<DropMenuProps> = ({
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [open]);
+
   // Animate between collapsed and expanded states
   return (
     <motion.div
+      ref={menuRef}
       role="button"
       tabIndex={0}
       onClick={handleToggle}
@@ -220,24 +227,18 @@ export const DropMenu: React.FC<DropMenuProps> = ({
         paddingBottom: { duration: 0.22 },
         paddingLeft: { duration: 0.22 }
       }}
-      style={{
-        backgroundColor: `${themeStyles.background}${Math.round(themeStyles.fillOpacity).toString(16).padStart(2, '0')}`,
-        minWidth: collapsedSize,
-        minHeight: collapsedSize
-      }}
     >
       {/* Icon: always visible, opacity animated */}
       <motion.div
         animate={{ opacity: iconOpacity }}
         transition={{ opacity: iconOpacity === 1 ? { duration: 0.15, delay: 0.15 } : { duration: 0 } }}
         className={`flex items-center ${open ? 'justify-start pl-3 pb-2' : 'justify-center'}`}
-        style={{ width: '100%' }}
       >
         <div className="w-6 h-6">
           <img
             src={iconSrc || avatarIcon}
             alt={title ? `${title} icon` : 'Drawer icon'}
-            style={{ display: 'block', width: 24, height: 24 }}
+            className="w-6 h-6 block"
           />
         </div>
       </motion.div>

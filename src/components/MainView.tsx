@@ -411,60 +411,21 @@ export const MainView = () => {
       }}
     >
       {/* Unified Settings Panel Container (collapsed/expanded) */}
-      <motion.div
-        className={`box-content fixed top-6 right-6 z-[10003] bg-[#181818]/80 backdrop-blur-md border border-white/10 ${isPanelOpen ? 'rounded-[24px]' : 'rounded-[32px]'} shadow-lg overflow-hidden flex flex-col items-center justify-center`}
-        style={{ maxWidth: '100vw', minHeight: '48px' }}
-        animate={{
-          width: isPanelOpen ? 360 : 48,
-          height: isPanelOpen ? 'calc(100vh - 48px)' : 48,
-          opacity: 1,
-        }}
-        initial={false}
-        transition={
-          isOpening
-            ? {
-                width: { type: 'spring', stiffness: 300, damping: 30 },
-                height: { type: 'spring', stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 }
-              }
-            : {
-                width: { type: 'spring', stiffness: 500, damping: 40 },
-                height: { type: 'spring', stiffness: 500, damping: 40 },
-                opacity: { duration: 0.2 }
-              }
-        }
-      >
-        {/* Collapsed: show icon only */}
-        {!isPanelOpen && (
-          <button
-            className="w-full h-full flex items-center justify-center rounded-full focus:outline-none"
-            aria-label="Open Settings Panel"
-            onClick={() => setIsPanelOpen(true)}
-            tabIndex={0}
-          >
-            <img src={FilterIcon} alt="Settings" className="w-6 h-6" />
-          </button>
-        )}
-        {/* Expanded: show panel content only */}
-        {isPanelOpen && (
-          <div className="w-full h-full flex flex-col">
-            <SettingsPanel
-              currentScreen={currentScreen}
-              baseAmount={baseAmount}
-              tipAmount={tipAmount}
-              cartItems={cartItems}
-              onAddItem={handleAddItem}
-              onClearCart={handleClearCart}
-              onRemoveCartItem={handleRemoveCartItem}
-              onBack={handleBack}
-              onNext={handleDevNavNext}
-              onRefresh={handleRefresh}
-              onReset={handleReset}
-              onPanelToggle={setIsPanelOpen}
-            />
-          </div>
-        )}
-      </motion.div>
+      <SettingsPanel
+        isOpen={isPanelOpen}
+        onPanelToggle={setIsPanelOpen}
+        currentScreen={currentScreen}
+        baseAmount={baseAmount}
+        tipAmount={tipAmount}
+        cartItems={cartItems}
+        onAddItem={handleAddItem}
+        onClearCart={handleClearCart}
+        onRemoveCartItem={handleRemoveCartItem}
+        onBack={handleBack}
+        onNext={handleDevNavNext}
+        onRefresh={handleRefresh}
+        onReset={handleReset}
+      />
       {/* Device DropMenu in the top left corner */}
       <div className="fixed top-6 left-6 z-[10002]">
         <DropMenu
@@ -481,8 +442,8 @@ export const MainView = () => {
       {/* User profile DropMenu on the right side, shifts left when dev panel is open (24px gap) */}
       <motion.div
         className="fixed top-6 z-[10002]"
-        initial={{ right: 80 }}
-        animate={{ right: isPanelOpen ? 404 : 80 }}
+        initial={{ right: 104 }}
+        animate={{ right: isPanelOpen ? 450 : 84 }}
         transition={drawerMotion}
       >
         <DropMenu
