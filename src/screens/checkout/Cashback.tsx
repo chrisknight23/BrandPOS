@@ -9,9 +9,10 @@ interface CashbackProps {
   onNext: (amount?: string) => void;
   amount?: string;
   userType?: string;
+  onQrVisibleChange?: (visible: boolean) => void;
 }
 
-export const Cashback = ({ onNext, amount = "1", userType }: CashbackProps) => {
+export const Cashback = ({ onNext, amount = "1", userType, onQrVisibleChange }: CashbackProps) => {
   // Determine the base value for returning customers
   const [baseReturningAmount, setBaseReturningAmount] = useState<number | null>(null);
 
@@ -39,8 +40,6 @@ export const Cashback = ({ onNext, amount = "1", userType }: CashbackProps) => {
   const [cardState, setCardState] = useState<CardState>('expanded');
   // Track whether we're currently transitioning states
   const [isTransitioning, setIsTransitioning] = useState(false);
-  // State to control logo visibility
-  const [showLogo, setShowLogo] = useState(false);
   
   // Force an explicit reset when entering the screen
   useEffect(() => {
@@ -49,7 +48,6 @@ export const Cashback = ({ onNext, amount = "1", userType }: CashbackProps) => {
     // Reset to expanded state on mount
     setCardState('expanded');
     setIsTransitioning(false);
-    setShowLogo(false);
     
     return () => {
       console.log('Cashback: Component unmounting');
@@ -64,17 +62,8 @@ export const Cashback = ({ onNext, amount = "1", userType }: CashbackProps) => {
   // Handle state changes from the card animation
   const handleStateChange = (newState: CardState) => {
     console.log(`Cashback: Card state changed to ${newState}`);
-    
     if (newState !== cardState) {
       setIsTransitioning(true);
-    }
-    
-    // Show the logo when the card reaches the initial state
-    if (newState === 'initial') {
-      // Wait a moment after the card reaches initial state to show logo
-      setTimeout(() => {
-        setShowLogo(true);
-      }, 500);
     }
   };
   
@@ -93,8 +82,8 @@ export const Cashback = ({ onNext, amount = "1", userType }: CashbackProps) => {
   
   // For debugging
   useEffect(() => {
-    console.log(`Current card state: ${cardState}, transitioning: ${isTransitioning}, logo: ${showLogo}`);
-  }, [cardState, isTransitioning, showLogo]);
+    console.log(`Current card state: ${cardState}, transitioning: ${isTransitioning}`);
+  }, [cardState, isTransitioning]);
 
   // Example: log or render something special for returning customers
   useEffect(() => {
@@ -138,24 +127,12 @@ export const Cashback = ({ onNext, amount = "1", userType }: CashbackProps) => {
               onAnimationComplete={handleAnimationComplete}
               autoPlay={true}
               suffixText="Back"
+              onFlip={onQrVisibleChange}
             />
           </motion.div>
           
           {/* Cash App Logo in bottom left corner - only shown after card animation completes */}
-          <AnimatePresence>
-            {showLogo && (
-              <motion.div 
-                className="absolute bottom-8 left-8"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                style={{ zIndex: 3 }}
-              >
-                <img src={CashAppLogo} alt="Cash App" width={100} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* (Logo logic removed for QR visibility tracking) */}
         </motion.div>
       </motion.div>
     </BaseScreen>

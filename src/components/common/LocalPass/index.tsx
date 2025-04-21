@@ -107,6 +107,18 @@ export interface LocalPassProps {
   
   /** Text to display after the numeric amount */
   suffixText?: string;
+
+  /** Show or hide the button in the card footer */
+  showButton?: boolean;
+
+  /** Show or hide the header section in the card */
+  showHeader?: boolean;
+
+  /** Whether the card should start flipped to the back side */
+  initialFlipped?: boolean;
+
+  /** Controlled prop to set the flipped state of the card (front/back) */
+  flipped?: boolean;
 }
 
 // ============= Constants =============
@@ -222,7 +234,13 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   isExpanded,
   onClick,
   children,
-  noAnimation = false
+  noAnimation = false,
+  
+  // New props
+  showButton = true,
+  showHeader = true,
+  initialFlipped = false,
+  flipped,
 }) => {
   const controls = useAnimation();
   const lottieControls = useAnimation();
@@ -239,7 +257,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   // Determine initial state based on either new or legacy props
   const derivedInitialState = initialState || (isExpanded ? 'expanded' : 'initial');
   const [animationState, setAnimationState] = useState<CardState>(derivedInitialState);
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(initialFlipped);
   const lottieContainer = useRef<HTMLDivElement>(null);
   const lottieAnimRef = useRef<any>(null);
   const prevAnimationState = useRef<CardState>(animationState);
@@ -607,10 +625,16 @@ export const LocalPass: React.FC<LocalPassProps> = ({
 
   // Add useEffect to initialize and reset isFlipped state
   useEffect(() => {
-    console.log('LocalPass: Component mounted, resetting flip state');
-    // Reset to front-facing
-    setIsFlipped(false);
-  }, []);
+    console.log('LocalPass: Component mounted, setting initial flip state');
+    setIsFlipped(initialFlipped);
+  }, [initialFlipped]);
+
+  // If the 'flipped' prop is provided, use it as the source of truth
+  useEffect(() => {
+    if (typeof flipped === 'boolean') {
+      setIsFlipped(flipped);
+    }
+  }, [flipped]);
 
   // Display text value if provided, otherwise use numeric amount
   const displayAmount = textAmount || amount;
@@ -658,7 +682,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
             {frontContent ? frontContent : (
               <div className="w-full h-full flex flex-col items-center justify-between p-5">
                 {/* Header with text and $ icon */}
-                {animationState !== 'expanded' && (
+                {animationState !== 'expanded' && showHeader && (
                   <motion.div 
                     className="w-full flex flex-col items-start"
                     animate={{ 
@@ -753,7 +777,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                 </div>
 
                 {/* Footer with button - hidden in expanded state */}
-                {animationState !== 'expanded' && (
+                {animationState !== 'expanded' && showButton && (
                   <div className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]">
                     <motion.div 
                       className="w-full h-20 relative overflow-hidden rounded-full bg-black bg-opacity-10"

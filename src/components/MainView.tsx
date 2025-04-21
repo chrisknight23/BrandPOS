@@ -11,7 +11,7 @@ import FilterIcon from '../assets/images/filter.svg';
 import { DropMenu } from './dev/dropMenu';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'CashoutSuccess', 'End'];
+const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -284,7 +284,7 @@ export const MainView = () => {
         .filter(screen => screen !== 'CustomTip')
         .filter(screen => {
           if (userType === 'cash-local') {
-            return screen !== 'Cashback' && screen !== 'CashoutSuccess';
+            return screen !== 'Cashback' && screen !== 'Cashout';
           }
           return true;
         })
@@ -329,6 +329,9 @@ export const MainView = () => {
       setBaseAmount(cartTotal);
     }
   }, [cartItems, currentScreen, calculateCartTotal]);
+  
+  // QR code visibility state for Cashback/SettingsPanel
+  const [isQrVisible, setIsQrVisible] = useState(false);
   
   // Get screen-specific props WITHOUT including the key
   const getScreenProps = () => {
@@ -375,7 +378,8 @@ export const MainView = () => {
       return {
         ...baseProps,
         amount: tipAmount || "1", // Pass the tip amount to Cashback screen
-        userType // Pass userType to Cashback
+        userType, // Pass userType to Cashback
+        onQrVisibleChange: setIsQrVisible, // Wire QR visibility up
       };
     } else if (currentScreen === 'CustomTip') {
       return {
@@ -393,13 +397,20 @@ export const MainView = () => {
   useEffect(() => {
     // Listen for dev QR scan simulation event
     const handleDevSimulateQr = () => {
-      setCurrentScreen('CashoutSuccess');
+      setCurrentScreen('Cashout');
     };
     window.addEventListener('dev-simulate-qr-cashout', handleDevSimulateQr);
     return () => {
       window.removeEventListener('dev-simulate-qr-cashout', handleDevSimulateQr);
     };
   }, []);
+  
+  // Reset QR visibility when leaving Cashback screen
+  useEffect(() => {
+    if (currentScreen !== 'Cashback' && isQrVisible) {
+      setIsQrVisible(false);
+    }
+  }, [currentScreen, isQrVisible]);
   
   return (
     <div
@@ -425,6 +436,8 @@ export const MainView = () => {
         onNext={handleDevNavNext}
         onRefresh={handleRefresh}
         onReset={handleReset}
+        isQrVisible={isQrVisible}
+        onQrVisibleChange={setIsQrVisible}
       />
       {/* Device DropMenu in the top left corner */}
       <div className="fixed top-6 left-6 z-[10002]">

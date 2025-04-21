@@ -51,6 +51,9 @@ interface ExpandableDevPanelProps {
   onAddItem?: () => void;
   onClearCart?: () => void;
   onRemoveCartItem?: (itemId: number) => void;
+  simulateScan?: () => void;
+  isQrVisible?: boolean;
+  onQrVisibleChange?: (visible: boolean) => void;
 }
 
 // Define the navigation screens that can be shown in the panel
@@ -125,7 +128,10 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   onReset,
   onAddItem,
   onClearCart,
-  onRemoveCartItem
+  onRemoveCartItem,
+  simulateScan,
+  isQrVisible: externalQrVisible,
+  onQrVisibleChange
 }) => {
   // Tab context
   const { activeTab, setActiveTab } = useTab();
@@ -429,11 +435,23 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
     }
   };
 
+  // Local state for QR visibility if not controlled externally
+  const [isQrVisible, setIsQrVisible] = useState(false);
+
+  // If parent provides isQrVisible, use it; otherwise use local state
+  const effectiveQrVisible = externalQrVisible !== undefined ? externalQrVisible : isQrVisible;
+
+  // Handler to update local state and notify parent if needed
+  const handleQrVisibleChange = (visible: boolean) => {
+    setIsQrVisible(visible);
+    if (onQrVisibleChange) onQrVisibleChange(visible);
+  };
+
   // Render the current tab content
   const renderTabContent = () => {
     switch (activeTab) {
       case 'interaction':
-        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} />;
+        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} simulateScan={simulateScan} isQrVisible={effectiveQrVisible} />;
       case 'analytics':
         return <AnalyticsView currentScreen={currentScreen} baseAmount={baseAmount} tipAmount={tipAmount} onBack={onBack} onNext={onNext} onRefresh={onRefresh} onReset={onReset} />;
       case 'settings':
@@ -443,7 +461,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'apis':
         return <APIsView />;
       default:
-        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} />;
+        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} simulateScan={simulateScan} isQrVisible={effectiveQrVisible} />;
     }
   };
 
@@ -543,7 +561,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
           <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-auto p-0">
             {renderTabContent()}
           </div>
-          {/* Divider between content and footer */}
           <div className="border-t border-white/10 my-4 w-full" />
           {/* Footer navigation */}
           <div>

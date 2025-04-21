@@ -2,13 +2,17 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../../ui/button';
 
-const InteractionView: React.FC<{
+interface InteractionViewProps {
   cartItems?: { id: number; name: string; price: number; quantity: number }[];
   onAddItem?: () => void;
   onClearCart?: () => void;
   onRemoveCartItem?: (itemId: number) => void;
   currentScreen?: string;
-}> = ({ cartItems = [], onAddItem, onClearCart, onRemoveCartItem, currentScreen }) => {
+  simulateScan?: () => void;
+  isQrVisible?: boolean;
+}
+
+const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAddItem, onClearCart, onRemoveCartItem, currentScreen, simulateScan, isQrVisible }) => {
   // Animation variants (copied from ExpandableDevPanel)
   const itemVariants = {
     hidden: { opacity: 0, y: 10 },
@@ -117,25 +121,6 @@ const InteractionView: React.FC<{
               <div className="mt-10" />
             </>
           )}
-
-          {/* QR Simulation Button for Cashback Screen */}
-          {currentScreen === 'Cashback' && (
-            <div className="mb-4 w-full">
-              <button
-                className="w-full py-3 px-4 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-base transition-colors shadow"
-                onClick={() => {
-                  if (typeof window.dispatchEvent === 'function') {
-                    window.dispatchEvent(new CustomEvent('dev-simulate-qr-cashout'));
-                  } else {
-                    alert('Navigation to CashoutSuccess not implemented!');
-                  }
-                }}
-                style={{ marginTop: 12 }}
-              >
-                Simulate QR Code Scan (Go to CashoutSuccess)
-              </button>
-            </div>
-          )}
         </div>
         {/* Bottom buttons section pinned to bottom */}
         <div className="space-y-4 mt-auto w-full">
@@ -144,7 +129,7 @@ const InteractionView: React.FC<{
               {/* Add item button */}
               <button
                 onClick={onAddItem}
-                className={`rounded-full py-4 flex-1 flex items-center justify-center bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors ${currentScreen === 'Cart' ? '' : 'w-full'}`}
+                className={`rounded-full py-4 flex-1 flex items-center justify-center bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors ${currentScreen === 'Cart' ? '' : 'w-full'}`}
               >
                 <div className="flex items-center justify-center text-white">
                   <svg className="w-4 h-4 text-white/80 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -158,11 +143,8 @@ const InteractionView: React.FC<{
                 <Button
                   onClick={() => {}}
                   disabled={cartItems.length === 0}
-                  className={`rounded-full py-4 flex-1 ${
-                    cartItems.length > 0 
-                      ? 'bg-[#00B843] hover:bg-[#00A33C] active:bg-[#008F35]' 
-                      : 'bg-white/10 cursor-not-allowed'
-                  }`}
+                  variant="primary"
+                  className={`flex-1 ${cartItems.length > 0 ? '' : 'bg-white/10 cursor-not-allowed'}`}
                 >
                   <div className="flex items-center justify-center text-white">
                     <div className="text-base font-medium">Checkout</div>
@@ -171,6 +153,30 @@ const InteractionView: React.FC<{
               )}
             </div>
           )}
+          {/* Cashback screen: show Scan QR button only when card is flipped (QR visible) */}
+          <AnimatePresence>
+            {currentScreen === 'Cashback' && isQrVisible && (
+              <motion.div
+                key="scan-qr-btn"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                className="w-full"
+              >
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => { /* Add handler if needed */ }}
+                  aria-label="Scan QR"
+                >
+                  <div className="flex items-center justify-center text-white">
+                    <div className="text-base font-medium">Scan QR</div>
+                  </div>
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
