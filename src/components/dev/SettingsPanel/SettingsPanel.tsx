@@ -54,6 +54,9 @@ interface ExpandableDevPanelProps {
   simulateScan?: () => void;
   isQrVisible?: boolean;
   onQrVisibleChange?: (visible: boolean) => void;
+  goToScreen?: (screen: string) => void;
+  isPaused?: boolean;
+  setIsPaused?: (paused: boolean) => void;
 }
 
 // Define the navigation screens that can be shown in the panel
@@ -131,7 +134,10 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   onRemoveCartItem,
   simulateScan,
   isQrVisible: externalQrVisible,
-  onQrVisibleChange
+  onQrVisibleChange,
+  goToScreen,
+  isPaused,
+  setIsPaused
 }) => {
   // Tab context
   const { activeTab, setActiveTab } = useTab();
@@ -451,7 +457,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   const renderTabContent = () => {
     switch (activeTab) {
       case 'interaction':
-        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} simulateScan={simulateScan} isQrVisible={effectiveQrVisible} />;
+        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} simulateScan={simulateScan} isQrVisible={effectiveQrVisible} goToScreen={goToScreen} isPaused={isPaused} setIsPaused={setIsPaused} />;
       case 'analytics':
         return <AnalyticsView currentScreen={currentScreen} baseAmount={baseAmount} tipAmount={tipAmount} onBack={onBack} onNext={onNext} onRefresh={onRefresh} onReset={onReset} />;
       case 'settings':
@@ -461,7 +467,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'apis':
         return <APIsView />;
       default:
-        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} simulateScan={simulateScan} isQrVisible={effectiveQrVisible} />;
+        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} simulateScan={simulateScan} isQrVisible={effectiveQrVisible} goToScreen={goToScreen} isPaused={isPaused} setIsPaused={setIsPaused} />;
     }
   };
 

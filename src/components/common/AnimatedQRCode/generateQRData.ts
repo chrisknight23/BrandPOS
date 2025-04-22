@@ -159,7 +159,7 @@ const generateStyledQRData = (qrMatrix: boolean[][], size: number): QRDot[] => {
   createCornerMarker(matrixSize - 7, 0); // Bottom-left
   
   // Generate dots for the main QR code pattern
-  const dotSize = cellSize * 0.75; // Slightly smaller dots for better visibility
+  const dotSize = Math.max(cellSize * 0.75, 2); // Clamp to minimum 2px for visibility
   
   // Center for calculating distance
   const centerX = size / 2;

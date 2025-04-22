@@ -10,9 +10,12 @@ interface InteractionViewProps {
   currentScreen?: string;
   simulateScan?: () => void;
   isQrVisible?: boolean;
+  goToScreen?: (screen: string) => void;
+  isPaused?: boolean;
+  setIsPaused?: (paused: boolean) => void;
 }
 
-const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAddItem, onClearCart, onRemoveCartItem, currentScreen, simulateScan, isQrVisible }) => {
+const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAddItem, onClearCart, onRemoveCartItem, currentScreen, simulateScan, isQrVisible, goToScreen, isPaused, setIsPaused }) => {
   // Animation variants (copied from ExpandableDevPanel)
   const itemVariants = {
     hidden: { opacity: 0, y: 10 },
@@ -153,6 +156,19 @@ const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAdd
               )}
             </div>
           )}
+          {/* End screen: show Pause/Play button */}
+          {currentScreen === 'End' && setIsPaused && (
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => setIsPaused(!isPaused)}
+              aria-label={isPaused ? 'Play' : 'Pause'}
+            >
+              <div className="flex items-center justify-center text-white">
+                <div className="text-base font-medium">{isPaused ? 'Play' : 'Pause'}</div>
+              </div>
+            </Button>
+          )}
           {/* Cashback screen: show Scan QR button only when card is flipped (QR visible) */}
           <AnimatePresence>
             {currentScreen === 'Cashback' && isQrVisible && (
@@ -167,7 +183,7 @@ const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAdd
                 <Button
                   variant="secondary"
                   className="w-full"
-                  onClick={() => { /* Add handler if needed */ }}
+                  onClick={() => { if (goToScreen) goToScreen('Cashout'); }}
                   aria-label="Scan QR"
                 >
                   <div className="flex items-center justify-center text-white">

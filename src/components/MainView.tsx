@@ -96,6 +96,8 @@ export const MainView = () => {
   const [baseAmount, setBaseAmount] = useState<string | null>(null);
   const [tipAmount, setTipAmount] = useState<string | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  // Add pause state for End screen timer
+  const [isPaused, setIsPaused] = useState(false);
   
   // Track previous isPanelOpen to determine open/close direction
   const prevPanelOpenRef = useRef(isPanelOpen);
@@ -191,6 +193,11 @@ export const MainView = () => {
         setCurrentScreen('End');
         return;
       }
+    }
+    // Explicitly go to End after Cashout
+    if (currentScreen === 'Cashout') {
+      setCurrentScreen('End');
+      return;
     }
     // Navigate to next screen by order
     const idx = SCREEN_ORDER.indexOf(currentScreen);
@@ -349,7 +356,9 @@ export const MainView = () => {
         tipAmount: tipAmount || undefined,
         goToScreen: goToScreen,  // Pass direct navigation function to End
         resetToHome: handleReset,  // Also pass reset function as an alternative
-        taxRate: TAX_RATE
+        taxRate: TAX_RATE,
+        isPaused,
+        setIsPaused,
       };
     } else if (currentScreen === 'Cart') {
       return {
@@ -387,6 +396,12 @@ export const MainView = () => {
         baseAmount: baseAmount || '0',
         goBack: () => goToScreen('Tipping')
       };
+    } else if (currentScreen === 'Cashout') {
+      return {
+        onNext: () => {}, // no-op to satisfy type
+        onComplete: handleNext,
+        amount: tipAmount || "3",
+      };
     } else {
       return baseProps;
     }
@@ -411,6 +426,13 @@ export const MainView = () => {
       setIsQrVisible(false);
     }
   }, [currentScreen, isQrVisible]);
+  
+  // Reset isPaused when navigating away from End screen
+  useEffect(() => {
+    if (currentScreen !== 'End' && isPaused) {
+      setIsPaused(false);
+    }
+  }, [currentScreen, isPaused]);
   
   return (
     <div
@@ -438,6 +460,10 @@ export const MainView = () => {
         onReset={handleReset}
         isQrVisible={isQrVisible}
         onQrVisibleChange={setIsQrVisible}
+        goToScreen={goToScreen}
+        // Pass pause state to SettingsPanel
+        isPaused={isPaused}
+        setIsPaused={setIsPaused}
       />
       {/* Device DropMenu in the top left corner */}
       <div className="fixed top-6 left-6 z-[10002]">

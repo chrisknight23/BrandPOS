@@ -119,6 +119,12 @@ export interface LocalPassProps {
 
   /** Controlled prop to set the flipped state of the card (front/back) */
   flipped?: boolean;
+
+  /** Show or hide the QR code animation */
+  disableAnimation?: boolean;
+
+  /** Animation pattern for QR code entry */
+  animateIn?: 'random' | 'inside-out' | 'outside-in' | 'wave' | 'sequential' | false;
 }
 
 // ============= Constants =============
@@ -241,6 +247,8 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   showHeader = true,
   initialFlipped = false,
   flipped,
+  disableAnimation,
+  animateIn,
 }) => {
   const controls = useAnimation();
   const lottieControls = useAnimation();
@@ -257,7 +265,9 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   // Determine initial state based on either new or legacy props
   const derivedInitialState = initialState || (isExpanded ? 'expanded' : 'initial');
   const [animationState, setAnimationState] = useState<CardState>(derivedInitialState);
-  const [isFlipped, setIsFlipped] = useState(initialFlipped);
+  const [isFlipped, setIsFlipped] = useState(
+    typeof flipped === 'boolean' ? flipped : initialFlipped
+  );
   const lottieContainer = useRef<HTMLDivElement>(null);
   const lottieAnimRef = useRef<any>(null);
   const prevAnimationState = useRef<CardState>(animationState);
@@ -661,6 +671,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
         <motion.div
           className="w-full h-full relative"
           style={{ transformStyle: 'preserve-3d' }}
+          initial={{ rotateY: isFlipped ? 180 : 0 }}
           animate={{ 
             rotateY: isFlipped ? 180 : 0
           }}
@@ -834,8 +845,8 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                   <AnimatedQRCode
                     value={`https://cash.app/${amount ? amount : '10'}`}
                     size={260}
-                    autoAnimate={isFlipped}
-                    pattern="outside-in"
+                    animateIn={typeof animateIn !== 'undefined' ? animateIn : (typeof disableAnimation === 'boolean' ? (disableAnimation ? false : 'outside-in') : (isFlipped ? 'outside-in' : false))}
+                    disableAnimation={typeof disableAnimation === 'boolean' ? disableAnimation : !isFlipped}
                     speed={1.0}
                     darkColor="#FFFFFF"
                     lightColor="transparent"

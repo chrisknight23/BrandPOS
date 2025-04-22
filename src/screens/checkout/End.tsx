@@ -12,9 +12,11 @@ interface EndProps {
   tipAmount?: string;    // Tip amount from Tipping screen
   goToScreen?: (screen: Screen) => void; // Add prop for direct navigation
   taxRate?: number;
+  isPaused?: boolean;
+  setIsPaused?: (paused: boolean) => void;
 }
 
-export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goToScreen, taxRate = 0.0875 }: EndProps) => {
+export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goToScreen, taxRate = 0.0875, isPaused }: EndProps) => {
   const [total, setTotal] = useState(amount || baseAmount);
   const [progress, setProgress] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
@@ -60,10 +62,10 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
   
   // Actual timer effect that starts after delay
   useEffect(() => {
-    // Only start the progress timer after the initial delay
-    if (!timerStarted) return;
+    // Only start the progress timer after the initial delay and if not paused
+    if (!timerStarted || isPaused) return;
     
-    const startTime = Date.now();
+    const startTime = Date.now() - progress * timerDuration;
     
     const timer = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -85,7 +87,7 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
     
     // Clean up on unmount
     return () => clearInterval(timer);
-  }, [onNext, timerDuration, timerInterval, timerStarted, goToScreen]);
+  }, [onNext, timerDuration, timerInterval, timerStarted, goToScreen, isPaused]);
 
   // Set background color based on userType
   const bgColor = userType === 'cash-local' ? '#00B843' : '#1189D6';

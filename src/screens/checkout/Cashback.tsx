@@ -128,6 +128,7 @@ export const Cashback = ({ onNext, amount = "1", userType, onQrVisibleChange }: 
               autoPlay={true}
               suffixText="Back"
               onFlip={onQrVisibleChange}
+              animateIn="outside-in"
             />
           </motion.div>
           
