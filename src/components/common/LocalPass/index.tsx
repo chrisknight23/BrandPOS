@@ -843,7 +843,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                   style={{ maxHeight: '300px' }}
                 >
                   <AnimatedQRCode
-                    value={`https://cash.app/${amount ? amount : '10'}`}
+                    value={`https://a746-136-24-91-134.ngrok-free.app/${amount ? amount : '10'}`}
                     size={260}
                     animateIn={typeof animateIn !== 'undefined' ? animateIn : (typeof disableAnimation === 'boolean' ? (disableAnimation ? false : 'outside-in') : (isFlipped ? 'outside-in' : false))}
                     disableAnimation={typeof disableAnimation === 'boolean' ? disableAnimation : !isFlipped}

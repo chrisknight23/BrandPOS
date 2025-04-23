@@ -1,9 +1,11 @@
 import { BaseScreen } from '../../components/common/BaseScreen';
 import { motion } from 'framer-motion';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Screen } from '../../types/screen';
 import { useUserType } from '../../context/UserTypeContext';
 import LocalCustomer from '../../components/common/LocalCustomer';
+import AnimatedMessage from '../../components/common/AnimatedMessage/';
+import ProgressButton from '../../components/common/ProgressButton';
 
 interface EndProps {
   onNext: () => void;
@@ -22,11 +24,41 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
   const [timerStarted, setTimerStarted] = useState(false);
   const [hasTip, setHasTip] = useState(false);
   const { userType } = useUserType();
-  
+  const [showFirst, setShowFirst] = useState(true);
+  const [progressReady, setProgressReady] = useState(false); // Wait for fade-in
+
   // Timer constants
-  const timerDuration = 12000; // 12 seconds total (increased from 10 seconds)
-  const timerInterval = 50; // Update every 50ms for smooth animation
+  const timerDuration = 12000; // 12 seconds total
   const initialDelay = 1500; // 1.5 second delay before timer starts
+
+  // Start timer after fade-in completes
+  useEffect(() => {
+    if (!progressReady) return;
+    const delayTimer = setTimeout(() => {
+      setTimerStarted(true);
+    }, initialDelay);
+    return () => clearTimeout(delayTimer);
+  }, [progressReady]);
+
+  // Minimal, reliable timer effect
+  useEffect(() => {
+    if (!timerStarted || isPaused) return;
+    const startTime = Date.now() - progress * timerDuration;
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const newProgress = Math.min(elapsed / timerDuration, 1);
+      setProgress(newProgress);
+      if (newProgress >= 1) {
+        clearInterval(timer);
+        if (goToScreen) {
+          goToScreen('Home');
+        } else {
+          onNext();
+        }
+      }
+    }, 50);
+    return () => clearInterval(timer);
+  }, [timerStarted, isPaused]);
 
   // Generate a random cash value under $30 for the local customer, persisted in sessionStorage for the session
   const randomCashValue = useMemo(() => {
@@ -49,49 +81,16 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
     setHasTip((tipAmount ? parseFloat(tipAmount) : 0) > 0);
   }, [amount, baseAmount, tipAmount, taxRate]);
   
-  // Set up timer effect with initial delay
   useEffect(() => {
-    // First set a timeout for the initial delay
-    const delayTimer = setTimeout(() => {
-      setTimerStarted(true);
-    }, initialDelay);
-    
-    // Clean up delay timer if component unmounts
-    return () => clearTimeout(delayTimer);
-  }, [initialDelay]);
-  
-  // Actual timer effect that starts after delay
-  useEffect(() => {
-    // Only start the progress timer after the initial delay and if not paused
-    if (!timerStarted || isPaused) return;
-    
-    const startTime = Date.now() - progress * timerDuration;
-    
-    const timer = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const newProgress = Math.min(elapsed / timerDuration, 1);
-      setProgress(newProgress);
-      
-      // When timer completes, navigate to Home screen
-      if (newProgress >= 1) {
-        clearInterval(timer);
-        // Check if we have direct navigation capability
-        if (goToScreen) {
-          goToScreen('Home');
-        } else {
-          // Fall back to regular navigation if necessary
-          onNext();
-        }
-      }
-    }, timerInterval);
-    
-    // Clean up on unmount
-    return () => clearInterval(timer);
-  }, [onNext, timerDuration, timerInterval, timerStarted, goToScreen, isPaused]);
+    // Show 'Local Cash sent' for 2.5s, then switch to 'Thanks for shopping local'
+    const timer = setTimeout(() => setShowFirst(false), 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Set background color based on userType
   const bgColor = userType === 'cash-local' ? '#00B843' : '#1189D6';
   const showReceiptButton = userType !== 'cash-local';
+  const showProgressBar = showReceiptButton && !showFirst;
 
   return (
     <BaseScreen onNext={onNext}>
@@ -109,10 +108,13 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
             <h2 className="text-2xl font-cash font-medium">
               Paid ${total} {hasTip && <span className="font-normal text-white/60">with tip</span>}
             </h2>
-            <h1 className="text-[56px] font-cash font-semibold leading-[48px] tracking-[-0.04em]">
-              Thanks for<br />
-              shopping local
-            </h1>
+            <AnimatedMessage show key={showFirst ? 'first' : 'second'}>
+              {showFirst ? (
+                <>Welcome to<br />Cash App Local</>
+              ) : (
+                <>Thanks for<br />shopping local</>
+              )}
+            </AnimatedMessage>
           </div>
           {/* Right: LocalCustomer profile */}
           {userType === 'cash-local' && (
@@ -131,41 +133,21 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          {showReceiptButton && (
-            <div 
-              className="relative overflow-hidden rounded-[12px] w-[340px] h-[96px] cursor-pointer"
+          {showReceiptButton && !showFirst && (
+            <ProgressButton
+              label="Get receipt"
+              progress={progress}
               onClick={() => {
-                // Navigate to Home screen when clicked
                 if (goToScreen) {
                   goToScreen('Home');
                 } else {
                   onNext();
                 }
               }}
-            >
-              {/* Base button background - original styling */}
-              <div className="absolute inset-0 bg-black/15" />
-              
-              {/* Progress bar - drains from left to right */}
-              <div className="absolute inset-0 overflow-hidden">
-                <motion.div 
-                  className="absolute inset-0 bg-black/[0.10]" 
-                  initial={{ x: 0 }}
-                  animate={{ x: -progress * 100 + '%' }}
-                  transition={{ 
-                    ease: "linear", 
-                    duration: 0.05
-                  }}
-                />
-              </div>
-              
-              {/* Button text - stays on top */}
-              <div className="relative z-10 flex items-center justify-center h-full">
-                <span className="text-[32px] font-cash font-medium text-white">
-                  Get receipt
-                </span>
-              </div>
-            </div>
+              show={true}
+              paused={isPaused}
+              onFadeInComplete={() => setProgressReady(true)}
+            />
           )}
         </motion.div>
       </div>

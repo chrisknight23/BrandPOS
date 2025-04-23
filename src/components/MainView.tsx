@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { logNavigation } from '../utils/debug';
 import { SCREEN_ORDER } from '../constants/screens';
@@ -9,6 +9,9 @@ import { useUserType } from '../context/UserTypeContext';
 import SettingsPanel from './dev/SettingsPanel';
 import FilterIcon from '../assets/images/filter.svg';
 import { DropMenu } from './dev/dropMenu';
+import { useEnvironment } from '../environment/EnvironmentContext';
+import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
+import { useQRCodeScanStatus } from '../hooks/useQRCodeScanStatus';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
@@ -284,33 +287,23 @@ export const MainView = () => {
     return baseAmount;
   }, [baseAmount, tipAmount]);
   
-  // Render screen navigation buttons for quick debugging
-  const renderScreenNav = () => (
-    <div className="flex gap-1.5">
-      {SCREEN_ORDER
-        .filter(screen => screen !== 'CustomTip')
-        .filter(screen => {
-          if (userType === 'cash-local') {
-            return screen !== 'Cashback' && screen !== 'Cashout';
-          }
-          return true;
-        })
-        .map(screen => (
-          <button
-            key={screen}
-            onClick={() => goToScreen(screen)}
-            className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
-              currentScreen === screen 
-                ? 'bg-white text-black font-medium border-white' 
-                : 'border-white/10 bg-[#141414] hover:bg-[#232323] active:bg-white/10 text-white/80'
-            }`}
-            style={{ minWidth: '60px', textAlign: 'center' }}
-          >
-            {screen}
-          </button>
-        ))}
-    </div>
-  );
+  // Prepare navigation pills/screens for ScreenNavigation
+  const getNavScreens = (): ScreenNavItem[] => {
+    return SCREEN_ORDER
+      .filter(screen => screen !== 'CustomTip')
+      .filter(screen => {
+        if (userType === 'cash-local') {
+          return screen !== 'Cashback' && screen !== 'Cashout';
+        }
+        return true;
+      })
+      .map(screen => ({ label: screen, value: screen }));
+  };
+  
+  // Handler for navigation pill selection
+  const handleScreenNavSelect = (screen: string) => {
+    goToScreen(screen as Screen);
+  };
   
   // Calculate the total from cart items
   const calculateCartTotal = useCallback(() => {
@@ -339,6 +332,26 @@ export const MainView = () => {
   
   // QR code visibility state for Cashback/SettingsPanel
   const [isQrVisible, setIsQrVisible] = useState(false);
+  
+  // Generate a unique session ID per app load
+  const sessionId = useMemo(() => {
+    if (window.crypto && window.crypto.randomUUID) {
+      return window.crypto.randomUUID();
+    }
+    // Fallback for older browsers
+    return Math.random().toString(36).substring(2, 15) +
+           Math.random().toString(36).substring(2, 15);
+  }, []);
+
+  // Use the polling hook to detect QR scan
+  const scanned = useQRCodeScanStatus(sessionId);
+
+  // When scanned, navigate to Cashout screen
+  useEffect(() => {
+    if (scanned && currentScreen !== 'Cashout') {
+      setCurrentScreen('Cashout');
+    }
+  }, [scanned, currentScreen]);
   
   // Get screen-specific props WITHOUT including the key
   const getScreenProps = () => {
@@ -386,9 +399,10 @@ export const MainView = () => {
     } else if (currentScreen === 'Cashback') {
       return {
         ...baseProps,
-        amount: tipAmount || "1", // Pass the tip amount to Cashback screen
-        userType, // Pass userType to Cashback
-        onQrVisibleChange: setIsQrVisible, // Wire QR visibility up
+        amount: tipAmount || "1",
+        userType,
+        onQrVisibleChange: setIsQrVisible,
+        sessionId, // Pass sessionId for QR code
       };
     } else if (currentScreen === 'CustomTip') {
       return {
@@ -408,6 +422,7 @@ export const MainView = () => {
   };
   
   const { userType, setUserType } = useUserType();
+  const { environment, setEnvironment } = useEnvironment();
   
   useEffect(() => {
     // Listen for dev QR scan simulation event
@@ -465,8 +480,8 @@ export const MainView = () => {
         isPaused={isPaused}
         setIsPaused={setIsPaused}
       />
-      {/* Device DropMenu in the top left corner */}
-      <div className="fixed top-6 left-6 z-[10002]">
+      {/* Device and Environment DropMenus in the top left corner */}
+      <div className="fixed top-6 left-6 z-[10002] flex flex-col gap-4">
         <DropMenu
           title="Device"
           rowLabels={["Register", "Stand", "Reader"]}
@@ -476,6 +491,17 @@ export const MainView = () => {
             else if (rowIndex === 1) setUserType('returning');
             else if (rowIndex === 2) setUserType('cash-local');
           }}
+        />
+        <DropMenu
+          title="Environment"
+          rowLabels={["SQ buyer display", "Cash App", "Cash Web"]}
+          onRowSelect={(rowIndex) => {
+            const env = rowIndex === 0 ? 'POS' : rowIndex === 1 ? 'iOS' : 'Web';
+            setEnvironment(env);
+          }}
+          initialSelectedRow={['POS', 'iOS', 'Web'].map((v, i) => ["Square POS", "Cash App", "Cash Web"][i]).indexOf(
+            environment === 'POS' ? 'Square POS' : environment === 'iOS' ? 'Cash App' : 'Cash Web'
+          ) + 1}
         />
       </div>
       {/* User profile DropMenu on the right side, shifts left when dev panel is open (24px gap) */}
@@ -529,7 +555,11 @@ export const MainView = () => {
             />
             {/* Centered screen navigation at the bottom of the device frame */}
             <div className="absolute bottom-12 left-0 w-full flex justify-center z-20">
-              {renderScreenNav()}
+              <ScreenNavigation
+                screens={getNavScreens()}
+                currentScreen={currentScreen}
+                onScreenSelect={handleScreenNavSelect}
+              />
             </div>
           </motion.div>
         </AnimatePresence>

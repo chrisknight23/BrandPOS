@@ -156,19 +156,6 @@ const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAdd
               )}
             </div>
           )}
-          {/* End screen: show Pause/Play button */}
-          {currentScreen === 'End' && setIsPaused && (
-            <Button
-              variant="secondary"
-              className="w-full"
-              onClick={() => setIsPaused(!isPaused)}
-              aria-label={isPaused ? 'Play' : 'Pause'}
-            >
-              <div className="flex items-center justify-center text-white">
-                <div className="text-base font-medium">{isPaused ? 'Play' : 'Pause'}</div>
-              </div>
-            </Button>
-          )}
           {/* Cashback screen: show Scan QR button only when card is flipped (QR visible) */}
           <AnimatePresence>
             {currentScreen === 'Cashback' && isQrVisible && (
