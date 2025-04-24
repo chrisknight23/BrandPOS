@@ -1,3 +1,17 @@
+/*
+  InteractionView Tab States
+  -------------------------
+  This view supports the following screen states:
+
+  - Home:      Square POS welcome screen. Merchants start payment by adding items to cart.
+  - Cart:      Shows total price and list of items. Users review order before payment.
+  - Payment:   Blue screen with amount and payment notches. Tap to pay.
+  - Tipping:   Choose preset/custom tip. Alternates between "Give a Tip" and "Earn Local Cash".
+  - Cashback:  Select cashback amount. Cash App card animation appears.
+  - End:       Transaction complete message. Flow ends, ready for new transaction.
+
+  The currentScreen prop controls which state is active.
+*/
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../../ui/button';
