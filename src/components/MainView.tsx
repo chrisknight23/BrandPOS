@@ -11,7 +11,7 @@ import FilterIcon from '../assets/images/filter.svg';
 import { DropMenu } from './dev/dropMenu';
 import { useEnvironment } from '../environment/EnvironmentContext';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
-import { useQRCodeScanStatus } from '../hooks/useQRCodeScanStatus';
+import { useNavigate } from 'react-router-dom';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
@@ -333,26 +333,18 @@ export const MainView = () => {
   // QR code visibility state for Cashback/SettingsPanel
   const [isQrVisible, setIsQrVisible] = useState(false);
   
-  // Generate a unique session ID per app load
+  // Generate a unique session ID per app load, persisted in sessionStorage
   const sessionId = useMemo(() => {
-    if (window.crypto && window.crypto.randomUUID) {
-      return window.crypto.randomUUID();
-    }
-    // Fallback for older browsers
-    return Math.random().toString(36).substring(2, 15) +
-           Math.random().toString(36).substring(2, 15);
+    const stored = sessionStorage.getItem('sessionId');
+    if (stored) return stored;
+
+    const newId = window.crypto?.randomUUID?.() ||
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem('sessionId', newId);
+    return newId;
   }, []);
 
-  // Use the polling hook to detect QR scan
-  const scanned = useQRCodeScanStatus(sessionId);
-
-  // When scanned, navigate to Cashout screen
-  useEffect(() => {
-    if (scanned && currentScreen !== 'Cashout') {
-      setCurrentScreen('Cashout');
-    }
-  }, [scanned, currentScreen]);
-  
   // Get screen-specific props WITHOUT including the key
   const getScreenProps = () => {
     // Base props without key
@@ -449,6 +441,7 @@ export const MainView = () => {
     }
   }, [currentScreen, isPaused]);
   
+  // --- Removed QR scan status effect ---
   return (
     <div
       className="flex flex-col w-screen h-screen bg-[#050505]"

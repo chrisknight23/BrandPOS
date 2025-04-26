@@ -1,33 +1,57 @@
-import { useEffect, useState } from 'react';
+/// <reference types="vite/client" />
 
-type ScanStatus = { scanned: boolean };
+import { useEffect, useState, useRef } from 'react';
+
+type ScanStatus = { scanned: boolean; handoffComplete: boolean; appReady?: boolean; amount?: number };
 
 export const useQRCodeScanStatus = (sessionId: string, pollInterval = 2000) => {
-  const [scanned, setScanned] = useState(false);
+  const [status, setStatus] = useState<ScanStatus>({ scanned: false, handoffComplete: false, appReady: false, amount: undefined });
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!sessionId) return;
 
     let isMounted = true;
+    const apiBase = import.meta.env.VITE_API_BASE_URL;
     const poll = async () => {
       try {
-        const res = await fetch(`https://a746-136-24-91-134.ngrok-free.app/status/${sessionId}`);
-        if (!res.ok) return;
+        const res = await fetch(`${apiBase}/status/${sessionId}`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        if (!res.ok) {
+          console.log('❌ Response not OK:', res.status);
+          return;
+        }
         const data: ScanStatus = await res.json();
-        if (isMounted && data.scanned) setScanned(true);
+        console.log('Scan status response:', data);
+        if (isMounted) {
+          setStatus(data);
+          // Stop polling if appReady is true
+          if (data.appReady) {
+            if (pollingRef.current) {
+              clearInterval(pollingRef.current);
+              pollingRef.current = null;
+            }
+          }
+        }
       } catch (e) {
         // Optionally handle error
       }
     };
 
-    const interval = setInterval(poll, pollInterval);
+    pollingRef.current = setInterval(poll, pollInterval);
     poll(); // Initial check
 
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
     };
   }, [sessionId, pollInterval]);
 
-  return scanned;
-}; 
+  return status;
+};
