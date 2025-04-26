@@ -125,6 +125,9 @@ export interface LocalPassProps {
 
   /** Animation pattern for QR code entry */
   animateIn?: 'random' | 'inside-out' | 'outside-in' | 'wave' | 'sequential' | false;
+
+  /** Session ID for QR scan tracking */
+  sessionId?: string;
 }
 
 // ============= Constants =============
@@ -249,6 +252,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   flipped,
   disableAnimation,
   animateIn,
+  sessionId,
 }) => {
   const controls = useAnimation();
   const lottieControls = useAnimation();
@@ -649,6 +653,9 @@ export const LocalPass: React.FC<LocalPassProps> = ({
   // Display text value if provided, otherwise use numeric amount
   const displayAmount = textAmount || amount;
 
+  // Add at the top of the component (inside LocalPass):
+  const apiBase = import.meta.env.VITE_API_BASE_URL;
+
   return (
     <div className={`w-full h-full flex items-center justify-center ${className}`}>
       <motion.div
@@ -843,7 +850,7 @@ export const LocalPass: React.FC<LocalPassProps> = ({
                   style={{ maxHeight: '300px' }}
                 >
                   <AnimatedQRCode
-                    value={`https://a746-136-24-91-134.ngrok-free.app/${amount ? amount : '10'}`}
+                    value={sessionId ? `https://chrisk.ngrok.app/ul/${sessionId}` : `${apiBase}/${amount ? amount : '10'}`}
                     size={260}
                     animateIn={typeof animateIn !== 'undefined' ? animateIn : (typeof disableAnimation === 'boolean' ? (disableAnimation ? false : 'outside-in') : (isFlipped ? 'outside-in' : false))}
                     disableAnimation={typeof disableAnimation === 'boolean' ? disableAnimation : !isFlipped}
