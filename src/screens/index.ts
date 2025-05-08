@@ -1,0 +1,21 @@
+import { Home } from './Home';
+import { Cart } from './Cart';
+import { Payment } from './Payment';
+import { Auth } from './Auth';
+import { Tipping } from './tipping/Tipping';
+import { CustomTip } from './tipping/CustomTip';
+import { Cashback } from './Cashback';
+import { Cashout } from './Cashout';
+import { End } from './End';
+
+export {
+  Home,
+  Cart,
+  Payment,
+  Auth,
+  Tipping,
+  Cashback,
+  CustomTip,
+  Cashout,
+  End,
+};

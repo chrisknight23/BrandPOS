@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { logNavigation } from '../utils/debug';
 import { SCREEN_ORDER } from '../constants/screens';
 import { Screen } from '../types/screen';
-import * as screens from '../screens/checkout';
+import * as screens from '../screens';
 import DesktopIcon from '../assets/images/Desktop.svg';
 import { useUserType } from '../context/UserTypeContext';
 import SettingsPanel from './dev/SettingsPanel';
