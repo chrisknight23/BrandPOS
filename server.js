@@ -45,42 +45,19 @@ app.post('/app-ready/:sessionId', (req, res) => {
   res.json({ success: true });
 });
 
-// Endpoint hit by QR code scan (now serves minimal page that triggers the App Clip / Universal Link dialog)
+// Endpoint hit by QR code scan (now redirects to the main /ul/ endpoint)
 app.get('/scan/:sessionId', (req, res) => {
   const { sessionId } = req.params;
   if (!scanStatus[sessionId]) {
     scanStatus[sessionId] = { scanned: false, handoffComplete: false, amount: null, appReady: false };
   }
   scanStatus[sessionId].scanned = true;
-  console.log('✅ Session marked as scanned:', sessionId);
+  console.log('✅ Scan endpoint accessed, redirecting to app page:', sessionId);
   
-  // Serve a completely blank page that just triggers the redirect
-  res.setHeader('Content-Type', 'text/html');
-  res.send(`<!DOCTYPE html>
-<html>
-<head>
-  <title>Loading...</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-itunes-app" content="app-id=6445987069,app-argument=https://chrisk.ngrok.app/scan/${sessionId}">
-  <style>
-    body {
-      background: #fff;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-    }
-  </style>
-</head>
-<body>
-  <script>
-    // This helps trigger the Universal Link action sheet
-    window.location.href = "https://chrisk.ngrok.app/scan/${sessionId}";
-  </script>
-</body>
-</html>`)
+  res.redirect(`/app/${sessionId}`);
 });
 
-// NEW: Direct Universal Link endpoint for QR codes - this is what should be encoded in QR codes
+// Direct Universal Link endpoint - optimized for being intercepted by iOS before page loads
 app.get('/direct/:sessionId', (req, res) => {
   const { sessionId } = req.params;
   if (!scanStatus[sessionId]) {
@@ -89,20 +66,17 @@ app.get('/direct/:sessionId', (req, res) => {
   scanStatus[sessionId].scanned = true;
   console.log('✅ Direct link accessed, session marked as scanned:', sessionId);
   
-  // Send a minimal response that will be used only if the app doesn't open
+  // Serve a minimal page with just the Smart Banner
   res.setHeader('Content-Type', 'text/html');
   res.send(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Opening App...</title>
+      <title>Open App</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="refresh" content="0;url=https://chrisk.ngrok.app/scan/${sessionId}">
+      <meta name="apple-itunes-app" content="app-id=6445987069, app-argument=https://chrisk.ngrok.app/scan/${sessionId}">
     </head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 40px 20px;">
-      <p>Opening LocalCashApp...</p>
-      <p>If the app doesn't open, <a href="https://chrisk.ngrok.app/scan/${sessionId}" style="color: #00B843; font-weight: bold;">tap here</a>.</p>
-    </body>
+    <body style="margin:0;padding:0;"></body>
     </html>
   `);
 });
@@ -126,7 +100,19 @@ app.get('/status/:sessionId', (req, res) => {
   res.json({ scanned: !!status.scanned, handoffComplete: !!status.handoffComplete, amount: status.amount, appReady: !!status.appReady });
 });
 
-// NEW: Dedicated QR code landing page that focuses on the Smart App Banner
+// Dev helper: Reset a session's status for testing (without server restart)
+app.post('/reset-session/:sessionId', (req, res) => {
+  const { sessionId } = req.params;
+  if (sessionId) {
+    scanStatus[sessionId] = { scanned: false, handoffComplete: false, amount: null, appReady: false };
+    console.log('🔄 DEV: Reset session status for:', sessionId);
+    res.json({ success: true, message: 'Session reset successfully' });
+  } else {
+    res.status(400).json({ success: false, message: 'Session ID is required' });
+  }
+});
+
+// App link endpoint (now redirects to the main /ul/ endpoint)
 app.get('/applink/:sessionId', (req, res) => {
   const { sessionId } = req.params;
   if (!scanStatus[sessionId]) {
@@ -135,22 +121,32 @@ app.get('/applink/:sessionId', (req, res) => {
   scanStatus[sessionId].scanned = true;
   console.log('✅ App link landing page accessed for session:', sessionId);
   
-  // Serve a minimal page that prominently displays the Smart App Banner
+  // Redirect to the main Universal Link handler
+  res.redirect(`/ul/${sessionId}`);
+});
+
+// Landing page for QR codes - this is what the QR codes will point to
+app.get('/landing/:sessionId', (req, res) => {
+  const { sessionId } = req.params;
+  if (!scanStatus[sessionId]) {
+    scanStatus[sessionId] = { scanned: false, handoffComplete: false, amount: null, appReady: false };
+  }
+  scanStatus[sessionId].scanned = true;
+  console.log('✅ Landing page accessed for session:', sessionId);
+  
+  // Serve a transition page optimized for triggering the iOS System Modal
   res.setHeader('Content-Type', 'text/html');
   res.send(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Open LocalCashApp</title>
+      <title>Opening LocalCashApp</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <!-- Apple Smart Banner - THIS is what creates the blue OPEN button -->
-      <meta name="apple-itunes-app" content="app-id=6445987069,app-argument=https://chrisk.ngrok.app/scan/${sessionId}">
       <style>
         body {
           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
           text-align: center;
-          padding: 20px;
-          font-size: 16px;
+          padding: 60px 20px;
           background: #f8f8f8;
           color: #333;
           margin: 0;
@@ -162,76 +158,117 @@ app.get('/applink/:sessionId', (req, res) => {
         }
         .container {
           max-width: 500px;
-          margin: 0 auto;
         }
-        .message {
-          margin: 30px 0;
-          padding: 20px;
-          background: #fff;
-          border-radius: 12px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .arrow-up {
-          width: 0; 
-          height: 0; 
-          border-left: 20px solid transparent;
-          border-right: 20px solid transparent;
-          border-bottom: 20px solid #00B843;
-          margin: 0 auto 10px auto;
-        }
-        .hint {
-          color: #00B843;
-          font-weight: bold;
-          font-size: 18px;
-          margin-bottom: 20px;
-        }
-        .fallback {
-          margin-top: 40px;
-          color: #666;
-        }
-        .manual-link {
-          display: inline-block;
-          background: #00B843;
+        .logo {
+          width: 80px;
+          height: 80px;
+          background-color: #00B843;
+          border-radius: 20px;
+          margin: 0 auto 20px auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           color: white;
-          text-decoration: none;
-          padding: 16px 32px;
-          border-radius: 24px;
-          font-size: 18px;
+          font-size: 40px;
           font-weight: bold;
-          margin: 20px 0;
+        }
+        .loading {
+          margin: 30px 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .dot {
+          width: 10px;
+          height: 10px;
+          background: #00B843;
+          border-radius: 50%;
+          margin: 0 5px;
+          animation: pulse 1.5s infinite ease-in-out;
+        }
+        .dot:nth-child(2) {
+          animation-delay: 0.3s;
+        }
+        .dot:nth-child(3) {
+          animation-delay: 0.6s;
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(0.7); opacity: 0.5; }
+          50% { transform: scale(1); opacity: 1; }
+        }
+        .hidden {
+          position: absolute;
+          width: 0;
+          height: 0;
+          overflow: hidden;
         }
       </style>
     </head>
     <body>
       <div class="container">
-        <div class="arrow-up"></div>
-        <div class="hint">Tap "OPEN" at the top of the screen</div>
-        
-        <div class="message">
-          <p>We're trying to open LocalCashApp...</p>
-          <p>If you don't see an "OPEN" button at the top of the screen, try the button below:</p>
-          
-          <a href="https://chrisk.ngrok.app/scan/${sessionId}" class="manual-link">Open in App</a>
-          
-          <p class="fallback">Session ID: ${sessionId}</p>
+        <div class="logo">$</div>
+        <h2>Opening LocalCashApp</h2>
+        <p>Please wait while we open the app...</p>
+        <div class="loading">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
         </div>
       </div>
+      
+      <!-- Hidden iframe used for triggering the system modal -->
+      <iframe id="universal-link-frame" class="hidden"></iframe>
+      
+      <script>
+        // Function to attempt to open the app via Universal Link
+        function tryOpenApp() {
+          // Attempt 1: Try opening with a direct Universal Link navigation
+          // This approach is most likely to trigger the iOS System Modal
+          window.location.href = 'https://chrisk.ngrok.app/direct/${sessionId}';
+          
+          // Fallback: If the app doesn't open within 2.5 seconds, try another method
+          setTimeout(function() {
+            // Attempt 2: Try using iframe for Universal Link (may work better on some iOS versions)
+            var frame = document.getElementById('universal-link-frame');
+            frame.src = 'https://chrisk.ngrok.app/direct/${sessionId}';
+            
+            // Attempt 3: Final fallback - redirect to the full page with smart banner
+            setTimeout(function() {
+              window.location.href = 'https://chrisk.ngrok.app/ul/${sessionId}';
+            }, 1500);
+          }, 2500);
+        }
+        
+        // Start the app opening sequence after a brief display of the loading screen
+        setTimeout(tryOpenApp, 1000);
+      </script>
     </body>
     </html>
   `);
 });
 
-// Pure Universal Link endpoint - no HTML, just a redirect to help trigger the App Clip dialog
+// Main Universal Link handler - simplified to one clean page with just the Smart Banner
 app.get('/ul/:sessionId', (req, res) => {
   const { sessionId } = req.params;
   if (!scanStatus[sessionId]) {
     scanStatus[sessionId] = { scanned: false, handoffComplete: false, amount: null, appReady: false };
   }
   scanStatus[sessionId].scanned = true;
-  console.log('✅ Universal Link endpoint accessed for session:', sessionId);
+  console.log('✅ Direct link accessed, session marked as scanned:', sessionId);
   
-  // Respond with a redirect to the scan endpoint
-  res.redirect(`https://chrisk.ngrok.app/scan/${sessionId}`);
+  // Serve a minimal page with just the Smart Banner
+  res.setHeader('Content-Type', 'text/html');
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Open App</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="apple-itunes-app" content="app-id=6445987069, app-argument=https://chrisk.ngrok.app/scan/${sessionId}">
+    </head>
+    <body style="margin:0;padding:0;"></body>
+    </html>
+  `);
 });
 
 app.listen(port, () => {
