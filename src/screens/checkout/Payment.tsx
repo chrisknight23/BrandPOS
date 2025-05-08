@@ -159,21 +159,27 @@ const PaymentNotch = ({ position, text }: { position: 'top' | 'bottom', text: st
 
 interface PaymentProps {
   onNext: (amount?: string) => void;
-  amount?: string;
-  taxRate?: number;
+  amount?: string; // This is already the total with tax from the Cart screen
+  baseAmount?: string; // This is also with tax from Cart
 }
 
-export const Payment = ({ onNext, amount = "10.80", taxRate = 0.0875 }: PaymentProps) => {
+export const Payment = ({ onNext, amount, baseAmount }: PaymentProps) => {
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
   const [notchesVisible, setNotchesVisible] = useState(false);
   const [showCardCursor, setShowCardCursor] = useState(true);
 
-  // Calculate tax and total
-  const base = parseFloat(amount);
-  const tax = base * taxRate;
-  const totalWithTax = base + tax;
+  // Use the provided amount, fall back to baseAmount if amount is not provided
+  // We don't need to recalculate tax here as it's already included in the amount from Cart
+  const displayAmount = amount ? parseFloat(amount) : 
+                       baseAmount ? parseFloat(baseAmount) : 0;
+  
+  // Format this for consistent display and passing
+  const formattedAmount = displayAmount.toFixed(2);
 
   useEffect(() => {
+    // Log the received amount for debugging
+    console.log(`Payment: Received amount=${amount}, baseAmount=${baseAmount}, calculated displayAmount=${displayAmount}, formatted=${formattedAmount}`);
+    
     // Start all animations immediately
     setAnimationState('paymentPrompts');
     setNotchesVisible(true);
@@ -184,11 +190,13 @@ export const Payment = ({ onNext, amount = "10.80", taxRate = 0.0875 }: PaymentP
     }, 2000);
 
     return () => clearTimeout(timeout);
-  }, []);
+  }, [amount, baseAmount, displayAmount, formattedAmount]);
 
   const handleNext = () => {
-    // Pass along the amount to the next screen
-    onNext(amount);
+    // Always pass the formatted amount to ensure consistency across screens
+    // This fixes issues with undefined values being passed
+    console.log(`Payment: Navigating to next screen with amount=${formattedAmount}`);
+    onNext(formattedAmount);
   };
   
   const handleTapComplete = () => {
@@ -213,7 +221,7 @@ export const Payment = ({ onNext, amount = "10.80", taxRate = 0.0875 }: PaymentP
             ease: [0.32, 0.72, 0, 1]
           }}
         >
-          ${totalWithTax.toFixed(2)}
+          ${formattedAmount}
         </motion.div>
 
         {/* Arrows */}

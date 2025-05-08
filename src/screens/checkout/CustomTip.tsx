@@ -1,27 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import ClearIcon from '../../assets/images/clear.svg';
 import { useUserType } from '../../context/UserTypeContext';
+import { Screen } from '../../types/screen';
 
 interface CustomTipProps {
   onNext: (amount: string) => void;
-  goBack?: () => void;
+  onBack?: () => void;
   baseAmount?: string;
+  goToScreen?: (screen: Screen) => void;
 }
 
-export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) => {
+export const CustomTip = ({ onNext, onBack, baseAmount = '0', goToScreen }: CustomTipProps) => {
   const [cents, setCents] = useState<number>(0);
   const [shake, setShake] = useState<boolean>(false);
   const tipAmount = cents / 100;
-  // subtotal (base + tip) before tax
-  const preTaxTotal = parseFloat(baseAmount) + tipAmount;
-  // total including 8.75% tax for display
-  const displayTotal = (preTaxTotal * 1.0875).toFixed(2);
+  
+  // baseAmount already includes tax from Cart, so we just add the tip
+  const totalWithTip = parseFloat(baseAmount) + tipAmount;
   // format the typed tip only (cents)
   const amount = tipAmount.toFixed(2);
   
   const { userType } = useUserType();
+  
+  // Log values for debugging
+  useEffect(() => {
+    console.log(`CustomTip: baseAmount=${baseAmount} (includes tax), tipAmount=${amount}, totalWithTip=${totalWithTip.toFixed(2)}`);
+  }, [baseAmount, amount, totalWithTip]);
   
   const handleNumberPress = (num: string) => {
     // Only digits; ignore decimal input
@@ -51,8 +57,13 @@ export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) 
   };
   
   const handleCancel = () => {
-    if (goBack) {
-      goBack();
+    // First preference: navigate directly to Tipping screen
+    if (goToScreen) {
+      goToScreen('Tipping');
+    } 
+    // Fallback to onBack if goToScreen is not available
+    else if (onBack) {
+      onBack();
     }
   };
   
@@ -77,7 +88,7 @@ export const CustomTip = ({ onNext, goBack, baseAmount = '0' }: CustomTipProps) 
           <div className="flex justify-between items-center">
             <h2 className="text-[24px] font-cash font-medium">
               Custom tip <span className="font-cash font-normal text-white/40">
-                ${displayTotal} {cents > 0 ? 'with tip' : 'total'}
+                ${totalWithTip.toFixed(2)} {cents > 0 ? 'with tip' : 'total'}
               </span>
             </h2>
             <button 

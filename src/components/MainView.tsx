@@ -7,11 +7,9 @@ import * as screens from '../screens/checkout';
 import DesktopIcon from '../assets/images/Desktop.svg';
 import { useUserType } from '../context/UserTypeContext';
 import SettingsPanel from './dev/SettingsPanel';
-import FilterIcon from '../assets/images/filter.svg';
 import { DropMenu } from './dev/dropMenu';
 import { useEnvironment } from '../environment/EnvironmentContext';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
-import { useNavigate } from 'react-router-dom';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
@@ -182,32 +180,89 @@ export const MainView = () => {
     }
   }, [currentScreen, cartItems.length, nextItemId]);
   
-  // Handle navigation to next screen with amounts
+  // Calculate the total from cart items - move this function earlier in the file
+  const calculateCartTotal = useCallback(() => {
+    if (cartItems.length === 0) return '0.00';
+    
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const tax = subtotal * TAX_RATE;
+    const total = subtotal + tax;
+    
+    console.log(`MainView:calculateCartTotal: Subtotal=${subtotal.toFixed(2)}, Tax=${tax.toFixed(2)}, Total=${total.toFixed(2)}`);
+    return total.toFixed(2);
+  }, [cartItems]);
+  
+  // Calculate the total amount including tip if applicable
+  const calculateTotalAmount = useCallback(() => {
+    // If baseAmount isn't set but we have cart items, calculate from cart with tax
+    if (!baseAmount && cartItems.length > 0) {
+      const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const tax = subtotal * TAX_RATE;
+      const total = subtotal + tax;
+      console.log(`MainView:calculateTotalAmount: Using cart items - Subtotal=${subtotal.toFixed(2)}, Tax=${tax.toFixed(2)}, Total=${total.toFixed(2)}`);
+      return total.toFixed(2);
+    }
+    
+    if (!baseAmount) return undefined;
+    
+    // baseAmount from Cart already includes tax, just add tip if there is one
+    if (tipAmount && tipAmount !== '0') {
+      const base = parseFloat(baseAmount);
+      const tip = parseFloat(tipAmount);
+      const total = base + tip;
+      console.log(`MainView:calculateTotalAmount: Base=${base.toFixed(2)} (with tax) + Tip=${tip.toFixed(2)} = ${total.toFixed(2)}`);
+      return total.toFixed(2);
+    }
+    
+    // Otherwise, just return the base amount (already includes tax from Cart)
+    console.log(`MainView:calculateTotalAmount: Using baseAmount=${baseAmount} (already includes tax)`);
+    return baseAmount;
+  }, [baseAmount, tipAmount, cartItems]);
+  
+  // Now handleNext can use calculateCartTotal
   const handleNext = useCallback((amount?: string) => {
     logNavigation('MainView:handleNext', `Navigate from ${currentScreen}`, { amount });
     
+    console.log(`MainView:handleNext: Current baseAmount=${baseAmount}, tipAmount=${tipAmount}, newAmount=${amount}`);
+    
+    // Important: If an amount is provided, always use it
     if (amount) {
       if (currentScreen === 'Cart' || currentScreen === 'Payment') {
+        console.log(`MainView:handleNext: Setting baseAmount to ${amount}`);
         setBaseAmount(amount);
       } else if (currentScreen === 'Tipping') {
+        console.log(`MainView:handleNext: Setting tipAmount to ${amount}`);
         setTipAmount(amount);
       } else if (currentScreen === 'CustomTip') {
+        console.log(`MainView:handleNext: Setting tipAmount to ${amount} and navigating to End`);
         setTipAmount(amount);
         setCurrentScreen('End');
         return;
       }
     }
+    
+    // Ensure we have a baseAmount when needed
+    if (!baseAmount && (currentScreen === 'Cart' || currentScreen === 'Payment')) {
+      const cartTotal = calculateCartTotal();
+      console.log(`MainView:handleNext: No baseAmount, setting from cart: ${cartTotal}`);
+      setBaseAmount(cartTotal);
+    }
+    
     // Explicitly go to End after Cashout
     if (currentScreen === 'Cashout') {
+      console.log(`MainView:handleNext: Navigating from Cashout to End`);
       setCurrentScreen('End');
       return;
     }
+    
     // Navigate to next screen by order
     const idx = SCREEN_ORDER.indexOf(currentScreen);
     if (idx < SCREEN_ORDER.length - 1) {
-      setCurrentScreen(SCREEN_ORDER[idx + 1]);
+      const nextScreen = SCREEN_ORDER[idx + 1];
+      console.log(`MainView:handleNext: Navigating from ${currentScreen} to ${nextScreen}`);
+      setCurrentScreen(nextScreen);
     }
-  }, [currentScreen]);
+  }, [currentScreen, baseAmount, calculateCartTotal, tipAmount]);
   
   // Handle back navigation
   const handleBack = useCallback(() => {
@@ -245,6 +300,48 @@ export const MainView = () => {
     setTipAmount(null);
   }, []);
   
+  // QR code visibility state for Cashback/SettingsPanel
+  const [isQrVisible, setIsQrVisible] = useState(false);
+  
+  // Generate a unique session ID per app load, persisted in sessionStorage
+  const sessionId = useMemo(() => {
+    const stored = sessionStorage.getItem('sessionId');
+    if (stored) return stored;
+
+    const newId = window.crypto?.randomUUID?.() ||
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem('sessionId', newId);
+    return newId;
+  }, []);
+
+  // Reset the current session's status on the server for testing (without requiring restart)
+  const handleResetSession = useCallback(async () => {
+    logNavigation('MainView:handleResetSession', 'Resetting session status on server');
+    console.log('MainView: Resetting session status for:', sessionId);
+    
+    try {
+      // Always use localhost for reset-session specifically
+      const response = await fetch(`http://localhost:3001/reset-session/${sessionId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+      
+      if (response.ok) {
+        console.log('✅ Session status reset successfully');
+        // Also navigate back to home screen
+        setCurrentScreen('Home');
+      } else {
+        console.error('❌ Failed to reset session status');
+      }
+    } catch (error) {
+      console.error('❌ Error resetting session status:', error);
+    }
+  }, [sessionId]);
+  
   // Direct navigation to specific screen
   const goToScreen = useCallback((screen: Screen) => {
     logNavigation('MainView:goToScreen', `Navigating directly to ${screen}`, 
@@ -271,21 +368,25 @@ export const MainView = () => {
   
   // Get the current screen component
   const CurrentScreenComponent = screens[currentScreen as keyof typeof screens];
-
-  // Calculate the total amount including tip if applicable
-  const calculateTotalAmount = useCallback(() => {
-    if (!baseAmount) return undefined;
-    
-    // If there's a tip, add it to the base amount
-    if (tipAmount && tipAmount !== '0') {
-      const base = parseFloat(baseAmount);
-      const tip = parseFloat(tipAmount);
-      return (base + tip).toFixed(2);
+  
+  // Simplify the effects - only keep one essential effect
+  useEffect(() => {
+    // Ensure base amount is set when on Payment, Tipping, Cashback, etc.
+    if ((currentScreen === 'Payment' || currentScreen === 'Tipping' || 
+         currentScreen === 'Cashback' || currentScreen === 'Cashout' || 
+         currentScreen === 'End') && (!baseAmount || baseAmount === '0.00')) {
+      const cartTotal = calculateCartTotal();
+      console.log(`MainView: Setting base amount for screen ${currentScreen}: ${cartTotal}`);
+      setBaseAmount(cartTotal);
     }
     
-    // Otherwise, just return the base amount
-    return baseAmount;
-  }, [baseAmount, tipAmount]);
+    // Update base amount when on Cart screen based on cart items
+    if (currentScreen === 'Cart') {
+      const cartTotal = calculateCartTotal();
+      console.log(`MainView: Setting base amount for Cart: ${cartTotal}`);
+      setBaseAmount(cartTotal);
+    }
+  }, [currentScreen, calculateCartTotal, baseAmount, cartItems]);
   
   // Prepare navigation pills/screens for ScreenNavigation
   const getNavScreens = (): ScreenNavItem[] => {
@@ -303,114 +404,6 @@ export const MainView = () => {
   // Handler for navigation pill selection
   const handleScreenNavSelect = (screen: string) => {
     goToScreen(screen as Screen);
-  };
-  
-  // Calculate the total from cart items
-  const calculateCartTotal = useCallback(() => {
-    if (cartItems.length === 0) return '0.00';
-    
-    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    return total.toFixed(2);
-  }, [cartItems]);
-  
-  // Update the base amount when the cart items change or when navigating to Payment
-  useEffect(() => {
-    if (currentScreen === 'Payment') {
-      const cartTotal = calculateCartTotal();
-      console.log(`MainView: Setting base amount to cart total: ${cartTotal}`);
-      setBaseAmount(cartTotal);
-    }
-  }, [currentScreen, calculateCartTotal]);
-  
-  // Additional effect to update base amount when cart changes
-  useEffect(() => {
-    if (currentScreen === 'Cart') {
-      const cartTotal = calculateCartTotal();
-      setBaseAmount(cartTotal);
-    }
-  }, [cartItems, currentScreen, calculateCartTotal]);
-  
-  // QR code visibility state for Cashback/SettingsPanel
-  const [isQrVisible, setIsQrVisible] = useState(false);
-  
-  // Generate a unique session ID per app load, persisted in sessionStorage
-  const sessionId = useMemo(() => {
-    const stored = sessionStorage.getItem('sessionId');
-    if (stored) return stored;
-
-    const newId = window.crypto?.randomUUID?.() ||
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15);
-    sessionStorage.setItem('sessionId', newId);
-    return newId;
-  }, []);
-
-  // Get screen-specific props WITHOUT including the key
-  const getScreenProps = () => {
-    // Base props without key
-    const baseProps = {
-      onNext: handleNext,
-    };
-
-    // Return props specific to the current screen
-    if (currentScreen === 'End') {
-      return {
-        ...baseProps,
-        amount: calculateTotalAmount(),
-        baseAmount: baseAmount || undefined,
-        tipAmount: tipAmount || undefined,
-        goToScreen: goToScreen,  // Pass direct navigation function to End
-        resetToHome: handleReset,  // Also pass reset function as an alternative
-        taxRate: TAX_RATE,
-        isPaused,
-        setIsPaused,
-      };
-    } else if (currentScreen === 'Cart') {
-      return {
-        ...baseProps,
-        amount: calculateCartTotal(), // Use calculated cart total
-        cartItems: cartItems,
-        onCartUpdate: handleCartUpdate
-      };
-    } else if (currentScreen === 'Payment') {
-      return {
-        ...baseProps,
-        amount: baseAmount || calculateCartTotal(), // Use baseAmount or cart total as fallback
-        taxRate: TAX_RATE
-      };
-    } else if (currentScreen === 'Auth') {
-      return {
-        ...baseProps,
-        amount: baseAmount || calculateCartTotal() // Pass the amount from Payment to Auth
-      };
-    } else if (currentScreen === 'Tipping') {
-      return {
-        ...baseProps,
-        goToScreen: goToScreen  // Pass direct navigation function to Tipping
-      };
-    } else if (currentScreen === 'Cashback') {
-      return {
-        ...baseProps,
-        amount: tipAmount || "1",
-        userType,
-        onQrVisibleChange: setIsQrVisible,
-        sessionId, // Pass sessionId for QR code
-      };
-    } else if (currentScreen === 'CustomTip') {
-      return {
-        ...baseProps,
-        baseAmount: baseAmount || '0',
-        goBack: () => goToScreen('Tipping')
-      };
-    } else if (currentScreen === 'Cashout') {
-      return {
-        onNext: () => {}, // no-op to satisfy type
-        onComplete: handleNext,
-        amount: tipAmount || "3",
-      };
-    } else {
-      return baseProps;
-    }
   };
   
   const { userType, setUserType } = useUserType();
@@ -441,6 +434,38 @@ export const MainView = () => {
     }
   }, [currentScreen, isPaused]);
   
+  // Get props for the current screen component
+  const getScreenProps = () => {
+    // Log current state before generating props
+    console.log(`MainView:getScreenProps: Preparing props for ${currentScreen}`, {
+      baseAmount,
+      tipAmount,
+      totalAmount: calculateTotalAmount()
+    });
+    
+    // Generate props with proper null/undefined handling
+    return {
+      onNext: handleNext,
+      onBack: handleBack,
+      onComplete: handleNext,
+      // Pass baseAmount as string or undefined (never null)
+      baseAmount: baseAmount || undefined,
+      // Pass tipAmount as string or undefined (never null)
+      tipAmount: tipAmount || undefined,
+      // Pass totalAmount which includes both base and tip
+      totalAmount: calculateTotalAmount() || undefined,
+      // Pass the raw cart items
+      cartItems,
+      onCartUpdate: handleCartUpdate,
+      // QR code visibility
+      isQrVisible,
+      // Session ID for tracking
+      sessionId,
+      // Direct navigation function
+      goToScreen
+    };
+  };
+  
   // --- Removed QR scan status effect ---
   return (
     <div
@@ -466,6 +491,7 @@ export const MainView = () => {
         onNext={handleDevNavNext}
         onRefresh={handleRefresh}
         onReset={handleReset}
+        onResetSession={handleResetSession}
         isQrVisible={isQrVisible}
         onQrVisibleChange={setIsQrVisible}
         goToScreen={goToScreen}

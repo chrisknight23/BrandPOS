@@ -18,8 +18,8 @@ interface EndProps {
   setIsPaused?: (paused: boolean) => void;
 }
 
-export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goToScreen, taxRate = 0.0875, isPaused }: EndProps) => {
-  const [total, setTotal] = useState(amount || baseAmount);
+export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, taxRate = 0.0875, isPaused }: EndProps) => {
+  const [total, setTotal] = useState(amount || baseAmount || "0");
   const [progress, setProgress] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
   const [hasTip, setHasTip] = useState(false);
@@ -72,14 +72,31 @@ export const End = ({ onNext, amount, baseAmount = "10.80", tipAmount = "0", goT
 
   // Calculate the total (base + tip) then apply tax to that subtotal
   useEffect(() => {
-    // Determine the subtotal: either amount prop (base+tip) or derive from baseAmount and tipAmount
-    const subtotal = amount
-      ? parseFloat(amount)
-      : (parseFloat(baseAmount) + (tipAmount ? parseFloat(tipAmount) : 0));
-    const tax = subtotal * taxRate;
-    setTotal((subtotal + tax).toFixed(2));
+    // Log received values for debugging
+    console.log(`End: Received amount=${amount}, baseAmount=${baseAmount}, tipAmount=${tipAmount}`);
+
+    // Use amount directly if available
+    if (amount) {
+      console.log(`End: Using provided amount=${amount}`);
+      setTotal(amount);
+      return;
+    }
+    
+    // If no amount but we have baseAmount (already includes tax from Cart)
+    if (baseAmount) {
+      const baseValue = parseFloat(baseAmount);
+      const tipValue = tipAmount ? parseFloat(tipAmount) : 0;
+      const totalValue = baseValue + tipValue;
+      
+      console.log(`End: Calculated total=${totalValue.toFixed(2)} from baseAmount=${baseAmount} (includes tax) and tipAmount=${tipAmount}`);
+      setTotal(totalValue.toFixed(2));
+    } else {
+      console.log(`End: No valid amount values provided`);
+      setTotal("0.00");
+    }
+    
     setHasTip((tipAmount ? parseFloat(tipAmount) : 0) > 0);
-  }, [amount, baseAmount, tipAmount, taxRate]);
+  }, [amount, baseAmount, tipAmount]);
   
   useEffect(() => {
     // Show 'Local Cash sent' for 2.5s, then switch to 'Thanks for shopping local'
