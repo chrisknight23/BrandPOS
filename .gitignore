@@ -35,4 +35,4 @@ yarn-error.log*
 
 # Environment variables
 .env.*
-!.env.example 
+!.env.example raw-link.html
