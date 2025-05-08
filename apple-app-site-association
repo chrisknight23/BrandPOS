@@ -9,8 +9,27 @@
           "/direct/*",
           "/applink/*",
           "/ul/*",
+          "/landing/*",
           "/*/scan/*",
           "/*/scan/"
+        ],
+        "components": [
+          {
+            "/": "/scan/*",
+            "comment": "Primary universal link path that should open the app directly"
+          },
+          {
+            "/": "/direct/*",
+            "comment": "Alternative path that should open the app directly"
+          },
+          {
+            "/": "/applink/*",
+            "comment": "App banner path that should open the app directly"
+          },
+          {
+            "/": "/landing/*",
+            "comment": "App banner path that should open the app directly"
+          }
         ]
       }
     ]
