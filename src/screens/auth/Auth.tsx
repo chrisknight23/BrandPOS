@@ -90,7 +90,12 @@ interface AuthProps {
   amount?: string;
 }
 
-export const Auth = ({ onNext, amount = "10.80" }: AuthProps) => {
+export const Auth = ({ onNext, amount }: AuthProps) => {
+  // Log the received amount for debugging
+  useEffect(() => {
+    console.log(`Auth: Received amount=${amount}`);
+  }, [amount]);
+
   return (
     <BaseScreen onNext={() => onNext(amount)}>
       <div className="w-[800px] h-[500px] bg-[#1189D6] relative overflow-hidden flex items-center justify-center rounded-[8px]">

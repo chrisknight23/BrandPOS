@@ -12,7 +12,7 @@ interface CartItem {
 // Initial cart data
 const initialCartData = {
   items: [
-    { id: 1, name: 'Item name', price: 10.80, quantity: 1 }
+    { id: 1, name: 'Espresso', price: 3.95, quantity: 1 }
   ],
   taxRate: 0.0875 // 8.75% typical US sales tax
 };

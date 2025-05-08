@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { useQRCodeScanStatus } from '../../hooks/useQRCodeScanStatus';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import cashBackAnimation from '../../assets/CashBackLogo.json';
-import CashAppLogo from '../../assets/images/CashApplogo.svg';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CashbackProps {
@@ -47,13 +46,13 @@ export const Cashback = ({ onNext, amount = "1", userType, onQrVisibleChange, se
     setIsPolling(true);
   }, []);
 
-  // Trigger handoff animation or navigation when appReady is true
+  // Navigate to Cashout immediately when QR is scanned
   useEffect(() => {
-    if (appReady) {
-      // You can trigger your handoff animation here, or navigate to the next screen
+    if (scanned) {
+      console.log('Cashback: QR code scanned, navigating to Cashout');
       onNext();
     }
-  }, [appReady, onNext]);
+  }, [scanned, onNext]);
   
   const [cardState, setCardState] = useState<CardState>('expanded');
   // Track whether we're currently transitioning states
@@ -134,13 +133,6 @@ export const Cashback = ({ onNext, amount = "1", userType, onQrVisibleChange, se
           className="w-full h-full relative flex items-center justify-center"
           style={{ zIndex: 2 }}
         >
-          {/* Show waiting message after scan, before handoff complete */}
-          {scanned && !handoffComplete && (
-            <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center z-50 bg-black/80">
-              <div className="text-white text-2xl font-semibold mb-2">Waiting for handoff…</div>
-              <div className="text-white/70 text-lg">Please complete the handoff in the iOS app.</div>
-            </div>
-          )}
           {/* Original LocalPass card component */}
           <motion.div>
             <LocalPass
@@ -154,7 +146,7 @@ export const Cashback = ({ onNext, amount = "1", userType, onQrVisibleChange, se
               useRandomValues={false}
               headerText="Local Cash"
               subheaderText=""
-              buttonText="Cash Out"
+              buttonText="Claim"
               onAnimationComplete={handleAnimationComplete}
               autoPlay={true}
               suffixText="Back"
