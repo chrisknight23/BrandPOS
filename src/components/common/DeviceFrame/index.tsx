@@ -8,7 +8,7 @@ interface DeviceFrameProps {
 export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   return (
     <div className="w-screen h-screen flex items-center justify-center">
-      <div className={`w-[800px] h-[500px] bg-black relative overflow-hidden rounded-2xl ${className}`}>
+      <div className={`w-[800px] h-[500px] bg-black relative overflow-hidden rounded-2xl flex items-center justify-center ${className}`}>
         {children}
       </div>
     </div>

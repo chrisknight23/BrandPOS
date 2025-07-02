@@ -1,4 +1,4 @@
-import { LocalPass, CardState } from '../components/common/LocalPass';
+import { BrandPass, CardState } from '../components/common/BrandPass';
 import { useEffect, useState, useCallback } from 'react';
 import { useQRCodeScanStatus } from '../hooks/useQRCodeScanStatus';
 import { BaseScreen } from '../components/common/BaseScreen/index';
@@ -135,7 +135,7 @@ export const Cashback = ({ onNext, amount = "1", userType, onQrVisibleChange, se
         >
           {/* Original LocalPass card component */}
           <motion.div>
-            <LocalPass
+            <BrandPass
               amount={formattedAmount}
               initialState={cardState}
               isExpanded={cardState === 'expanded'}

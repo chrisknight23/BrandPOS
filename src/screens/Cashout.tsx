@@ -1,5 +1,5 @@
 import { BaseScreen } from '../components/common/BaseScreen';
-import { LocalPass } from '../components/common/LocalPass';
+import { BrandPass } from '../components/common/BrandPass';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useQRCodeScanStatus } from '../hooks/useQRCodeScanStatus';
@@ -120,7 +120,7 @@ export const Cashout = ({ amount = '3', onComplete, sessionId }: CashoutProps) =
           }}
           className="w-full h-full flex items-center justify-center"
         >
-          <LocalPass
+          <BrandPass
             initialState={cardState}
             flipped={flipped}
             showButton={false}

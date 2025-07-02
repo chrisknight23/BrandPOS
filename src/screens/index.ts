@@ -7,6 +7,8 @@ import { CustomTip } from './tipping/CustomTip';
 import { Cashback } from './Cashback';
 import { Cashout } from './Cashout';
 import { End } from './End';
+import { Screensaver } from './Screensaver';
+import { Test3D } from './Test3D';
 
 export {
   Home,
@@ -18,4 +20,6 @@ export {
   CustomTip,
   Cashout,
   End,
+  Screensaver,
+  Test3D,
 };

@@ -3,6 +3,7 @@
  */
 export type Screen = 
   | 'Home'
+  | 'Screensaver'
   | 'Cart'
   | 'Payment'
   | 'Auth'
@@ -10,7 +11,8 @@ export type Screen =
   | 'Cashback'
   | 'Cashout'
   | 'CustomTip'
-  | 'End';
+  | 'End'
+  | 'Test3D';
 
 export interface ScreenProps {
   onNext: () => void;

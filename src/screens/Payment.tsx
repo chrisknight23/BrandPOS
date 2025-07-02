@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BaseScreen } from '../components/common/BaseScreen/index';
 import { motion, AnimatePresence } from 'framer-motion';
-import CreditCardCursor from '../components/common/CreditCardCursor';
 
 interface ArrowProps {
   direction: 'up' | 'down';
@@ -166,7 +165,6 @@ interface PaymentProps {
 export const Payment = ({ onNext, amount, baseAmount }: PaymentProps) => {
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
   const [notchesVisible, setNotchesVisible] = useState(false);
-  const [showCardCursor, setShowCardCursor] = useState(true);
 
   // Use the provided amount, fall back to baseAmount if amount is not provided
   // We don't need to recalculate tax here as it's already included in the amount from Cart
@@ -198,18 +196,10 @@ export const Payment = ({ onNext, amount, baseAmount }: PaymentProps) => {
     console.log(`Payment: Navigating to next screen with amount=${formattedAmount}`);
     onNext(formattedAmount);
   };
-  
-  const handleTapComplete = () => {
-    // When tap animation completes, proceed to next screen
-    setShowCardCursor(false);
-    setTimeout(() => {
-      handleNext();
-    }, 800); // Give some time to see the card animation complete
-  };
 
   return (
     <BaseScreen onNext={handleNext}>
-      <div className="w-[800px] h-[500px] bg-[#1189D6] relative overflow-hidden flex items-center justify-center rounded-[8px]">
+      <div className="w-[800px] h-[500px] bg-[#1A1A1A] relative overflow-hidden flex items-center justify-center rounded-[8px]">
         {/* Price Display */}
         <motion.div 
           className="text-white text-[110px] leading-none font-medium origin-center"
@@ -237,9 +227,6 @@ export const Payment = ({ onNext, amount, baseAmount }: PaymentProps) => {
             </>
           )}
         </AnimatePresence>
-        
-        {/* Credit card cursor */}
-        <CreditCardCursor active={showCardCursor} onTapComplete={handleTapComplete} />
       </div>
     </BaseScreen>
   );

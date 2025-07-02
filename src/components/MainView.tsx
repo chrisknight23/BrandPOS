@@ -8,11 +8,10 @@ import DesktopIcon from '../assets/images/Desktop.svg';
 import { useUserType } from '../context/UserTypeContext';
 import SettingsPanel from './dev/SettingsPanel';
 import { DropMenu } from './dev/dropMenu';
-import { useEnvironment } from '../environment/EnvironmentContext';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
+const INSTANT_SCREENS = ['Home', 'Screensaver', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -92,7 +91,7 @@ const drawerMotion = {
  * @component
  */
 export const MainView = () => {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('Home');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('Test3D');
   const [refreshKey, setRefreshKey] = useState(0);
   const [baseAmount, setBaseAmount] = useState<string | null>(null);
   const [tipAmount, setTipAmount] = useState<string | null>(null);
@@ -407,7 +406,6 @@ export const MainView = () => {
   };
   
   const { userType, setUserType } = useUserType();
-  const { environment, setEnvironment } = useEnvironment();
   
   useEffect(() => {
     // Listen for dev QR scan simulation event
@@ -510,17 +508,6 @@ export const MainView = () => {
             else if (rowIndex === 1) setUserType('returning');
             else if (rowIndex === 2) setUserType('cash-local');
           }}
-        />
-        <DropMenu
-          title="Environment"
-          rowLabels={["SQ buyer display", "Cash App", "Cash Web"]}
-          onRowSelect={(rowIndex) => {
-            const env = rowIndex === 0 ? 'POS' : rowIndex === 1 ? 'iOS' : 'Web';
-            setEnvironment(env);
-          }}
-          initialSelectedRow={['POS', 'iOS', 'Web'].map((v, i) => ["Square POS", "Cash App", "Cash Web"][i]).indexOf(
-            environment === 'POS' ? 'Square POS' : environment === 'iOS' ? 'Cash App' : 'Cash Web'
-          ) + 1}
         />
       </div>
       {/* User profile DropMenu on the right side, shifts left when dev panel is open (24px gap) */}

@@ -135,7 +135,7 @@ export const CustomTip = ({ onNext, onBack, baseAmount = '0', goToScreen }: Cust
                 className={`w-full h-full rounded-2xl flex items-center justify-center text-[32px] font-cash font-medium transition-colors
                   ${userType === 'cash-local' 
                     ? 'bg-[#00B843] active:bg-[#009C36]' 
-                    : 'bg-[#1189D6] active:bg-[#0D7BC3]'}
+                    : 'bg-[#1A1A1A] active:bg-[#222]'}
                 `}
               >
                 Add tip

@@ -12,8 +12,8 @@ export { AnimatedQRCode } from './AnimatedQRCode';
 // BaseScreen
 export { BaseScreen } from './BaseScreen';
 
-// BrandLocalPass
-export { BrandLocalPass, type BrandLocalPassProps, type CardState as BrandLocalPassCardState } from './BrandLocalPass';
+// BrandPass
+export { BrandPass, type BrandPassProps, type CardState as BrandPassCardState } from './BrandPass';
 
 // DeviceFrame
 export { DeviceFrame } from './DeviceFrame';
@@ -23,6 +23,9 @@ export { LocalPass, type LocalPassProps, type CardState } from './LocalPass';
 
 // ProgressButton
 export { ProgressButton } from './ProgressButton';
+
+// ScreensaverCard
+export { ScreensaverCard, type ScreensaverCardProps } from './ScreensaverCard';
 
 // TipButton
 export { TipButton } from './TipButton'; 

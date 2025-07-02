@@ -2,6 +2,7 @@ import { Screen } from '../types/screen';
 
 export const SCREEN_ORDER: Screen[] = [
   'Home',
+  'Screensaver',
   'Cart',
   'Payment',
   'Auth',
@@ -9,5 +10,6 @@ export const SCREEN_ORDER: Screen[] = [
   'Cashback',
   'Cashout',
   'CustomTip',
-  'End'
+  'End',
+  'Test3D'
 ]; 

@@ -25,6 +25,7 @@ type TipButtonProps = {
   onAnimationComplete?: () => void;
   color?: 'blue' | 'green'; // New color prop
   disableExpand?: boolean; // New prop to disable expansion
+  mainColor?: string; // Optional custom color
 };
 
 export const TipButton: React.FC<TipButtonProps> = ({ 
@@ -42,6 +43,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
   onAnimationComplete,
   color = 'blue', // Default to blue
   disableExpand = false, // Default to false
+  mainColor, // Optional custom color
 }) => {
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -93,7 +95,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
   };
 
   // Color logic
-  const mainColor = color === 'green' ? '#00B843' : '#1189D6';
+  const mainColorValue = mainColor || (color === 'green' ? '#00B843' : '#1189D6');
 
   return (
     <>
@@ -103,8 +105,8 @@ export const TipButton: React.FC<TipButtonProps> = ({
         className={`
           flex flex-col items-center justify-center
           ${isSelected 
-            ? `bg-[${mainColor}] text-white` 
-            : `bg-[${mainColor}] text-white`
+            ? `bg-[${mainColorValue}] text-white` 
+            : `bg-[${mainColorValue}] text-white`
           }
           cursor-pointer shadow-sm rounded-[16px]
         `}
@@ -150,7 +152,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
             className="shadow-lg text-white absolute z-50"
             initial={{
               ...getExpandedInitialStyle(),
-              backgroundColor: mainColor,
+              backgroundColor: mainColorValue,
               opacity: 1,
               scale: 0.7,
               borderRadius: '16px'
@@ -163,12 +165,12 @@ export const TipButton: React.FC<TipButtonProps> = ({
               borderRadius: '4px',
               opacity: 1,
               scale: 1,
-              backgroundColor: mainColor
+              backgroundColor: mainColorValue
             }}
             exit={{ 
               ...getExpandedInitialStyle(),
               opacity: 0,
-              backgroundColor: mainColor,
+              backgroundColor: mainColorValue,
               transition: { duration: 0.2, ease: 'easeInOut' } 
             }}
             transition={{

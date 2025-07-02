@@ -259,6 +259,7 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
                   onAnimationComplete={selectedAmount === amount ? handleSelectedAnimationComplete : undefined}
                   {...buttonEntranceAnimation}
                   color={userType === 'cash-local' ? 'green' : 'blue'}
+                  mainColor={userType === 'cash-local' ? undefined : '#1A1A1A'}
                   disableExpand={userType === 'cash-local'}
                 />
               </motion.div>
