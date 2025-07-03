@@ -27,5 +27,8 @@ export { ProgressButton } from './ProgressButton';
 // ScreensaverCard
 export { ScreensaverCard, type ScreensaverCardProps } from './ScreensaverCard';
 
+// ScreensaverMessaging
+export { ScreensaverMessaging, type ScreensaverMessagingProps } from './ScreensaverMessaging';
+
 // TipButton
 export { TipButton } from './TipButton'; 

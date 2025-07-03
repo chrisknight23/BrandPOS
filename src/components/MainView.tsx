@@ -11,7 +11,7 @@ import { DropMenu } from './dev/dropMenu';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Screensaver', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
+const INSTANT_SCREENS = ['Home', 'Screensaver', 'ScreensaverExit', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -91,7 +91,7 @@ const drawerMotion = {
  * @component
  */
 export const MainView = () => {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('Test3D');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('Home');
   const [refreshKey, setRefreshKey] = useState(0);
   const [baseAmount, setBaseAmount] = useState<string | null>(null);
   const [tipAmount, setTipAmount] = useState<string | null>(null);
@@ -533,7 +533,7 @@ export const MainView = () => {
         animate={{ x: isPanelOpen ? -180 : 0 }}
         transition={drawerMotion}
       >
-        <AnimatePresence mode="popLayout" initial={false}>
+        <AnimatePresence mode={isInstantTransition ? "wait" : "popLayout"} initial={false}>
           <motion.div
             key={`${currentScreen}-${refreshKey}`}
             className={`absolute flex items-center justify-center h-full ${
@@ -550,9 +550,9 @@ export const MainView = () => {
             exit={{ 
               x: isInstantTransition ? 0 : -200, 
               opacity: isInstantTransition ? 1 : 0.8,
-              transition: { duration: 0.15 }
+              transition: { duration: isInstantTransition ? 0 : 0.15 }
             }}
-            transition={drawerMotion}
+            transition={isInstantTransition ? { duration: 0 } : drawerMotion}
           >
             {/* Apply key directly to component, not through spread */}
             <CurrentScreenComponent 

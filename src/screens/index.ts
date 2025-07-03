@@ -8,7 +8,7 @@ import { Cashback } from './Cashback';
 import { Cashout } from './Cashout';
 import { End } from './End';
 import { Screensaver } from './Screensaver';
-import { Test3D } from './Test3D';
+import { ScreensaverExit } from './ScreensaverExit';
 
 export {
   Home,
@@ -21,5 +21,5 @@ export {
   Cashout,
   End,
   Screensaver,
-  Test3D,
+  ScreensaverExit,
 };

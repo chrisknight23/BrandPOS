@@ -11,7 +11,7 @@ The ScreensaverCard component provides a smooth, coordinated animation sequence 
 ```tsx
 import { ScreensaverCard } from '../components/common/ScreensaverCard';
 
-// Basic usage with defaults
+// Basic usage - automatic animation sequence
 <ScreensaverCard />
 
 // Customized screensaver card
@@ -21,6 +21,20 @@ import { ScreensaverCard } from '../components/common/ScreensaverCard';
   brandName="$yourbrand"
   subtitle="Custom Mode"
   startDelay={1500}
+/>
+
+// NEW: Controlled state usage
+<ScreensaverCard 
+  initialPhase="expand"    // Start in full-screen mode
+  targetPhase="normal"     // Animate to small card
+  autoStart={false}        // Don't use automatic sequence
+  startDelay={200}         // Brief delay before animation
+/>
+
+// NEW: Static state (no animation)
+<ScreensaverCard 
+  initialPhase="expand"    // Show in full-screen mode
+  autoStart={false}        // No animation
 />
 ```
 
@@ -35,6 +49,20 @@ import { ScreensaverCard } from '../components/common/ScreensaverCard';
 | `className` | string | `''` | Additional CSS classes |
 | `autoStart` | boolean | `true` | Whether to start animation automatically |
 | `startDelay` | number | `2000` | Delay in ms before starting animation |
+| `onExpandStart` | function | `undefined` | Callback when expand phase starts |
+| `initialPhase` | ScreensaverPhase | `'normal'` | **NEW:** Initial state of the card |
+| `targetPhase` | ScreensaverPhase | `undefined` | **NEW:** Target state to animate to |
+
+### ScreensaverPhase Type
+```typescript
+type ScreensaverPhase = 'normal' | 'drop' | 'rotate' | 'expand' | 'fullscreen';
+```
+
+- **`normal`**: Small card (361x480px) in center
+- **`drop`**: Scaled down to 0.6x size
+- **`rotate`**: Rotated 90° (landscape orientation)  
+- **`expand`**: Transition state with 360° flip animation to full screen
+- **`fullscreen`**: Static full screen state with dynamic messaging (no animation)
 
 ## Animation Sequence
 
@@ -55,10 +83,12 @@ The component performs a coordinated 3-phase animation:
 - Dimensions change to 800x500px
 - Fills device frame in landscape
 
-### Overlay Content
-- Fades in at 1.0s after drop starts
-- Shows brand name and subtitle
-- Appears over the blank card
+### Dynamic Messaging Content (ScreensaverMessaging Component)
+- Fades in during the expand phase
+- Displays rotating promotional messages (e.g., "Follow us and earn rewards")
+- Uses ScreensaverMessaging component for dynamic text cycling
+- Counter-scales to maintain readable text size
+- Integrated within the expanded card area
 
 ## Card Specifications
 
@@ -102,15 +132,55 @@ The component uses unified spring animations for smooth motion:
 />
 ```
 
+## NEW: State Control Examples
+
+### Screensaver Screen (Forward Animation)
+```tsx
+<ScreensaverCard 
+  autoStart={true}
+  startDelay={0}
+  onExpandStart={() => setIsExpanding(true)}
+/>
+```
+
+### ScreensaverExit Screen (Reverse Animation)  
+```tsx
+<ScreensaverCard 
+  initialPhase="fullscreen" // Start in static full-screen state
+  targetPhase="normal"      // Shrink to small card
+  autoStart={false}         // Don't use auto sequence
+  startDelay={200}          // Brief delay
+/>
+```
+
+### Static Display (No Animation)
+```tsx
+<ScreensaverCard 
+  initialPhase="fullscreen" // Show static full-screen state
+  autoStart={false}         // No animation
+/>
+```
+
 ## Implementation Notes
 
 - Uses Framer Motion for smooth animations
 - Maintains 3D perspective and backface culling
 - Optimized spring settings prevent animation conflicts
-- Self-contained with no external dependencies
+- Integrates ScreensaverMessaging component for dynamic messaging in expand phase
+- Self-contained with minimal external dependencies
 - Designed specifically for screensaver use cases
+
+## Dependencies
+
+- **ScreensaverMessaging**: Handles dynamic message cycling during expand phase
+- **Framer Motion**: Animation library for smooth transitions
 
 ## Changelog
 
-- **Initial Release**: Multi-phase screensaver animation with blank card design
-- Extracted from BrandPass component for better separation of concerns 
+- **v2.0**: Added state control with `initialPhase` and `targetPhase` props
+  - Can now start in any phase (normal, drop, rotate, expand)
+  - Can animate to specific target phases
+  - Enables reverse animations (expand → normal)
+  - Perfect for ScreensaverExit transitions
+- **v1.0**: Multi-phase screensaver animation with blank card design
+  - Extracted from BrandPass component for better separation of concerns 

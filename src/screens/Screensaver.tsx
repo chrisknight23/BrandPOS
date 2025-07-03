@@ -1,8 +1,11 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { BaseScreen } from '../components/common/BaseScreen/index';
 import { ScreensaverCard } from '../components/common/ScreensaverCard';
 import CashAppLogo from '../assets/images/logos/16x16logo.png';
 
 export const Screensaver = ({ onNext }: { onNext: () => void }) => {
+  const [isExpanding, setIsExpanding] = useState(false);
   return (
     <BaseScreen onNext={onNext}>
       <div className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden border border-[#222]">
@@ -18,13 +21,22 @@ export const Screensaver = ({ onNext }: { onNext: () => void }) => {
             backfaceColor="bg-[#4A4A32]"
             brandName="$mileendbagel"
             subtitle="Screensaver Mode"
-            startDelay={2000}
+            startDelay={0}
+            onExpandStart={() => setIsExpanding(true)}
           />
         </div>
 
-        {/* Bottom left message - always visible */}
-        <div 
+        {/* Bottom left message - fades out during card drop */}
+        <motion.div 
           className="absolute bottom-0 left-0 p-8"
+          animate={{
+            opacity: 0
+          }}
+          transition={{
+            duration: 0.3,
+            delay: 0, // Start fading when card drop begins
+            ease: "easeOut"
+          }}
         >
           <div>
             <div className="flex items-center gap-1 mb-4">
@@ -39,7 +51,7 @@ export const Screensaver = ({ onNext }: { onNext: () => void }) => {
               earn rewards
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </BaseScreen>
   );
