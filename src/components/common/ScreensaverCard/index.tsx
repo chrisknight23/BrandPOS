@@ -63,25 +63,25 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
     }
   }, [targetPhase, screensaverPhase, startDelay, onExpandStart]);
 
-  // Handle automatic animation sequence
+  // Handle automatic animation sequence - RUBBER BAND EFFECT
   useEffect(() => {
     if (!autoStart || targetPhase) return; // Don't auto-animate if targetPhase is controlled
 
     // Start the screensaver sequence after initial delay
     const startTimer = setTimeout(() => {
-      // Phase 1: Drop first
+      // Phase 1: Pull back (drop phase)
       setScreensaverPhase('drop');
       
-      // Phase 2: Expand at the low point of elastic bounce for fluid transition
+      // Phase 2: Snap forward (expand phase) - no pause, just quick transition
       const expandTimer = setTimeout(() => {
         setScreensaverPhase('expand');
         onExpandStart?.(); // Notify parent when expand starts
-      }, 400); // Trigger at elastic low point, not after settling
+      }, 50); // Minimal delay, just enough to trigger drop phase
       
       // Show overlay content after animations complete
       const overlayTimer = setTimeout(() => {
         setShowOverlay(true);
-      }, 3500);
+      }, 2500);
 
       return () => {
         clearTimeout(expandTimer);
@@ -107,29 +107,15 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
       */}
       <motion.div
         animate={{
-          // Scale animation based on phase
-          scale: screensaverPhase === 'normal' ? 1.0 :
-                 screensaverPhase === 'drop' ? 0.6 :
-                 screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 1.38 : 1.0,
-          
           // Rotation animation - only during expand phase
           rotateZ: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 90 : 0,
           
-          // Dimension changes during flip - MANUAL ADJUSTMENT AREA
-          width: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '361px' : '361px',  // Change these values manually
-          height: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '578px' : '480px', // Change these values manually
-          
-          // 3D perspective effects - only during expand to avoid conflicts
-          rotateX: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 0 : 0,
-          rotateY: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 0 : 0,
-          z: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? -40 : 0,
+          // Dimension changes during flip
+          width: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '361px' : '361px',
+          height: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '578px' : '480px',
         }}
         initial={{ 
-          scale: initialPhase === 'fullscreen' ? 1.38 : 1.0,
           rotateZ: initialPhase === 'fullscreen' ? 90 : 0,
-          rotateX: 0,
-          rotateY: 0,
-          z: initialPhase === 'fullscreen' ? -40 : 0,
           width: initialPhase === 'fullscreen' ? '361px' : '361px',
           height: initialPhase === 'fullscreen' ? '578px' : '480px',
         }}
@@ -142,56 +128,19 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
           transformStyle: 'preserve-3d'
         }}
         transition={{
-          scale: {
-            delay: 0,
-            type: "spring",
-            stiffness: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 120 : 
-                      screensaverPhase === 'drop' ? 100 : 200,
-            damping: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 20 : 
-                    screensaverPhase === 'drop' ? 8 : 15,
-            mass: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 1.2 : 
-                 screensaverPhase === 'drop' ? 1.5 : 0.8,
-            velocity: screensaverPhase === 'drop' ? -2 : 0
-          },
           rotateZ: {
-            delay: 0,
             type: "spring",
-            stiffness: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 120 : 150,
-            damping: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 20 : 20,
-            mass: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 1.2 : 1.0
+            stiffness: 200,  // Much faster rotation
+            damping: 25,     // Higher damping for quicker settle
+            mass: 0.8        // Lower mass for faster response
           },
-          // Animation settings for manual dimension changes
           width: {
-            delay: 0,
             type: "spring",
             stiffness: 120,
             damping: 20,
             mass: 1.2
           },
           height: {
-            delay: 0,
-            type: "spring",
-            stiffness: 120,
-            damping: 20,
-            mass: 1.2
-          },
-
-          rotateX: {
-            delay: 0,
-            type: "spring",
-            stiffness: 120,
-            damping: 20,
-            mass: 1.2
-          },
-          rotateY: {
-            delay: 0,
-            type: "spring",
-            stiffness: 120,
-            damping: 20,
-            mass: 1.2
-          },
-          z: {
-            delay: 0,
             type: "spring",
             stiffness: 120,
             damping: 20,
@@ -203,7 +152,7 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
           className="w-full h-full relative"
           style={{ transformStyle: 'preserve-3d' }}
           animate={{ 
-            rotateY: screensaverPhase === 'expand' ? 360 : 
+            rotateY: screensaverPhase === 'expand' ? 180 : 
                     screensaverPhase === 'fullscreen' ? 180 : 0
           }}
           initial={{
@@ -249,16 +198,42 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
               }
             }}
           >
-            {/* BrandPass Content - Only show in normal and drop phases AND when showFrontContent is true */}
-            {showFrontContent && (screensaverPhase === 'normal' || screensaverPhase === 'drop') && (
+            {/* Logo - always visible on front of card, positioned to match BrandPass layout */}
+            {showFrontContent && (
               <div className="w-full h-full flex flex-col items-center justify-center p-5 gap-6">
-                {/* Header with text */}
+                {/* Spacer for header area */}
+                <div className="w-full flex flex-col items-start" style={{ minHeight: '32px' }}>
+                  {/* This space matches the header area in BrandPass */}
+                </div>
+                
+                {/* Middle section with Logo - matches BrandPass structure */}
+                <div className="flex-1 w-full flex items-center justify-center relative">
+                  {/* Mileendbagel Logo */}
+                  <div className="flex items-center justify-center">
+                    <img src={MileendbagelLogo} alt="Mileendbagel" className="w-auto h-auto max-w-[260px] max-h-[260px] object-contain" />
+                  </div>
+                </div>
+                
+                {/* Spacer for footer area */}
+                <div className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]" style={{ minHeight: '88px' }}>
+                  {/* This space matches the footer area in BrandPass */}
+                </div>
+              </div>
+            )}
+
+            {/* Header and Button - Show only in normal and drop phases */}
+            {showFrontContent && (screensaverPhase === 'normal' || screensaverPhase === 'drop') && (
+              <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-between p-5">
+                {/* Header with text - fades out during drop */}
                 <motion.div 
                   className="w-full flex flex-col items-start"
-                  animate={{ 
-                    opacity: screensaverPhase === 'drop' ? 0 : 1 
+                  animate={{
+                    opacity: screensaverPhase === 'drop' ? 0 : 1
                   }}
-                  transition={{ duration: 0.3 }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeOut"
+                  }}
                 >
                   <div className="w-full flex justify-between items-center">
                     <div className="text-white text-base font-medium antialiased" style={{
@@ -269,23 +244,18 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
                   </div>
                 </motion.div>
 
-                {/* Middle section with Logo */}
-                <div className="flex-1 w-full flex items-center justify-center relative">
-                  {/* Mileendbagel Logo */}
-                  <div className="flex items-center justify-center">
-                    <img src={MileendbagelLogo} alt="Mileendbagel" className="w-auto h-auto max-w-[260px] max-h-[260px] object-contain" />
-                  </div>
-                </div>
-
-                {/* Footer with button */}
-                <div className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]">
-                  <motion.div 
-                    className="w-full h-[72px] relative overflow-hidden rounded-full bg-black bg-opacity-20"
-                    animate={{ 
-                      opacity: screensaverPhase === 'drop' ? 0 : 1 
-                    }}
-                    transition={{ duration: 0.3 }}
-                  >
+                {/* Footer with button - fades out during drop */}
+                <motion.div 
+                  className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]"
+                  animate={{
+                    opacity: screensaverPhase === 'drop' ? 0 : 1
+                  }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeOut"
+                  }}
+                >
+                  <div className="w-full h-[72px] relative overflow-hidden rounded-full bg-black bg-opacity-20">
                     {/* Button content */}
                     <button 
                       className="w-full h-full flex items-center justify-center relative z-10"
@@ -300,14 +270,20 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
                         MozOsxFontSmoothing: 'grayscale'
                       }}>Follow</span>
                     </button>
-                  </motion.div>
-                </div>
+                  </div>
+                </motion.div>
               </div>
             )}
 
-            {/* Logo Only - Show when front content is hidden */}
-            {!showFrontContent && (screensaverPhase === 'normal' || screensaverPhase === 'drop') && (
-              <div className="w-full h-full flex items-center justify-center p-5">
+            {/* Logo Only - Show when front content is hidden - ALWAYS visible on front face */}
+            {!showFrontContent && (
+              <div 
+                className="w-full h-full flex items-center justify-center p-5"
+                style={{
+                  // Counter-transform for ScreensaverExit orientation
+                  transform: screensaverPhase === 'normal' ? 'scaleX(-1) rotateZ(180deg)' : 'none'
+                }}
+              >
                 {/* Middle section with Logo only */}
                 <div className="flex-1 w-full flex items-center justify-center relative">
                   <div className="flex items-center justify-center">
@@ -318,7 +294,7 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
             )}
           </motion.div>
 
-          {/* Back Face - Blank Card */}
+          {/* Back Face - Card with Messaging */}
           <motion.div
             className="absolute inset-0 w-full h-full backface-hidden"
             style={{
@@ -348,14 +324,14 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
                 duration: screensaverPhase === 'fullscreen' ? 0 : undefined
               }
             }}
-          />
-
-          {/* Text Messaging - fades in during card flip transition */}
-          <ScreensaverMessaging 
-            isVisible={screensaverPhase === 'expand' || screensaverPhase === 'fullscreen'}
-            brandName={brandName}
-            isStaticFullscreen={screensaverPhase === 'fullscreen'}
-          />
+          >
+            {/* Text Messaging - only visible on back face */}
+            <ScreensaverMessaging 
+              isVisible={screensaverPhase === 'expand' || screensaverPhase === 'fullscreen'}
+              brandName={brandName}
+              isStaticFullscreen={screensaverPhase === 'fullscreen'}
+            />
+          </motion.div>
 
         </motion.div>
       </motion.div>

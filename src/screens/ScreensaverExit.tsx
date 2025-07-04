@@ -63,10 +63,19 @@ export const ScreensaverExit = ({ onNext }: { onNext: () => void }) => {
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           style={{ zIndex: 20 }}
+          initial={{
+            x: 0,
+            y: 0,
+            scale: 1.38,  // Start at full frame scale - no movement on entry
+            scaleX: -1,   // Flip horizontally
+            rotateZ: 180  // Rotate 180deg to correct text orientation
+          }}
           animate={{
             x: animationPhase === 'shrinking' || animationPhase === 'landed' ? 274 : 0, // Move to right panel position
             y: animationPhase === 'shrinking' || animationPhase === 'landed' ? -100 : 0,  // Slight vertical adjustment
-            scale: animationPhase === 'shrinking' || animationPhase === 'landed' ? 0.45 : 1, // Scale down to fit right panel
+            scale: animationPhase === 'shrinking' || animationPhase === 'landed' ? 0.45 : 1.38, // Start at full frame scale, then shrink
+            scaleX: -1,   // Keep horizontal flip throughout animation
+            rotateZ: 180  // Keep 180deg rotation throughout animation
           }}
           transition={{
             duration: 0.8,
@@ -80,10 +89,10 @@ export const ScreensaverExit = ({ onNext }: { onNext: () => void }) => {
             backfaceColor="bg-[#4A4A32]"
             brandName="$mileendbagel"
             subtitle="Screensaver Mode"
-            initialPhase="fullscreen"     // Start in fullscreen state with messaging
+            initialPhase="fullscreen"     // Start in fullscreen state with messaging on back face
             targetPhase={animationPhase === 'shrinking' || animationPhase === 'landed' ? 'normal' : 'fullscreen'} // Animate to normal when shrinking
             autoStart={false}            // Don't use automatic animation sequence
-            startDelay={50}              // Start flipping almost immediately
+            startDelay={0}               // No delay needed
             onExpandStart={() => {}}
             showFrontContent={false}     // Hide header and button, show only logo
           />
