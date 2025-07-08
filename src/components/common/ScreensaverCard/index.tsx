@@ -2,21 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ScreensaverMessaging } from '../ScreensaverMessaging';
 import MileendbagelLogo from '../../../assets/images/logos/mileendbagel.png';
+import { Screen } from '../../../types/screen';
+import { BRAND_COLORS } from '../../../constants/colors';
 
 // Screensaver animation phases
-type ScreensaverPhase = 'normal' | 'drop' | 'rotate' | 'expand' | 'fullscreen';
+type ScreensaverPhase = 'normal' | 'drop' | 'expand' | 'fullscreen';
 
 export interface ScreensaverCardProps {
-  /** Background color for the card (CSS color string) */
+  /** Background color for the card front face (CSS color string) */
   backgroundColor?: string;
-  /** Background color for the back of the card (CSS color string) */
+  /** Background color for the card back face (CSS color string) */
   backfaceColor?: string;
   /** Brand name to display */
   brandName?: string;
-  /** Subtitle text */
-  subtitle?: string;
-  /** Custom class name for the card container */
-  className?: string;
   /** Whether to start the screensaver animation immediately */
   autoStart?: boolean;
   /** Delay before starting the animation sequence */
@@ -29,20 +27,48 @@ export interface ScreensaverCardProps {
   targetPhase?: ScreensaverPhase;
   /** Whether to show the front face content (header and button) */
   showFrontContent?: boolean;
+  /** Whether to show the back face messaging content */
+  showBackContent?: boolean;
+  /** Callback when Follow button is clicked */
+  onButtonClick?: () => void;
+  /** Do a full 360° flip instead of 180° */
+  fullFlip?: boolean;
+  /** Custom content for the back face */
+  customBackContent?: React.ReactNode;
+  /** Navigation function to go to a specific screen */
+  goToScreen?: (screen: Screen) => void;
+  /** Whether the card should be flipped to show the back face */
+  flipped?: boolean;
+  /** Force flip to front face (overrides other flip logic) */
+  flipToFront?: boolean;
+  /** Force flip to QR code on back face (for ScreensaverFollow) */
+  flipToQR?: boolean;
+  /** Simple 180° flip to front (for close button) */
+  simpleFlipToFront?: boolean;
+  /** Hide front content until simpleFlipToFront is triggered */
+  hideFrontContentUntilFlip?: boolean;
 }
 
 export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
-  backgroundColor = 'bg-[#5D5D3F]',
-  backfaceColor = 'bg-[#4A4A32]',
+  backgroundColor = BRAND_COLORS.primary,
+  backfaceColor = BRAND_COLORS.primaryDark,
   brandName = '$mileendbagel',
-  subtitle = 'Screensaver Mode',
-  className = '',
   autoStart = true,
   startDelay = 2000,
   onExpandStart,
   initialPhase = 'normal',
   targetPhase,
   showFrontContent = true,
+  showBackContent = true,
+  onButtonClick,
+  fullFlip = false,
+  customBackContent,
+  goToScreen,
+  flipped = false,
+  flipToFront = false,
+  flipToQR = false,
+  simpleFlipToFront = false,
+  hideFrontContentUntilFlip = false,
 }) => {
   const [screensaverPhase, setScreensaverPhase] = useState<ScreensaverPhase>(initialPhase);
   const [showOverlay, setShowOverlay] = useState(initialPhase === 'expand');
@@ -63,22 +89,18 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
     }
   }, [targetPhase, screensaverPhase, startDelay, onExpandStart]);
 
-  // Handle automatic animation sequence - RUBBER BAND EFFECT
+  // Handle automatic animation sequence
   useEffect(() => {
-    if (!autoStart || targetPhase) return; // Don't auto-animate if targetPhase is controlled
+    if (!autoStart || targetPhase) return;
 
-    // Start the screensaver sequence after initial delay
     const startTimer = setTimeout(() => {
-      // Phase 1: Pull back (drop phase)
       setScreensaverPhase('drop');
       
-      // Phase 2: Snap forward (expand phase) - no pause, just quick transition
       const expandTimer = setTimeout(() => {
         setScreensaverPhase('expand');
-        onExpandStart?.(); // Notify parent when expand starts
-      }, 50); // Minimal delay, just enough to trigger drop phase
+        onExpandStart?.();
+      }, 50);
       
-      // Show overlay content after animations complete
       const overlayTimer = setTimeout(() => {
         setShowOverlay(true);
       }, 2500);
@@ -92,53 +114,33 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
     return () => clearTimeout(startTimer);
   }, [autoStart, startDelay, targetPhase, onExpandStart]);
 
+  const isExpanded = screensaverPhase === 'expand' || screensaverPhase === 'fullscreen';
+  const isFullscreen = screensaverPhase === 'fullscreen';
+
   return (
-    <div className={`w-full h-full flex items-center justify-center ${className}`}>
-      {/* 
-        SCREENSAVER CARD ANIMATION
-        =========================
-        
-        Multi-phase animation sequence:
-        1. DROP: Card scales from 1.0 to 0.85 with spring bounce
-        2. ROTATE: Card rotates 90° and flips to back side  
-        3. EXPAND: Card scales to 2.2x and fills device frame (800x500)
-        
-        Card maintains same aspect ratio as BrandPass (361x480)
-      */}
+    <div className="w-full h-full flex items-center justify-center">
       <motion.div
         animate={{
-          // Rotation animation - only during expand phase
-          rotateZ: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 90 : 0,
-          
-          // Dimension changes during flip
-          width: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '361px' : '361px',
-          height: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '578px' : '480px',
+          rotateZ: isExpanded ? 90 : 0,
+          height: isExpanded ? '578px' : '480px',
         }}
         initial={{ 
-          rotateZ: initialPhase === 'fullscreen' ? 90 : 0,
-          width: initialPhase === 'fullscreen' ? '361px' : '361px',
-          height: initialPhase === 'fullscreen' ? '578px' : '480px',
+          rotateZ: isFullscreen ? 90 : 0,
+          height: isFullscreen ? '578px' : '480px',
         }}
         className="relative"
         style={{
           transformOrigin: 'center center',
           perspective: '1000px',
           width: '361px',
-          height: '480px',
           transformStyle: 'preserve-3d'
         }}
         transition={{
           rotateZ: {
             type: "spring",
-            stiffness: 200,  // Much faster rotation
-            damping: 25,     // Higher damping for quicker settle
-            mass: 0.8        // Lower mass for faster response
-          },
-          width: {
-            type: "spring",
-            stiffness: 120,
-            damping: 20,
-            mass: 1.2
+            stiffness: 200,
+            damping: 25,
+            mass: 0.8
           },
           height: {
             type: "spring",
@@ -152,22 +154,28 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
           className="w-full h-full relative"
           style={{ transformStyle: 'preserve-3d' }}
           animate={{ 
-            rotateY: screensaverPhase === 'expand' ? 180 : 
-                    screensaverPhase === 'fullscreen' ? 180 : 0
+            rotateY: flipToFront ? 0 : (
+              flipToQR ? 180 : (
+                simpleFlipToFront ? (fullFlip ? 360 : 0) : (
+                  isExpanded ? 180 : 
+                  (fullFlip ? 540 : (flipped ? 180 : 0))
+                )
+              )
+            )
           }}
           initial={{
-            rotateY: initialPhase === 'fullscreen' ? 180 : 0
+            rotateY: isFullscreen ? 180 : (flipped ? 180 : 0)
           }}
           transition={{
             type: "spring",
-            stiffness: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 120 : 50,
-            damping: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 20 : 5,
-            mass: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? 1.2 : 0.45,
+            stiffness: (flipToFront || flipToQR || simpleFlipToFront) ? 120 : (isExpanded ? 120 : 50),
+            damping: (flipToFront || flipToQR || simpleFlipToFront) ? 18 : (isExpanded ? 20 : 5),
+            mass: (flipToFront || flipToQR || simpleFlipToFront) ? 1.2 : (isExpanded ? 1.2 : 0.45),
             restSpeed: 0.001,
             velocity: 2
           }}
         >
-          {/* Front Face - BrandPass Content */}
+          {/* Front Face */}
           <motion.div
             className="absolute inset-0 w-full h-full backface-hidden"
             style={{
@@ -175,20 +183,18 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
               transform: 'rotateY(0deg)'
             }}
             animate={{
-              backgroundColor: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '#3B3B28' : '#5D5D3F',
-              borderTop: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '1px solid rgba(255, 255, 255, 0)' : '1px solid rgba(255, 255, 255, 0.2)',
-              // Corner radius changes during transition - MANUAL ADJUSTMENT AREA
-              borderRadius: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '16px' : '32px' // Change these values manually
+              backgroundColor: isExpanded ? BRAND_COLORS.primaryExpanded : backgroundColor,
+              borderTop: isExpanded ? `1px solid ${BRAND_COLORS.borderTransparent}` : `1px solid ${BRAND_COLORS.borderLight}`,
+              borderRadius: isExpanded ? '16px' : '32px'
             }}
             initial={{
-              backgroundColor: initialPhase === 'fullscreen' ? '#3B3B28' : '#5D5D3F',
-              borderTop: initialPhase === 'fullscreen' ? '1px solid rgba(255, 255, 255, 0)' : '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: initialPhase === 'fullscreen' ? '16px' : '32px'
+              backgroundColor: isFullscreen ? BRAND_COLORS.primaryExpanded : backgroundColor,
+              borderTop: isFullscreen ? `1px solid ${BRAND_COLORS.borderTransparent}` : `1px solid ${BRAND_COLORS.borderLight}`,
+              borderRadius: isFullscreen ? '16px' : '32px'
             }}
             transition={{
               duration: screensaverPhase === 'fullscreen' ? 0 : 0.6,
               ease: "easeOut",
-              // Animation settings for manual corner radius changes
               borderRadius: {
                 type: "spring",
                 stiffness: 120,
@@ -198,33 +204,31 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
               }
             }}
           >
-            {/* Logo - always visible on front of card, positioned to match BrandPass layout */}
+            {/* Logo - always visible on front */}
             {showFrontContent && (
               <div className="w-full h-full flex flex-col items-center justify-center p-5 gap-6">
-                {/* Spacer for header area */}
                 <div className="w-full flex flex-col items-start" style={{ minHeight: '32px' }}>
-                  {/* This space matches the header area in BrandPass */}
+                  {/* Header space */}
                 </div>
                 
-                {/* Middle section with Logo - matches BrandPass structure */}
                 <div className="flex-1 w-full flex items-center justify-center relative">
-                  {/* Mileendbagel Logo */}
                   <div className="flex items-center justify-center">
                     <img src={MileendbagelLogo} alt="Mileendbagel" className="w-auto h-auto max-w-[260px] max-h-[260px] object-contain" />
                   </div>
                 </div>
                 
-                {/* Spacer for footer area */}
                 <div className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]" style={{ minHeight: '88px' }}>
-                  {/* This space matches the footer area in BrandPass */}
+                  {/* Footer space */}
                 </div>
               </div>
             )}
 
-            {/* Header and Button - Show only in normal and drop phases */}
-            {showFrontContent && (screensaverPhase === 'normal' || screensaverPhase === 'drop') && (
+            {/* Header and Button - Show only in normal and drop phases, OR when simpleFlipToFront is true */}
+            {showFrontContent && (
+              hideFrontContentUntilFlip ? simpleFlipToFront : 
+              (simpleFlipToFront || (screensaverPhase === 'normal' || screensaverPhase === 'drop'))
+            ) && (
               <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-between p-5">
-                {/* Header with text - fades out during drop */}
                 <motion.div 
                   className="w-full flex flex-col items-start"
                   animate={{
@@ -240,11 +244,10 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
                       textRendering: 'optimizeLegibility',
                       WebkitFontSmoothing: 'antialiased',
                       MozOsxFontSmoothing: 'grayscale'
-                    }}>$mileendbagel</div>
+                    }}>{brandName}</div>
                   </div>
                 </motion.div>
 
-                {/* Footer with button - fades out during drop */}
                 <motion.div 
                   className="w-full flex flex-col items-start gap-4 px-[8px] pb-[8px]"
                   animate={{
@@ -256,12 +259,11 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
                   }}
                 >
                   <div className="w-full h-[72px] relative overflow-hidden rounded-full bg-black bg-opacity-20">
-                    {/* Button content */}
                     <button 
                       className="w-full h-full flex items-center justify-center relative z-10"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Handle button click if needed
+                        onButtonClick?.();
                       }}
                     >
                       <span className="text-2xl font-medium text-white antialiased" style={{
@@ -275,16 +277,9 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
               </div>
             )}
 
-            {/* Logo Only - Show when front content is hidden - ALWAYS visible on front face */}
+            {/* Logo Only - when front content is hidden */}
             {!showFrontContent && (
-              <div 
-                className="w-full h-full flex items-center justify-center p-5"
-                style={{
-                  // Counter-transform for ScreensaverExit orientation
-                  transform: screensaverPhase === 'normal' ? 'scaleX(-1) rotateZ(180deg)' : 'none'
-                }}
-              >
-                {/* Middle section with Logo only */}
+              <div className="w-full h-full flex items-center justify-center p-5">
                 <div className="flex-1 w-full flex items-center justify-center relative">
                   <div className="flex items-center justify-center">
                     <img src={MileendbagelLogo} alt="Mileendbagel" className="w-auto h-auto max-w-[260px] max-h-[260px] object-contain" />
@@ -294,7 +289,7 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
             )}
           </motion.div>
 
-          {/* Back Face - Card with Messaging */}
+          {/* Back Face */}
           <motion.div
             className="absolute inset-0 w-full h-full backface-hidden"
             style={{
@@ -302,20 +297,18 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
               transform: 'rotateY(180deg)'
             }}
             animate={{
-              backgroundColor: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '#3B3B28' : '#4A4A32',
-              borderTop: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '1px solid rgba(255, 255, 255, 0)' : '1px solid rgba(255, 255, 255, 0.2)',
-              // Corner radius changes during transition - MANUAL ADJUSTMENT AREA
-              borderRadius: screensaverPhase === 'expand' || screensaverPhase === 'fullscreen' ? '16px' : '32px' // Change these values manually
+              backgroundColor: isExpanded ? BRAND_COLORS.primaryExpanded : backfaceColor,
+              borderTop: isExpanded ? `1px solid ${BRAND_COLORS.borderTransparent}` : `1px solid ${BRAND_COLORS.borderLight}`,
+              borderRadius: isExpanded ? '16px' : '32px'
             }}
             initial={{
-              backgroundColor: initialPhase === 'fullscreen' ? '#3B3B28' : '#4A4A32',
-              borderTop: initialPhase === 'fullscreen' ? '1px solid rgba(255, 255, 255, 0)' : '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: initialPhase === 'fullscreen' ? '16px' : '32px'
+              backgroundColor: isFullscreen ? BRAND_COLORS.primaryExpanded : backfaceColor,
+              borderTop: isFullscreen ? `1px solid ${BRAND_COLORS.borderTransparent}` : `1px solid ${BRAND_COLORS.borderLight}`,
+              borderRadius: isFullscreen ? '16px' : '32px'
             }}
             transition={{
               duration: screensaverPhase === 'fullscreen' ? 0 : 0.6,
               ease: "easeOut",
-              // Animation settings for manual corner radius changes
               borderRadius: {
                 type: "spring",
                 stiffness: 120,
@@ -325,14 +318,19 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
               }
             }}
           >
-            {/* Text Messaging - only visible on back face */}
-            <ScreensaverMessaging 
-              isVisible={screensaverPhase === 'expand' || screensaverPhase === 'fullscreen'}
-              brandName={brandName}
-              isStaticFullscreen={screensaverPhase === 'fullscreen'}
-            />
-          </motion.div>
+            {/* Default back content */}
+            {showBackContent && !customBackContent && (
+              <ScreensaverMessaging 
+                isVisible={isExpanded}
+                brandName={brandName}
+                isStaticFullscreen={isFullscreen}
+                goToScreen={goToScreen}
+              />
+            )}
 
+            {/* Custom back content */}
+            {showBackContent && customBackContent && customBackContent}
+          </motion.div>
         </motion.div>
       </motion.div>
     </div>

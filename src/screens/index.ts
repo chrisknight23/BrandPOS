@@ -1,4 +1,5 @@
 import { Home } from './Home';
+import { Follow } from './Follow';
 import { Cart } from './Cart';
 import { Payment } from './Payment';
 import { Auth } from './Auth';
@@ -9,9 +10,11 @@ import { Cashout } from './Cashout';
 import { End } from './End';
 import { Screensaver } from './Screensaver';
 import { ScreensaverExit } from './ScreensaverExit';
+import { ScreensaverFollow } from './ScreensaverFollow';
 
 export {
   Home,
+  Follow,
   Cart,
   Payment,
   Auth,
@@ -22,4 +25,5 @@ export {
   End,
   Screensaver,
   ScreensaverExit,
+  ScreensaverFollow,
 };

@@ -108,7 +108,7 @@ export const Cashout = ({ amount = '3', onComplete, sessionId }: CashoutProps) =
 
   return (
     <BaseScreen onNext={onComplete}>
-      <div className="w-[800px] h-[500px] bg-black flex items-center justify-center relative overflow-hidden rounded-[16px] border border-[#222]">
+      <div className="w-[800px] h-[500px] bg-black flex items-center justify-center relative overflow-hidden rounded-[16px]">
         <motion.div
           initial={{ y: 0 }}
           animate={slideOut ? { y: 600 } : { y: 0 }}

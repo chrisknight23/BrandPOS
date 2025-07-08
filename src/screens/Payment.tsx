@@ -199,7 +199,7 @@ export const Payment = ({ onNext, amount, baseAmount }: PaymentProps) => {
 
   return (
     <BaseScreen onNext={handleNext}>
-      <div className="w-[800px] h-[500px] bg-[#1A1A1A] relative overflow-hidden flex items-center justify-center rounded-[8px]">
+              <div className="w-[800px] h-[500px] bg-[#1A1A1A] relative overflow-hidden flex items-center justify-center rounded-[16px]">
         {/* Price Display */}
         <motion.div 
           className="text-white text-[110px] leading-none font-medium origin-center"

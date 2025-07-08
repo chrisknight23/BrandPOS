@@ -1,29 +1,29 @@
 # ScreensaverCard
 
-A specialized card component designed for screensaver animations with multi-phase motion sequences.
+A specialized card component designed for screensaver animations with multi-phase motion sequences and flexible flip controls.
 
 ## Description
 
-The ScreensaverCard component provides a smooth, coordinated animation sequence specifically designed for screensaver modes. It features a blank card that goes through drop, rotate, and expand phases with customizable timing and appearance.
+The ScreensaverCard component provides a smooth, coordinated animation sequence specifically designed for screensaver modes. It features a card that goes through drop, rotate, and expand phases with customizable timing, appearance, and flip behavior. The component supports both automatic animation sequences and manual flip controls.
 
 ## Usage
 
 ```tsx
 import { ScreensaverCard } from '../components/common/ScreensaverCard';
+import { BRAND_COLORS } from '../constants/colors';
 
 // Basic usage - automatic animation sequence
 <ScreensaverCard />
 
-// Customized screensaver card
+// Customized screensaver card with centralized colors
 <ScreensaverCard 
-  backgroundColor="bg-[#5D5D3F]"
-  backfaceColor="bg-[#4A4A32]"
+  backgroundColor={BRAND_COLORS.primary}
+  backfaceColor={BRAND_COLORS.primaryDark}
   brandName="$yourbrand"
-  subtitle="Custom Mode"
   startDelay={1500}
 />
 
-// NEW: Controlled state usage
+// Controlled state usage
 <ScreensaverCard 
   initialPhase="expand"    // Start in full-screen mode
   targetPhase="normal"     // Animate to small card
@@ -31,10 +31,16 @@ import { ScreensaverCard } from '../components/common/ScreensaverCard';
   startDelay={200}         // Brief delay before animation
 />
 
-// NEW: Static state (no animation)
+// Manual flip control
 <ScreensaverCard 
-  initialPhase="expand"    // Show in full-screen mode
-  autoStart={false}        // No animation
+  fullFlip={true}          // Do 540° rotation instead of 180°
+  flipped={true}           // Show back face
+  flipToFront={false}      // Override to flip to front
+/>
+
+// Simple flip to front (overrides all other flip logic)
+<ScreensaverCard 
+  flipToFront={true}       // Force flip to front face
 />
 ```
 
@@ -42,145 +48,161 @@ import { ScreensaverCard } from '../components/common/ScreensaverCard';
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `backgroundColor` | string | `'bg-[#5D5D3F]'` | Background color for the card front face |
-| `backfaceColor` | string | `'bg-[#4A4A32]'` | Background color for the card back face |
-| `brandName` | string | `'$mileendbagel'` | Brand name to display in overlay |
-| `subtitle` | string | `'Screensaver Mode'` | Subtitle text in overlay |
-| `className` | string | `''` | Additional CSS classes |
+| `backgroundColor` | string | `BRAND_COLORS.primary` | Background color for the card front face (CSS color) |
+| `backfaceColor` | string | `BRAND_COLORS.primaryDark` | Background color for the card back face (CSS color) |
+| `brandName` | string | `'$mileendbagel'` | Brand name to display |
 | `autoStart` | boolean | `true` | Whether to start animation automatically |
 | `startDelay` | number | `2000` | Delay in ms before starting animation |
 | `onExpandStart` | function | `undefined` | Callback when expand phase starts |
-| `initialPhase` | ScreensaverPhase | `'normal'` | **NEW:** Initial state of the card |
-| `targetPhase` | ScreensaverPhase | `undefined` | **NEW:** Target state to animate to |
+| `initialPhase` | ScreensaverPhase | `'normal'` | Initial state of the card |
+| `targetPhase` | ScreensaverPhase | `undefined` | Target state to animate to |
+| `showFrontContent` | boolean | `true` | Whether to show front content (header, logo, button) |
+| `showBackContent` | boolean | `true` | Whether to show back face messaging content |
+| `onButtonClick` | function | `undefined` | Callback when Follow button is clicked |
+| `fullFlip` | boolean | `false` | Do a full 540° flip instead of 180° |
+| `customBackContent` | ReactNode | `undefined` | Custom content for the back face |
+| `goToScreen` | function | `undefined` | Navigation function to go to a specific screen |
+| `flipped` | boolean | `false` | Whether the card should be flipped to show the back face |
+| `flipToFront` | boolean | `false` | Force flip to front face (overrides other flip logic) |
 
 ### ScreensaverPhase Type
 ```typescript
-type ScreensaverPhase = 'normal' | 'drop' | 'rotate' | 'expand' | 'fullscreen';
+type ScreensaverPhase = 'normal' | 'drop' | 'expand' | 'fullscreen';
 ```
 
 - **`normal`**: Small card (361x480px) in center
-- **`drop`**: Scaled down to 0.6x size
-- **`rotate`**: Rotated 90° (landscape orientation)  
-- **`expand`**: Transition state with 360° flip animation to full screen
-- **`fullscreen`**: Static full screen state with dynamic messaging (no animation)
+- **`drop`**: Scaled down during rubber band effect
+- **`expand`**: Transition state with flip animation to full screen
+- **`fullscreen`**: Full screen state (361x578px) with content on back face
 
-## Animation Sequence
+## Color System
 
-The component performs a coordinated 3-phase animation:
+The component uses centralized color management through `BRAND_COLORS`:
 
-### Phase 1: Drop (0-1.8s)
-- Card scales from 1.0 to 0.85
-- Natural spring bounce effect
-- 0.5s delay before starting
+```typescript
+// From constants/colors.ts
+BRAND_COLORS = {
+  primary: '#5D5D3F',           // Default front face color
+  primaryDark: '#4A4A32',       // Default back face color
+  primaryExpanded: '#3B3B28',   // Color when expanded/fullscreen
+  borderLight: 'rgba(255, 255, 255, 0.2)',
+  borderTransparent: 'rgba(255, 255, 255, 0)',
+}
+```
 
-### Phase 2: Rotate (1.8s-3.3s)  
-- Card rotates 90 degrees (landscape)
-- Card flips to show back face
-- Maintains 0.85 scale
+### Benefits:
+- **Consistent**: All cards use the same color system
+- **Maintainable**: Change `BRAND_COLORS.primary` to update all cards
+- **Flexible**: Can still override per instance if needed
 
-### Phase 3: Expand (3.3s+)
-- Card scales to 2.2x size
-- Dimensions change to 800x500px
-- Fills device frame in landscape
+## Animation System
 
-### Dynamic Messaging Content (ScreensaverMessaging Component)
-- Fades in during the expand phase
-- Displays rotating promotional messages (e.g., "Follow us and earn rewards")
-- Uses ScreensaverMessaging component for dynamic text cycling
-- Counter-scales to maintain readable text size
-- Integrated within the expanded card area
+### 1. Phase-Based Animations
+The card goes through different phases with specific behaviors:
+- `normal` → `drop` → `expand` → `fullscreen`
+- Each phase has specific rotateY, scale, and color values
 
-## Card Specifications
+### 2. Flip Control Hierarchy (in order of priority)
+1. **`flipToFront={true}`**: Overrides everything, forces `rotateY: 0`
+2. **Phase-based**: `expand`/`fullscreen` force 180° (back face)
+3. **`fullFlip={true}`**: Uses 540° rotation instead of 180°
+4. **`flipped` prop**: Simple 180° vs 0° control
 
-- **Initial Size**: 361x480px (same as BrandPass)
-- **Aspect Ratio**: Maintains BrandPass proportions
-- **Expanded Size**: 800x500px (device frame)
-- **Border**: White top border (20% opacity)
-- **Corner Radius**: 32px rounded corners
+### 3. Animation Logic
+```typescript
+rotateY: flipToFront ? 0 : (
+  isExpanded ? 180 : 
+  (fullFlip ? 540 : (flipped ? 180 : 0))
+)
+```
 
-## Animation Settings
+## Common Usage Patterns
 
-The component uses unified spring animations for smooth motion:
-
-- **Drop Phase**: Fast, bouncy (stiffness: 200, damping: 15)
-- **Expand Phase**: Smooth, controlled (stiffness: 120, damping: 30)
-- **All Properties**: Coordinated timing to prevent jitter
-
-## Customization
-
-### Colors
+### Entry Animation (ScreensaverFollow)
 ```tsx
 <ScreensaverCard 
-  backgroundColor="bg-blue-600"
-  backfaceColor="bg-blue-800"
+  backgroundColor={BRAND_COLORS.primary}
+  initialPhase="fullscreen"     // Start showing back face
+  targetPhase="normal"          // Animate to normal size
+  autoStart={false}            
+  fullFlip={true}              // 540° rotation to end on back
+  customBackContent={<QRCode />}
 />
 ```
 
-### Content
+### Exit Animation (Flip to Front)
 ```tsx
+const [flipToFront, setFlipToFront] = useState(false);
+
+// On close button click:
+setFlipToFront(true); // Simple override to flip to front
+
 <ScreensaverCard 
-  brandName="$customname"
-  subtitle="Your Custom Text"
+  backgroundColor={BRAND_COLORS.primary}
+  fullFlip={true}              // Preserve entry animation
+  flipToFront={flipToFront}    // Simple exit flip
 />
 ```
 
-### Timing
+### Static Display
 ```tsx
 <ScreensaverCard 
-  startDelay={3000}  // 3 second delay
-  autoStart={false}  // Manual control
+  backgroundColor={BRAND_COLORS.primary}
+  initialPhase="fullscreen"
+  autoStart={false}            // No animation
+  customBackContent={<Content />}
 />
 ```
 
-## NEW: State Control Examples
+## Best Practices
 
-### Screensaver Screen (Forward Animation)
-```tsx
-<ScreensaverCard 
-  autoStart={true}
-  startDelay={0}
-  onExpandStart={() => setIsExpanding(true)}
-/>
-```
+### ✅ Do:
+- Use `BRAND_COLORS` constants for consistent colors
+- Use `flipToFront` for simple exit animations
+- Use `targetPhase` for controlled animations
+- Specify `autoStart={false}` when controlling animations externally
 
-### ScreensaverExit Screen (Reverse Animation)  
-```tsx
-<ScreensaverCard 
-  initialPhase="fullscreen" // Start in static full-screen state
-  targetPhase="normal"      // Shrink to small card
-  autoStart={false}         // Don't use auto sequence
-  startDelay={200}          // Brief delay
-/>
-```
+### ❌ Don't:
+- Mix Tailwind classes with CSS colors
+- Use multiple flip props simultaneously (causes conflicts)
+- Hardcode color values (use centralized constants)
 
-### Static Display (No Animation)
-```tsx
-<ScreensaverCard 
-  initialPhase="fullscreen" // Show static full-screen state
-  autoStart={false}         // No animation
-/>
-```
+## Front Content Animation
+
+### Logo Positioning
+- Logo positioned using exact BrandPass layout structure
+- Uses `flex-1` middle section with proper header/footer spacers
+- Logo remains visible throughout all animation phases
+
+### Element Fade Animations
+- **Header text** and **Follow button** fade out during drop phase
+- **Logo** always remains visible on front
+- Fade duration: 0.3s with easeOut timing
 
 ## Implementation Notes
 
 - Uses Framer Motion for smooth animations
 - Maintains 3D perspective and backface culling
-- Optimized spring settings prevent animation conflicts
-- Integrates ScreensaverMessaging component for dynamic messaging in expand phase
-- Self-contained with minimal external dependencies
-- Designed specifically for screensaver use cases
+- Integrates ScreensaverMessaging component for dynamic messaging
+- **Warning**: Multiple flip props can conflict - use `flipToFront` for simple overrides
+- Colors use centralized `BRAND_COLORS` system for consistency
 
 ## Dependencies
 
-- **ScreensaverMessaging**: Handles dynamic message cycling during expand phase
+- **ScreensaverMessaging**: Handles dynamic message cycling
 - **Framer Motion**: Animation library for smooth transitions
+- **BRAND_COLORS**: Centralized color constants
 
 ## Changelog
 
+- **v3.0**: Major cleanup and best practices implementation
+  - Removed unused props: `subtitle`, `className`, `backfaceColor` (now customizable)
+  - Removed unused phases: `rotate`, `screensaver`
+  - Implemented centralized color system with `BRAND_COLORS`
+  - Simplified animation logic and removed redundant code
+  - Added `backfaceColor` prop for full customization
+  - Updated all usages to use consistent CSS color format
+- **v2.2**: Added flip control props (`flipped`, `flipToFront`)
+- **v2.1**: Enhanced front content animations and positioning
 - **v2.0**: Added state control with `initialPhase` and `targetPhase` props
-  - Can now start in any phase (normal, drop, rotate, expand)
-  - Can animate to specific target phases
-  - Enables reverse animations (expand → normal)
-  - Perfect for ScreensaverExit transitions
-- **v1.0**: Multi-phase screensaver animation with blank card design
-  - Extracted from BrandPass component for better separation of concerns 
+- **v1.0**: Multi-phase screensaver animation with blank card design 

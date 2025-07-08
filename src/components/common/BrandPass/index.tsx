@@ -686,10 +686,15 @@ export const BrandPass: React.FC<BrandPassProps> = ({
           ease: "easeOut" 
         }}
         onClick={() => {
-          // Only allow flipping when not in expanded state
-          if (animationState !== 'expanded') {
-            setIsFlipped(!isFlipped);
-            if (onFlip) onFlip(!isFlipped);
+          // If external onClick is provided, use that instead of flipping
+          if (onClick) {
+            onClick();
+          } else {
+            // Only allow flipping when not in expanded state
+            if (animationState !== 'expanded') {
+              setIsFlipped(!isFlipped);
+              if (onFlip) onFlip(!isFlipped);
+            }
           }
         }}
       >

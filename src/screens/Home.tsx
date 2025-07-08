@@ -4,62 +4,85 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import CashAppLogo from '../assets/images/logos/16x16logo.png';
 
-export const Home = ({ onNext }: { onNext: () => void }) => {
-  const [showAnimations, setShowAnimations] = useState(false);
-  const [showSecondPhase, setShowSecondPhase] = useState(false);
-  const [startTextPushBack, setStartTextPushBack] = useState(false);
+interface HomeProps {
+  onNext: () => void;
+  isIdle?: boolean; // New prop to control starting vs idle state
+  goToScreen?: (screen: Screen) => void;
+}
+
+type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'Cashback' | 'Cashout' | 'End' | 'CustomTip';
+
+export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
+  const [showAnimations, setShowAnimations] = useState(isIdle);
+  const [showSecondPhase, setShowSecondPhase] = useState(isIdle);
+  const [startTextPushBack, setStartTextPushBack] = useState(isIdle);
+
+  const handleFollowButtonClick = () => {
+    if (goToScreen) {
+      goToScreen('Follow');
+    } else {
+      onNext(); // Fallback to onNext if goToScreen not available
+    }
+  };
 
   useEffect(() => {
-    // Start all animations after a short delay when component mounts
-    const initialTimer = setTimeout(() => {
-      setShowAnimations(true);
+    // Only run animations if not in idle mode
+    if (!isIdle) {
+      // Start all animations after a short delay when component mounts
+      const initialTimer = setTimeout(() => {
+        setShowAnimations(true);
+        
+        // Start text push back animation slightly before card animation
+        const textPushBackTimer = setTimeout(() => {
+          setStartTextPushBack(true);
+        }, 2960); // Start text animation 0.5s before card
+        
+        // Start second phase animations after the first phase completes
+        const secondPhaseTimer = setTimeout(() => {
+          setShowSecondPhase(true);
+        }, 3000); // 3 second delay before second phase animations start
+        
+        return () => {
+          clearTimeout(textPushBackTimer);
+          clearTimeout(secondPhaseTimer);
+        };
+      }, 500); // Delay before starting all animations
       
-      // Start text push back animation slightly before card animation
-      const textPushBackTimer = setTimeout(() => {
-        setStartTextPushBack(true);
-      }, 2960); // Start text animation 0.5s before card
-      
-      // Start second phase animations after the first phase completes
-      const secondPhaseTimer = setTimeout(() => {
-        setShowSecondPhase(true);
-      }, 3000); // 3 second delay before second phase animations start
-      
-      return () => {
-        clearTimeout(textPushBackTimer);
-        clearTimeout(secondPhaseTimer);
-      };
-    }, 500); // Delay before starting all animations
-    
-    return () => clearTimeout(initialTimer);
-  }, []);
+      return () => clearTimeout(initialTimer);
+    }
+  }, [isIdle]);
 
   return (
     <BaseScreen onNext={onNext}>
-      <div className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden border border-[#222]">
+      <div className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden">
         <motion.div 
           className="flex-1 flex flex-col items-center justify-center w-full"
-          animate={{ 
+          animate={isIdle ? {} : { 
             opacity: startTextPushBack ? 0 : 1,
             scale: startTextPushBack ? 0.8 : 1,
             z: startTextPushBack ? 1 : 10
           }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          transition={isIdle ? {} : { duration: 0.3, ease: "easeOut" }}
           style={{
-            zIndex: startTextPushBack ? 1 : 10
+            zIndex: isIdle ? 1 : (startTextPushBack ? 1 : 10),
+            opacity: isIdle ? 0 : undefined,
+            scale: isIdle ? 0.8 : undefined
           }}
         >
           <motion.h1 
             className="text-[90px] font-cash font-medium text-center leading-[0.85] tracking-[-0.02em]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: showAnimations ? 1 : 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={isIdle ? {} : { opacity: 0 }}
+            animate={isIdle ? {} : { opacity: showAnimations ? 1 : 0 }}
+            transition={isIdle ? {} : { duration: 0.8, ease: "easeOut" }}
+            style={{ opacity: isIdle ? 0 : undefined }}
             dangerouslySetInnerHTML={{ __html: "Follow us and<br/>earn rewards" }}
           />
           <motion.p 
             className="text-[22px] text-white mt-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: showAnimations ? 0.5 : 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={isIdle ? {} : { opacity: 0 }}
+            animate={isIdle ? {} : { opacity: showAnimations ? 0.5 : 0 }}
+            transition={isIdle ? {} : { duration: 0.8, ease: "easeOut" }}
+            style={{ opacity: isIdle ? 0 : undefined }}
           >
             $mileendbagel on Cash App
           </motion.p>
@@ -68,8 +91,8 @@ export const Home = ({ onNext }: { onNext: () => void }) => {
         <motion.div 
           className="absolute w-full h-full flex justify-center items-center"
           // Starting position (completely off-screen below the frame)
-          initial={{ y: 0 }}
-          animate={{ 
+          initial={isIdle ? { y: 0 } : { y: 0 }}
+          animate={isIdle ? { y: 0 } : { 
             // Animation positions
             y: showSecondPhase ? 
               // Center position
@@ -80,7 +103,7 @@ export const Home = ({ onNext }: { onNext: () => void }) => {
                 // Initial off-screen position
                 500)
           }}
-          transition={{
+          transition={isIdle ? {} : {
             // Spring animation
             type: "spring",
             stiffness: 120,
@@ -89,7 +112,7 @@ export const Home = ({ onNext }: { onNext: () => void }) => {
             restDelta: 0.001
           }}
           style={{
-            zIndex: showSecondPhase ? 10 : 5
+            zIndex: isIdle ? 10 : (showSecondPhase ? 10 : 5)
           }}
         >
           <BrandPass 
@@ -100,18 +123,20 @@ export const Home = ({ onNext }: { onNext: () => void }) => {
             headerText="$mileendbagel"
             backgroundColor="bg-[#5D5D3F]"
             backfaceColor="bg-[#4A4A32]"
+            onButtonClick={handleFollowButtonClick}
+            onClick={handleFollowButtonClick}
           />
         </motion.div>
 
         {/* Bottom left message that fades in when card slides up */}
         <motion.div 
           className="absolute bottom-0 left-0 p-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ 
+          initial={isIdle ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={isIdle ? { opacity: 1, y: 0 } : { 
             opacity: showSecondPhase ? 1 : 0,
             y: showSecondPhase ? 0 : 20
           }}
-          transition={{ duration: 0.3, ease: "easeOut", delay: 0.25 }}
+          transition={isIdle ? {} : { duration: 0.3, ease: "easeOut", delay: 0.25 }}
         >
           <div>
             <div className="flex items-center gap-1 mb-4">

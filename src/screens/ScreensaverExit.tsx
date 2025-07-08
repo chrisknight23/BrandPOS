@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BaseScreen } from '../components/common/BaseScreen/index';
 import { ScreensaverCard } from '../components/common/ScreensaverCard';
+import { BRAND_COLORS } from '../constants/colors';
 
 export const ScreensaverExit = ({ onNext }: { onNext: () => void }) => {
   const [animationPhase, setAnimationPhase] = useState<'fullscreen' | 'shrinking' | 'landed'>('fullscreen');
 
-  // Start the shrinking animation after a brief delay
+  // Start the shrinking animation immediately
   useEffect(() => {
-    const shrinkTimer = setTimeout(() => {
-      setAnimationPhase('shrinking');
-    }, 800); // Brief pause to show fullscreen state
-
-    return () => clearTimeout(shrinkTimer);
+    setAnimationPhase('shrinking');
   }, []);
 
   // Handle animation completion and navigate to Cart
@@ -20,18 +17,14 @@ export const ScreensaverExit = ({ onNext }: { onNext: () => void }) => {
     if (animationPhase === 'shrinking') {
       setAnimationPhase('landed');
       
-      // DISABLED: Navigate to Cart after a brief pause to show the final state
-      // const navTimer = setTimeout(() => {
-      //   onNext();
-      // }, 300);
-      // 
-      // return () => clearTimeout(navTimer);
+      // Navigate to Cart instantly after animation completes
+      onNext();
     }
   };
 
   return (
     <BaseScreen onNext={onNext}>
-      <div className="w-[800px] h-[500px] bg-black text-white rounded-[16px] border border-[#222] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)] flex justify-end relative overflow-hidden">
+      <div className="w-[800px] h-[500px] bg-black text-white rounded-[16px] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)] flex justify-end relative overflow-hidden">
         
         {/* Background Layer - Right Panel Content */}
         <div className="bg-black flex flex-col items-center justify-center mt-6 mr-6 mb-6">
@@ -67,15 +60,15 @@ export const ScreensaverExit = ({ onNext }: { onNext: () => void }) => {
             x: 0,
             y: 0,
             scale: 1.38,  // Start at full frame scale - no movement on entry
-            scaleX: -1,   // Flip horizontally
-            rotateZ: 180  // Rotate 180deg to correct text orientation
+            scaleX: 1,    // Normal horizontal orientation
+            rotateZ: 0    // No rotation
           }}
           animate={{
             x: animationPhase === 'shrinking' || animationPhase === 'landed' ? 274 : 0, // Move to right panel position
             y: animationPhase === 'shrinking' || animationPhase === 'landed' ? -100 : 0,  // Slight vertical adjustment
             scale: animationPhase === 'shrinking' || animationPhase === 'landed' ? 0.45 : 1.38, // Start at full frame scale, then shrink
-            scaleX: -1,   // Keep horizontal flip throughout animation
-            rotateZ: 180  // Keep 180deg rotation throughout animation
+            scaleX: 1,    // Keep normal horizontal orientation throughout
+            rotateZ: 0    // Keep no rotation throughout
           }}
           transition={{
             duration: 0.8,
@@ -85,16 +78,15 @@ export const ScreensaverExit = ({ onNext }: { onNext: () => void }) => {
           onAnimationComplete={handleAnimationComplete}
         >
           <ScreensaverCard 
-            backgroundColor="bg-[#5D5D3F]"
-            backfaceColor="bg-[#4A4A32]"
+            backgroundColor={BRAND_COLORS.primary}
             brandName="$mileendbagel"
-            subtitle="Screensaver Mode"
             initialPhase="fullscreen"     // Start in fullscreen state with messaging on back face
             targetPhase={animationPhase === 'shrinking' || animationPhase === 'landed' ? 'normal' : 'fullscreen'} // Animate to normal when shrinking
             autoStart={false}            // Don't use automatic animation sequence
             startDelay={0}               // No delay needed
             onExpandStart={() => {}}
             showFrontContent={false}     // Hide header and button, show only logo
+            showBackContent={false}      // Hide messaging component on back face
           />
         </motion.div>
       </div>

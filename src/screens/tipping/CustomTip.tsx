@@ -77,7 +77,7 @@ export const CustomTip = ({ onNext, onBack, baseAmount = '0', goToScreen }: Cust
 
   return (
     <BaseScreen onNext={() => {}}>
-      <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[8px] border border-[#222]">
+              <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[16px]">
         {/* Main container */}
         <motion.div 
           className="w-full h-full bg-black text-white p-8 flex flex-col"

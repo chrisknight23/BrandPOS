@@ -3,8 +3,10 @@
  */
 export type Screen = 
   | 'Home'
+  | 'Follow'
   | 'Screensaver'
   | 'ScreensaverExit'
+  | 'ScreensaverFollow'
   | 'Cart'
   | 'Payment'
   | 'Auth'

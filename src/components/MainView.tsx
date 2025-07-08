@@ -11,7 +11,7 @@ import { DropMenu } from './dev/dropMenu';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Screensaver', 'ScreensaverExit', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
+const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -98,6 +98,8 @@ export const MainView = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   // Add pause state for End screen timer
   const [isPaused, setIsPaused] = useState(false);
+  // Track if this is the first visit to Home (for starting vs idle state)
+  const [isFirstHomeVisit, setIsFirstHomeVisit] = useState(true);
   
   // Track previous isPanelOpen to determine open/close direction
   const prevPanelOpenRef = useRef(isPanelOpen);
@@ -117,10 +119,15 @@ export const MainView = () => {
     window.cartItems = cartItems;
   }, [cartItems]);
   
-  // Log the current screen for debugging
+  // Log the current screen for debugging and track Home visits
   useEffect(() => {
     console.log(`MainView: Current screen is now ${currentScreen}`);
-  }, [currentScreen]);
+    
+    // If we're navigating away from Home for the first time, mark it as no longer first visit
+    if (currentScreen !== 'Home' && isFirstHomeVisit) {
+      setIsFirstHomeVisit(false);
+    }
+  }, [currentScreen, isFirstHomeVisit]);
   
   // Handle adding an item to the cart
   const handleAddItem = useCallback(() => {
@@ -442,7 +449,7 @@ export const MainView = () => {
     });
     
     // Generate props with proper null/undefined handling
-    return {
+    const baseProps = {
       onNext: handleNext,
       onBack: handleBack,
       onComplete: handleNext,
@@ -462,6 +469,17 @@ export const MainView = () => {
       // Direct navigation function
       goToScreen
     };
+
+    // Add screen-specific props
+    if (currentScreen === 'Home') {
+      return {
+        ...baseProps,
+        // Home screen should be in idle mode if it's not the first visit
+        isIdle: !isFirstHomeVisit
+      };
+    }
+
+    return baseProps;
   };
   
   // --- Removed QR scan status effect ---

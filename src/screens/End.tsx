@@ -111,7 +111,7 @@ export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, t
 
   return (
     <BaseScreen onNext={onNext}>
-      <div className="w-[800px] h-[500px] text-white p-10 flex flex-col justify-between rounded-[8px] relative"
+              <div className="w-[800px] h-[500px] text-white p-10 flex flex-col justify-between rounded-[16px] relative"
         style={{ backgroundColor: bgColor }}
       >
         <motion.div

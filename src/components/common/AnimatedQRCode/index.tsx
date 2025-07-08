@@ -243,6 +243,8 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)',
+              width: '62px',
+              height: '62px',
               zIndex: 10
             }}
           >
@@ -282,30 +284,13 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
         overflow: 'hidden' // Prevent any content from spilling outside
       }}
     >
-      {/* Loading state */}
-      {isLoading && (
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: darkColor
-          }}
-        >
-          <span>Loading...</span>
-        </div>
-      )}
+
       
       {/* AnimatePresence for animate out */}
       <AnimatePresence>
         {!isLoading && visible && (
           <React.Fragment key="qr-anim-in">
-            {/* Position markers - always visible at full opacity */}
+            {/* Position markers - fade in with animation */}
             <div className="qr-position-markers" style={{
               position: 'relative',
               width: '100%',
@@ -313,9 +298,16 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
               zIndex: 2  // Ensure markers are above placeholder dots
             }}>
               {positionMarkers.map((dot, idx) => (
-                <div
+                <motion.div
                   key={`marker-${idx}`}
                   style={getDotStyle(dot, true, darkColor, 1)}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={isAnimating ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
+                  transition={{
+                    delay: 0, // Start immediately with animation
+                    duration: 0.3,
+                    ease: 'easeOut'
+                  }}
                 />
               ))}
             </div>
@@ -365,17 +357,24 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
               </>
             )}
             
-            {/* Center logo */}
+            {/* Center logo - fade in with animation */}
             {logo && (
-              <div
+              <motion.div
                 style={{
                   position: 'absolute',
-                  top: '50%',
-                  left: '50%',
+                  top: '38%',
+                  left: '38%',
                   transform: 'translate(-50%, -50%)',
                   width: '62px',
                   height: '62px',
                   zIndex: 3  // Ensure logo is on top
+                }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={isAnimating ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1 }}
+                transition={{
+                  delay: 0, // Same timing as position markers
+                  duration: 0.3,
+                  ease: 'easeOut'
                 }}
               >
                 {typeof logo === 'string' ? (
@@ -397,7 +396,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
                 ) : (
                   logo
                 )}
-              </div>
+              </motion.div>
             )}
           </React.Fragment>
         )}

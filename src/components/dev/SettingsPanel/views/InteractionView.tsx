@@ -14,7 +14,7 @@
 */
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '../../../ui/button';
+import { Button } from '../../../ui/Button';
 
 interface InteractionViewProps {
   cartItems?: { id: number; name: string; price: number; quantity: number }[];

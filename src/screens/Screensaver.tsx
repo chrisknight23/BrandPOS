@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BaseScreen } from '../components/common/BaseScreen/index';
 import { ScreensaverCard } from '../components/common/ScreensaverCard';
+import { BRAND_COLORS } from '../constants/colors';
 import CashAppLogo from '../assets/images/logos/16x16logo.png';
 
-export const Screensaver = ({ onNext }: { onNext: () => void }) => {
+export const Screensaver = ({ onNext, goToScreen }: { onNext: () => void; goToScreen?: (screen: string) => void }) => {
   const [isExpanding, setIsExpanding] = useState(false);
   const [animationPhase, setAnimationPhase] = useState<'normal' | 'drop' | 'expand'>('normal');
 
@@ -25,9 +26,15 @@ export const Screensaver = ({ onNext }: { onNext: () => void }) => {
     };
   }, []);
 
+  const handleFollowClick = () => {
+    if (goToScreen) {
+      goToScreen('ScreensaverFollow');
+    }
+  };
+
   return (
     <BaseScreen onNext={onNext}>
-      <div className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden border border-[#222]">
+      <div className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden">
         
         {/* Card positioned in center with screen-controlled animation */}
         <motion.div 
@@ -75,17 +82,17 @@ export const Screensaver = ({ onNext }: { onNext: () => void }) => {
           }}
         >
           <ScreensaverCard 
-            backgroundColor="bg-[#5D5D3F]"
-            backfaceColor="bg-[#4A4A32]"
+            backgroundColor={BRAND_COLORS.primary}
             brandName="$mileendbagel"
-            subtitle="Screensaver Mode"
             initialPhase="normal"
             targetPhase={animationPhase === 'expand' ? 'expand' : 
                         animationPhase === 'drop' ? 'drop' : 'normal'}
             autoStart={false}            // Screen controls the animation now
             startDelay={0}
             onExpandStart={() => setIsExpanding(true)}
-            showFrontContent={true}      // Show front content with fade animations
+            showFrontContent={false}     // Hide header and button, show only logo
+            onButtonClick={handleFollowClick}
+            goToScreen={goToScreen}
           />
         </motion.div>
 
@@ -115,6 +122,8 @@ export const Screensaver = ({ onNext }: { onNext: () => void }) => {
             </p>
           </div>
         </motion.div>
+
+
       </div>
     </BaseScreen>
   );

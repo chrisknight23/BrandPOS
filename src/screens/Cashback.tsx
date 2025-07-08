@@ -120,7 +120,7 @@ export const Cashback = ({ onNext, amount = "1", userType, onQrVisibleChange, se
     <BaseScreen onNext={onNext}>
       {/* Main container for the device frame - everything must stay within this boundary */}
       <motion.div 
-        className="w-[800px] h-[500px] relative overflow-hidden rounded-[16px] border border-[#222]"
+        className="w-[800px] h-[500px] relative overflow-hidden rounded-[16px]"
         initial={{ opacity: 1 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 1 }}

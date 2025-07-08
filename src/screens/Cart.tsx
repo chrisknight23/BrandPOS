@@ -1,4 +1,8 @@
 import { BaseScreen } from '../components/common/BaseScreen/index';
+import { ScreensaverCard } from '../components/common/ScreensaverCard';
+import { AnimatedQRCode } from '../components/common/AnimatedQRCode';
+import { ToggleButton } from '../components/ui/ToggleButton';
+import { BRAND_COLORS } from '../constants/colors';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
@@ -41,6 +45,8 @@ export const Cart = ({
 }) => {
   // Use provided cart items or default to initial data
   const [items, setItems] = useState<CartItem[]>(cartItems || initialCartData.items);
+  const [cardCentered, setCardCentered] = useState(false);
+  const [toggleIndex, setToggleIndex] = useState(0); // Track toggle button state
   const taxRate = initialCartData.taxRate;
   
   // Calculate totals
@@ -69,7 +75,7 @@ export const Cart = ({
   return (
     <BaseScreen onNext={handleNext}>
       <div 
-        className="w-[800px] h-[500px] bg-black text-white rounded-[16px] border border-[#222] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)] flex justify-end"
+        className="w-[800px] h-[500px] bg-black text-white rounded-[16px] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)] flex justify-end"
       >
         {/* Left Panel - Cart Content */}
         <div 
@@ -125,16 +131,69 @@ export const Cart = ({
           </div>
         </div>
 
-        {/* Right Panel - Brand Card */}
-        <div className="bg-black flex flex-col items-center justify-center mt-6 mr-6 mb-6">
+        {/* Lightbox overlay - appears when card is centered */}
+        {cardCentered && (
+          <motion.div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            style={{ zIndex: 10 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{
+              duration: 0.3,
+              ease: [0.32, 0.72, 0, 1]
+            }}
+          />
+        )}
+
+        {/* Right controls - appears when card is centered */}
+        {cardCentered && (
+          <motion.div 
+            className="absolute right-0 top-0 h-full flex flex-col justify-center items-center p-8"
+            style={{ zIndex: 30 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{
+              duration: 0.3,
+              ease: "easeOut"
+            }}
+          >
+            {/* Toggle Button */}
+            <ToggleButton
+              selectedIndex={toggleIndex}
+              onToggle={(index: number) => {
+                setToggleIndex(index);
+              }}
+              icons={[
+                // QR icon (index 0)
+                <img src="/src/assets/images/24/qr.svg" alt="QR Code" className="w-6 h-6 block" />,
+                // SMS icon (index 1)
+                <img src="/src/assets/images/24/comm-sms.svg" alt="SMS" className="w-6 h-6 block" />
+              ]}
+            />
+
+            {/* Close button positioned at bottom */}
+            <motion.button
+              onClick={() => setCardCentered(false)}
+              className="w-16 h-16 rounded-full bg-black border border-white/20 flex items-center justify-center absolute bottom-8"
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.1 }}
+              tabIndex={0}
+              aria-label="Close and return to cart"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </motion.button>
+          </motion.div>
+        )}
+
+        {/* Right Panel - Brand Card (Same as ScreensaverExit) */}
+        <div className="bg-black flex flex-col items-center justify-center mt-6 mr-6 mb-6 relative">
           {/* Content Container with Border */}
           <div className="border border-[#333] rounded-[24px] p-5 flex flex-col items-center">
-            {/* Brand Pass Card */}
-            <div className="w-[161px] h-[213px] bg-[#5D5D3F] rounded-[32px] border-t border-white/20 flex flex-col items-center justify-center p-4 mb-6">
-              {/* Avatar/Logo placeholder */}
-              <div className="w-16 h-16 bg-[#8B8B6B] rounded-full mb-4 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">m</span>
-              </div>
+            {/* Empty space where card will land - no static card */}
+            <div className="w-[161px] h-[213px] mb-6">
+              {/* Empty placeholder for card landing area */}
             </div>
             
             {/* Brand Name */}
@@ -148,10 +207,87 @@ export const Cart = ({
             </div>
             
             {/* Follow Button */}
-            <button className="bg-white/15 text-white px-8 py-3 rounded-full text-[18px] font-medium hover:bg-white/20 transition-colors w-full">
+            <button 
+              onClick={() => setCardCentered(true)}
+              className="bg-white/15 text-white px-8 py-3 rounded-full text-[18px] font-medium hover:bg-white/20 transition-colors w-full"
+            >
               Follow
             </button>
           </div>
+
+          {/* ScreensaverCard positioned in the right rail (landed state) */}
+          <motion.div
+            className="absolute top-[20px] left-[21px] w-[161px] h-[213px] flex items-center justify-center"
+            style={{ 
+              zIndex: 20
+            }}
+            animate={{
+              x: cardCentered ? -257 : 0,
+              y: cardCentered ? 100 : 0
+            }}
+            transition={{
+              duration: 0.8,
+              ease: [0.32, 0.72, 0, 1]
+            }}
+          >
+            <motion.div
+              initial={{
+                scale: 0.45,
+                scaleX: 1,
+                rotateZ: 0
+              }}
+              animate={{
+                scale: cardCentered ? 1 : 0.45,
+                scaleX: cardCentered ? 1 : 1,
+                rotateZ: cardCentered ? 0 : 0
+              }}
+              transition={{
+                duration: 0.8,
+                ease: [0.32, 0.72, 0, 1]
+              }}
+              style={{ 
+                transformOrigin: 'center'
+              }}
+            >
+              <ScreensaverCard 
+                backgroundColor={BRAND_COLORS.primary}
+                brandName="$mileendbagel"
+                initialPhase="normal"        // Start in normal state (landed)
+                targetPhase="normal"         // Stay in normal state
+                autoStart={false}           // No animation needed
+                startDelay={0}              
+                onExpandStart={() => {}}
+                showFrontContent={false}    // Hide header and button, show only logo
+                showBackContent={true}      // Show QR code on back face when centered
+                flipToQR={cardCentered}     // Use the flipToQR prop to show QR code when centered
+                customBackContent={
+                  <div className="w-full h-full flex flex-col items-center justify-center p-8">
+                    {/* QR code container */}
+                    <div 
+                      className="relative overflow-hidden"
+                      style={{ maxHeight: '300px' }}
+                    >
+                      <AnimatedQRCode
+                        value={`https://chrisk.ngrok.app/landing/follow-session`}
+                        size={260}
+                        animateIn={cardCentered ? "sequential" : false}
+                        disableAnimation={false}
+                        speed={100.0}
+                        darkColor="#FFFFFF"
+                        lightColor="transparent"
+                        placeholderOpacity={1.0}
+                        logo="cash-icon"
+                        className="max-h-[260px] overflow-hidden"
+                        onAnimationComplete={() => {
+                          console.log("QR animation complete");
+                        }}
+                      />
+                    </div>
+                  </div>
+                }
+              />
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </BaseScreen>
