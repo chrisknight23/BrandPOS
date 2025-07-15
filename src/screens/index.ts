@@ -5,7 +5,8 @@ import { Payment } from './Payment';
 import { Auth } from './Auth';
 import { Tipping } from './tipping/Tipping';
 import { CustomTip } from './tipping/CustomTip';
-import { Cashback } from './Cashback';
+import { Reward } from './Reward';
+
 import { Cashout } from './Cashout';
 import { End } from './End';
 import { Screensaver } from './Screensaver';
@@ -19,7 +20,8 @@ export {
   Payment,
   Auth,
   Tipping,
-  Cashback,
+  Reward,
+
   CustomTip,
   Cashout,
   End,

@@ -102,16 +102,11 @@ export const TipButton: React.FC<TipButtonProps> = ({
       {/* Regular button that's visible when not selected */}
       <motion.div
         ref={buttonRef}
-        className={`
-          flex flex-col items-center justify-center
-          ${isSelected 
-            ? `bg-[${mainColorValue}] text-white` 
-            : `bg-[${mainColorValue}] text-white`
-          }
-          cursor-pointer shadow-sm rounded-[16px]
-        `}
+        className="flex flex-col items-center justify-center text-white cursor-pointer shadow-sm rounded-[24px]"
         style={{ 
           height: '248px',
+          backgroundColor: mainColorValue,
+          border: mainColor && mainColor.includes('rgba(255, 255, 255') ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
           visibility: disableExpand ? 'visible' : (isSelected ? 'hidden' : 'visible'),
           willChange: 'transform'
         }}
@@ -125,7 +120,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
           delay: (transition.delay || 0) + (index * 0.06)
         } : undefined}
         // Only keep tap animation, remove hover
-        whileTap={!isSelected ? { scale: 0.98 } : undefined}
+        whileTap={!isSelected ? { scale: 0.95 } : undefined}
       >
         {/* Simple variant without percentages */}
         {!showPercentage ? (

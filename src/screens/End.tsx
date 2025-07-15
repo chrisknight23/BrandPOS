@@ -16,15 +16,16 @@ interface EndProps {
   taxRate?: number;
   isPaused?: boolean;
   setIsPaused?: (paused: boolean) => void;
+  skipWelcome?: boolean; // Skip welcome message and go directly to thanks
 }
 
-export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, taxRate = 0.0875, isPaused }: EndProps) => {
+export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, taxRate = 0.0875, isPaused, skipWelcome = false }: EndProps) => {
   const [total, setTotal] = useState(amount || baseAmount || "0");
   const [progress, setProgress] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
   const [hasTip, setHasTip] = useState(false);
   const { userType } = useUserType();
-  const [showFirst, setShowFirst] = useState(true);
+  const [showFirst, setShowFirst] = useState(!skipWelcome);
   const [progressReady, setProgressReady] = useState(false); // Wait for fade-in
 
   // Timer constants
@@ -99,13 +100,16 @@ export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, t
   }, [amount, baseAmount, tipAmount]);
   
   useEffect(() => {
-    // Show 'Local Cash sent' for 2.5s, then switch to 'Thanks for shopping local'
-    const timer = setTimeout(() => setShowFirst(false), 2500);
-    return () => clearTimeout(timer);
-  }, []);
+    // Only show welcome message transition if not skipping
+    if (!skipWelcome) {
+      // Show 'Welcome to Cash App Local' for 2.5s, then switch to 'Thanks for shopping local'
+      const timer = setTimeout(() => setShowFirst(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [skipWelcome]);
 
-  // Set background color based on userType
-  const bgColor = userType === 'cash-local' ? '#00B843' : '#1189D6';
+  // Set background color to match brand pass front color
+  const bgColor = '#5D5D3F';
   const showReceiptButton = userType !== 'cash-local';
   const showProgressBar = showReceiptButton && !showFirst;
 
@@ -155,11 +159,8 @@ export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, t
               label="Get receipt"
               progress={progress}
               onClick={() => {
-                if (goToScreen) {
-                  goToScreen('Home');
-                } else {
-                  onNext();
-                }
+                // Button click handler - currently does nothing
+                console.log('Get receipt button clicked');
               }}
               show={true}
               paused={isPaused}

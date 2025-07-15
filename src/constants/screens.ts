@@ -10,7 +10,7 @@ export const SCREEN_ORDER: Screen[] = [
   'Payment',
   'Auth',
   'Tipping',
-  'Cashback',
+  'Reward',
   'Cashout',
   'CustomTip',
   'End'

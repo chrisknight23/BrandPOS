@@ -132,6 +132,12 @@ export interface BrandPassProps {
   
   /** Show or hide the progress timer */
   showProgressTimer?: boolean;
+  
+  /** Show animated number instead of logo */
+  showAnimatedNumber?: boolean;
+  
+  /** Handler for when the progress timer completes */
+  onTimerComplete?: () => void;
 }
 
 // ============= Constants =============
@@ -219,7 +225,7 @@ const CardFace: React.FC<CardFaceProps> = ({
 export const BrandPass: React.FC<BrandPassProps> = ({
   // Handle both new and legacy props
   initialState,
-  backgroundColor = 'bg-[#96151D]',
+  backgroundColor = 'bg-[#5D5D3F]',
   backfaceColor = 'bg-[#6A0F15]',
   lottieAnimation,
   initialValue,
@@ -258,13 +264,15 @@ export const BrandPass: React.FC<BrandPassProps> = ({
   animateIn,
   sessionId,
   showProgressTimer = true,
+  showAnimatedNumber = false,
+  onTimerComplete,
 }) => {
   const controls = useAnimation();
   const lottieControls = useAnimation();
   const numberControls = useAnimation();
   
   // Progress timer state
-  const [progressTimer, setProgressTimer] = useState(0);
+  const [progressTimer, setProgressTimer] = useState(100); // Start at 100% (full)
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerDuration = 12000; // 12 seconds timer duration
@@ -308,6 +316,13 @@ export const BrandPass: React.FC<BrandPassProps> = ({
       }
     }
   }, [initialState, animationDelay]);
+  
+  // Sync external flipped prop with internal isFlipped state
+  useEffect(() => {
+    if (typeof flipped === 'boolean' && flipped !== isFlipped) {
+      setIsFlipped(flipped);
+    }
+  }, [flipped, isFlipped]);
   
   // Number display state
   const [showNumber, setShowNumber] = useState(false);
@@ -570,49 +585,69 @@ export const BrandPass: React.FC<BrandPassProps> = ({
 
   // Start the timer when the button is shown
   useEffect(() => {
-    if (showProgressTimer && animationState !== 'expanded' && !isTimerRunning) {
-      // Start timer with delay
+    // Always clean up any existing timer first
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    
+    if (showProgressTimer && (animationState === 'initial' || animationState === 'dropped') && !isFlipped) {
+      // Set timer to full immediately when showProgressTimer becomes true
+      setProgressTimer(100);
       setIsTimerRunning(true);
-      setProgressTimer(100); // Start at 100%
       
       // Add delay before starting the countdown
       const delayTimeout = setTimeout(() => {
-        timerRef.current = setInterval(() => {
-          setProgressTimer(prev => {
-            const newValue = prev - (100 * timerInterval / timerDuration);
-            if (newValue <= 0) {
-              // Timer finished
-              if (timerRef.current) {
-                clearInterval(timerRef.current);
-                setIsTimerRunning(false);
+        // Double-check that we should still start the timer
+        if (showProgressTimer && (animationState === 'initial' || animationState === 'dropped') && !isFlipped) {
+          timerRef.current = setInterval(() => {
+            setProgressTimer(prev => {
+              const newValue = prev - (100 * timerInterval / timerDuration);
+              if (newValue <= 0) {
+                // Timer finished
+                if (timerRef.current) {
+                  clearInterval(timerRef.current);
+                  timerRef.current = null;
+                  setIsTimerRunning(false);
+                }
+                // Call the completion handler if provided
+                if (onTimerComplete) {
+                  onTimerComplete();
+                }
+                return 0;
               }
-              return 0;
-            }
-            return newValue;
-          });
-        }, timerInterval);
+              return newValue;
+            });
+          }, timerInterval);
+        }
       }, timerStartDelay);
       
       return () => {
         clearTimeout(delayTimeout);
         if (timerRef.current) {
           clearInterval(timerRef.current);
+          timerRef.current = null;
         }
       };
+    } else if (!showProgressTimer) {
+      // Reset timer when showProgressTimer becomes false
+      setProgressTimer(100);
+      setIsTimerRunning(false);
+    } else if (isFlipped) {
+      // Pause timer when flipped
+      setIsTimerRunning(false);
     }
-  }, [animationState, showProgressTimer]);
+  }, [animationState, showProgressTimer, isFlipped]);
 
   // Enhanced handleButtonClick to flip the card
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card flipping from the parent click handler
     
-    // Reset timer when button is clicked
-    setProgressTimer(100);
-    
     // Only flip the card if not in expanded state
     if (animationState !== 'expanded') {
-      setIsFlipped(!isFlipped);
-      if (onFlip) onFlip(!isFlipped);
+      const newFlippedState = !isFlipped;
+      setIsFlipped(newFlippedState);
+      if (onFlip) onFlip(newFlippedState);
     }
     
     // Call onButtonClick if provided
@@ -692,8 +727,9 @@ export const BrandPass: React.FC<BrandPassProps> = ({
           } else {
             // Only allow flipping when not in expanded state
             if (animationState !== 'expanded') {
-              setIsFlipped(!isFlipped);
-              if (onFlip) onFlip(!isFlipped);
+              const newFlippedState = !isFlipped;
+              setIsFlipped(newFlippedState);
+              if (onFlip) onFlip(newFlippedState);
             }
           }
         }}
@@ -758,10 +794,35 @@ export const BrandPass: React.FC<BrandPassProps> = ({
                     </div>
                   )}
                   
-                  {/* Mileendbagel Logo */}
-                  <div className="flex items-center justify-center">
-                    <img src={MileendbagelLogo} alt="Mileendbagel" className="w-auto h-auto max-w-[260px] max-h-[260px] object-contain" />
-                  </div>
+                  {/* Mileendbagel Logo or AnimatedNumber */}
+                  {showAnimatedNumber ? (
+                    <motion.div 
+                      className="absolute inset-0 flex items-center justify-center"
+                      animate={numberControls}
+                      initial={{ scale: getNumberScale(animationState) }}
+                      style={{
+                        transformOrigin: 'center center',
+                        opacity: animationState === 'expanded' ? (showNumber ? 1 : 0) : 1
+                      }}
+                    >
+                      <AnimatedNumber
+                        value={cashbackAmount}
+                        showDollarSign={true}
+                        suffixText={suffixText}
+                        className="text-white text-[110px] font-medium"
+                        showDecimals={false}
+                        showFormattedZero={false}
+                        digitOffsets={{}}
+                        combinationOffsets={{}}
+                        afterDollarSignOffsets={{}}
+                        useAutoKerning={false}
+                      />
+                    </motion.div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <img src={MileendbagelLogo} alt="Mileendbagel" className="w-auto h-auto max-w-[260px] max-h-[260px] object-contain" />
+                    </div>
+                  )}
                   
                   {/* Render children if provided (for backward compatibility) */}
                   {children && (
@@ -819,39 +880,28 @@ export const BrandPass: React.FC<BrandPassProps> = ({
             isFlipped
             animationState={animationState}
           >
-{backContent ? backContent : (
+            {backContent ? backContent : (
               <div className="w-full h-full flex flex-col items-center justify-center p-8">
-                <h3 className="text-2xl font-medium text-white mb-6">Scan to Cash Out</h3>
-                
-                {/* QR code container with better containment */}
+                {/* QR code container */}
                 <div 
-                  className="relative mb-6 overflow-hidden"
+                  className="relative overflow-hidden"
                   style={{ maxHeight: '300px' }}
                 >
                   <AnimatedQRCode
-                    value={sessionId ? `https://chrisk.ngrok.app/landing/${sessionId}` : `${apiBase}/${amount ? amount : '10'}`}
+                    value={`https://chrisk.ngrok.app/landing/follow-session`}
                     size={260}
-                    animateIn={typeof animateIn !== 'undefined' ? animateIn : (typeof disableAnimation === 'boolean' ? (disableAnimation ? false : 'outside-in') : (isFlipped ? 'outside-in' : false))}
-                    disableAnimation={typeof disableAnimation === 'boolean' ? disableAnimation : !isFlipped}
-                    speed={1.0}
+                    animateIn="sequential"
+                    disableAnimation={false}
+                    speed={100.0}
                     darkColor="#FFFFFF"
                     lightColor="transparent"
-                    placeholderOpacity={0.5}
+                    placeholderOpacity={1.0}
                     logo="cash-icon"
                     className="max-h-[260px] overflow-hidden"
                     onAnimationComplete={() => {
                       console.log("QR animation complete");
                     }}
                   />
-                </div>
-                
-                <p className="text-white/70 text-lg">
-                  Open Cash App to scan
-                </p>
-
-                {/* Back Content */}
-                <div className="flex-1 p-4 flex flex-col items-center justify-center text-white">
-                  <p className="text-center">{subheaderText}</p>
                 </div>
               </div>
             )}

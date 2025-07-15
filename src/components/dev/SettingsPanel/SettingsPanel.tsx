@@ -361,8 +361,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             return 'Payment Screen: Users see a blue screen with the amount and payment notches. They tap their Cash Card or contactless payment method to complete the transaction.';
           case 'Tipping':
             return 'Tipping Screen: Users choose from preset tip amounts or select a custom tip. The screen alternates between "Give a Tip" and "Earn Local Cash" prompts.';
-          case 'Cashback':
-            return 'Cashback Screen: Users can select a cashback amount from preset options or choose no cashback. A Cash App card animation appears when making a selection.';
+          
           case 'End':
             return 'End Screen: Users see a transaction complete message with their total amount. The payment flow is complete and they can start a new transaction.';
           default:
@@ -375,13 +374,13 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'flag-details':
         return 'Allows toggling of specific features for the selected flag. Shows detailed information including the flag ID and which screens the flag affects.';
       case 'navigation':
-        return 'Controls movement through the payment flow sequence: Home → Cart → Tap to Pay → Tipping → Cashback → End. Buttons let you move forward/backward or reset.';
+        return 'Controls movement through the payment flow sequence: Home → Cart → Tap to Pay → Tipping → Reward → Cashout → End. Buttons let you move forward/backward or reset.';
       case 'cart':
         return 'Manages the shopping cart: add single or multiple items, view current items with price details, remove individual items, or clear the entire cart.';
       case 'profile':
         return ''; // Remove description for profile screen
       case 'feature-flags':
-        return 'Enables/disables features available on the current screen. For example: animations on Cashback screen, enhanced UI on Tipping screen, or payment indicators.';
+        return 'Enables/disables features available on the current screen. For example: animations on Reward screen, enhanced UI on Tipping screen, or payment indicators.';
       case 'research':
         return 'This is the AI brain that controls product learning across different teams.';
       case 'apis':

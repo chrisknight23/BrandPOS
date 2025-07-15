@@ -11,7 +11,7 @@ export type Screen =
   | 'Payment'
   | 'Auth'
   | 'Tipping'
-  | 'Cashback'
+  | 'Reward'
   | 'Cashout'
   | 'CustomTip'
   | 'End';

@@ -27,9 +27,9 @@ export const FEATURE_FLAGS: FeatureFlag[] = [
   {
     id: 'new_card_animation',
     name: 'New Card Animation',
-    description: 'Use the new card animation on the Cashback screen',
+    description: 'Use the new card animation on screens',
     defaultValue: false,
-    availableOn: ['Cashback']
+    availableOn: ['Reward']
   },
   {
     id: 'enhanced_tipping',

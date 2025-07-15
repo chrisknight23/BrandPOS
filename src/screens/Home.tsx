@@ -10,7 +10,7 @@ interface HomeProps {
   goToScreen?: (screen: Screen) => void;
 }
 
-type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'Cashback' | 'Cashout' | 'End' | 'CustomTip';
+type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'Cashout' | 'End' | 'CustomTip';
 
 export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
   const [showAnimations, setShowAnimations] = useState(isIdle);
@@ -91,7 +91,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
         <motion.div 
           className="absolute w-full h-full flex justify-center items-center"
           // Starting position (completely off-screen below the frame)
-          initial={isIdle ? { y: 0 } : { y: 0 }}
+          initial={isIdle ? { y: 0 } : { y: 500 }}
           animate={isIdle ? { y: 0 } : { 
             // Animation positions
             y: showSecondPhase ? 

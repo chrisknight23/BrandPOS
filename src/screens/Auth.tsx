@@ -98,7 +98,7 @@ export const Auth = ({ onNext, amount }: AuthProps) => {
 
   return (
     <BaseScreen onNext={() => onNext(amount)}>
-              <div className="w-[800px] h-[500px] bg-[#1189D6] relative overflow-hidden flex items-center justify-center rounded-[16px]">
+              <div className="w-[800px] h-[500px] bg-[#1A1A1A] relative overflow-hidden flex items-center justify-center rounded-[16px]">
         {/* Pulsing dollar sign */}
         <motion.div
           className="text-white text-[110px] leading-none font-medium origin-center"

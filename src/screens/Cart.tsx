@@ -78,13 +78,19 @@ export const Cart = ({
         className="w-[800px] h-[500px] bg-black text-white rounded-[16px] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)] flex justify-end"
       >
         {/* Left Panel - Cart Content */}
-        <div 
+        <motion.div 
           className="flex-1 px-10 pt-[100px] pb-8 flex flex-col cursor-pointer"
           onClick={handleNext}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && handleNext()}
           aria-label="Review cart and continue to payment"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ 
+            duration: 0.3,
+            ease: [0.32, 0.72, 0, 1]
+          }}
         >
           {/* Total Header - Fixed */}
           <div className="text-[72px] font-cash font-medium mb-12">
@@ -109,13 +115,13 @@ export const Cart = ({
                 <motion.div 
                   className="mt-2"
                   // No initial/animate for instant appearance
-                  >
+                >
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-2xl">Tax</span>
                     <span className="text-2xl">${tax.toFixed(2)}</span>
                   </div>
                   <div className="text-white/60">
-                    Sales tax (${taxRate.toFixed(2)})
+                    Sales tax (${taxRate.toFixed(2)}%)
                   </div>
                 </motion.div>
               </>
@@ -129,7 +135,7 @@ export const Cart = ({
               </motion.div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Lightbox overlay - appears when card is centered */}
         {cardCentered && (

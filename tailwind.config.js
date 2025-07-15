@@ -7,7 +7,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Cash Sans', 'system-ui', 'sans-serif'],
+        'cash': ['CashSans', 'cash_sansregular', 'system-ui', 'sans-serif'], // Use unified CashSans first
+        'cash-sans': ['CashSans', 'cash_sansregular', 'system-ui', 'sans-serif'],
+        'cash-sans-medium': ['CashSans', 'cash_sansmedium', 'system-ui', 'sans-serif'],
+        sans: ['CashSans', 'cash_sansregular', 'system-ui', 'sans-serif'], // Default to CashSans
       },
     },
   },

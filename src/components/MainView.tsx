@@ -11,7 +11,7 @@ import { DropMenu } from './dev/dropMenu';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Cashback', 'CustomTip', 'Cashout', 'End'];
+const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'CustomTip', 'Cashout', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -80,7 +80,9 @@ const drawerMotion = {
   type: 'spring',
   stiffness: 400,
   damping: 35,
-  duration: 0.4
+  duration: 0.4,
+  restSpeed: 0.001,
+  restDelta: 0.001
 };
 
 /**
@@ -100,6 +102,8 @@ export const MainView = () => {
   const [isPaused, setIsPaused] = useState(false);
   // Track if this is the first visit to Home (for starting vs idle state)
   const [isFirstHomeVisit, setIsFirstHomeVisit] = useState(true);
+  // Track previous screen to detect when coming from End
+  const [previousScreen, setPreviousScreen] = useState<Screen | null>(null);
   
   // Track previous isPanelOpen to determine open/close direction
   const prevPanelOpenRef = useRef(isPanelOpen);
@@ -127,7 +131,12 @@ export const MainView = () => {
     if (currentScreen !== 'Home' && isFirstHomeVisit) {
       setIsFirstHomeVisit(false);
     }
-  }, [currentScreen, isFirstHomeVisit]);
+    
+    // Reset isFirstHomeVisit when navigating to Home from End screen to trigger entry animation
+    if (currentScreen === 'Home' && previousScreen === 'End') {
+      setIsFirstHomeVisit(true);
+    }
+  }, [currentScreen, isFirstHomeVisit, previousScreen]);
   
   // Handle adding an item to the cart
   const handleAddItem = useCallback(() => {
@@ -242,6 +251,7 @@ export const MainView = () => {
       } else if (currentScreen === 'CustomTip') {
         console.log(`MainView:handleNext: Setting tipAmount to ${amount} and navigating to End`);
         setTipAmount(amount);
+        setPreviousScreen(currentScreen);
         setCurrentScreen('End');
         return;
       }
@@ -257,6 +267,7 @@ export const MainView = () => {
     // Explicitly go to End after Cashout
     if (currentScreen === 'Cashout') {
       console.log(`MainView:handleNext: Navigating from Cashout to End`);
+      setPreviousScreen(currentScreen);
       setCurrentScreen('End');
       return;
     }
@@ -266,6 +277,7 @@ export const MainView = () => {
     if (idx < SCREEN_ORDER.length - 1) {
       const nextScreen = SCREEN_ORDER[idx + 1];
       console.log(`MainView:handleNext: Navigating from ${currentScreen} to ${nextScreen}`);
+      setPreviousScreen(currentScreen);
       setCurrentScreen(nextScreen);
     }
   }, [currentScreen, baseAmount, calculateCartTotal, tipAmount]);
@@ -278,6 +290,7 @@ export const MainView = () => {
     if (currentIndex > 0) {
       const prevScreen = SCREEN_ORDER[currentIndex - 1];
       console.log(`MainView: Navigating back from ${currentScreen} to ${prevScreen}`);
+      setPreviousScreen(currentScreen);
       setCurrentScreen(prevScreen);
     } else {
       console.log(`MainView: Cannot go back from ${currentScreen} (first screen)`);
@@ -301,12 +314,13 @@ export const MainView = () => {
   const handleReset = useCallback(() => {
     logNavigation('MainView:handleReset', 'Resetting to Home screen');
     console.log('MainView: Resetting to Home screen');
+    setPreviousScreen(currentScreen);
     setCurrentScreen('Home');
     setBaseAmount(null);
     setTipAmount(null);
-  }, []);
+  }, [currentScreen]);
   
-  // QR code visibility state for Cashback/SettingsPanel
+  // QR code visibility state for SettingsPanel
   const [isQrVisible, setIsQrVisible] = useState(false);
   
   // Generate a unique session ID per app load, persisted in sessionStorage
@@ -353,6 +367,8 @@ export const MainView = () => {
     logNavigation('MainView:goToScreen', `Navigating directly to ${screen}`, 
       { from: currentScreen });
     console.log(`MainView: Navigating directly from ${currentScreen} to ${screen}`);
+    // Update previous screen before changing current screen
+    setPreviousScreen(currentScreen);
     setCurrentScreen(screen);
   }, [currentScreen]);
   
@@ -363,6 +379,7 @@ export const MainView = () => {
     if (currentIndex < SCREEN_ORDER.length - 1) {
       const nextScreen = SCREEN_ORDER[currentIndex + 1];
       console.log(`MainView: Navigating from ${currentScreen} to ${nextScreen}`);
+      setPreviousScreen(currentScreen);
       setCurrentScreen(nextScreen);
     } else {
       console.log(`MainView: Cannot navigate forward from ${currentScreen} (last screen)`);
@@ -377,10 +394,9 @@ export const MainView = () => {
   
   // Simplify the effects - only keep one essential effect
   useEffect(() => {
-    // Ensure base amount is set when on Payment, Tipping, Cashback, etc.
+    // Ensure base amount is set when on Payment, Tipping, Cashout, etc.
     if ((currentScreen === 'Payment' || currentScreen === 'Tipping' || 
-         currentScreen === 'Cashback' || currentScreen === 'Cashout' || 
-         currentScreen === 'End') && (!baseAmount || baseAmount === '0.00')) {
+         currentScreen === 'Cashout' || currentScreen === 'End') && (!baseAmount || baseAmount === '0.00')) {
       const cartTotal = calculateCartTotal();
       console.log(`MainView: Setting base amount for screen ${currentScreen}: ${cartTotal}`);
       setBaseAmount(cartTotal);
@@ -400,7 +416,7 @@ export const MainView = () => {
       .filter(screen => screen !== 'CustomTip')
       .filter(screen => {
         if (userType === 'cash-local') {
-          return screen !== 'Cashback' && screen !== 'Cashout';
+          return screen !== 'Cashout';
         }
         return true;
       })
@@ -425,9 +441,9 @@ export const MainView = () => {
     };
   }, []);
   
-  // Reset QR visibility when leaving Cashback screen
+  // Reset QR visibility when leaving screens that use QR codes
   useEffect(() => {
-    if (currentScreen !== 'Cashback' && isQrVisible) {
+    if (isQrVisible) {
       setIsQrVisible(false);
     }
   }, [currentScreen, isQrVisible]);
@@ -467,7 +483,7 @@ export const MainView = () => {
       // Session ID for tracking
       sessionId,
       // Direct navigation function
-      goToScreen
+      goToScreen: (screen: string) => goToScreen(screen as Screen)
     };
 
     // Add screen-specific props
@@ -476,6 +492,17 @@ export const MainView = () => {
         ...baseProps,
         // Home screen should be in idle mode if it's not the first visit
         isIdle: !isFirstHomeVisit
+      };
+    }
+    
+    if (currentScreen === 'End') {
+      return {
+        ...baseProps,
+        // Skip welcome message when coming from Reward screen or Tipping screen (no tip)
+        skipWelcome: previousScreen === 'Reward' || previousScreen === 'Tipping',
+        // Pass pause state to End screen
+        isPaused,
+        setIsPaused
       };
     }
 
@@ -570,7 +597,16 @@ export const MainView = () => {
               opacity: isInstantTransition ? 1 : 0.8,
               transition: { duration: isInstantTransition ? 0 : 0.15 }
             }}
-            transition={isInstantTransition ? { duration: 0 } : drawerMotion}
+            transition={isInstantTransition ? { duration: 0 } : {
+              ...drawerMotion,
+              restSpeed: 0.001,
+              restDelta: 0.001
+            }}
+            style={{
+              // Performance optimizations
+              willChange: isInstantTransition ? 'auto' : 'transform, opacity',
+              backfaceVisibility: 'hidden'
+            }}
           >
             {/* Apply key directly to component, not through spread */}
             <CurrentScreenComponent 

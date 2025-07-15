@@ -15,7 +15,7 @@ interface FollowProps {
   goToScreen?: (screen: Screen) => void;
 }
 
-type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'Cashback' | 'Cashout' | 'End' | 'CustomTip';
+type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'Cashout' | 'End' | 'CustomTip';
 
 type BackMode = 'qr' | 'phone';
 

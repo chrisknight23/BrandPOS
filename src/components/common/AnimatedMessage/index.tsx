@@ -13,7 +13,7 @@ interface AnimatedMessageProps {
 export const AnimatedMessage: React.FC<AnimatedMessageProps> = ({ message, show, animated = true, duration, className, children }) => {
   if (!animated) {
     return (
-      <h1 className={className || "text-[56px] font-cash font-semibold leading-[48px] tracking-[-0.04em]"}>
+      <h1 className={className || "text-[56px] font-cash font-medium leading-[48px] tracking-[-0.04em]"}>
         {children ? children : message}
       </h1>
     );
@@ -33,9 +33,9 @@ export const AnimatedMessage: React.FC<AnimatedMessageProps> = ({ message, show,
           role="status"
           aria-live="polite"
         >
-          <h1 className="text-[56px] font-cash font-semibold leading-[48px] tracking-[-0.04em]">
-            {children ? children : message}
-          </h1>
+                  <h1 className="text-[56px] font-cash font-medium leading-[48px] tracking-[-0.04em]">
+          {children ? children : message}
+        </h1>
         </motion.div>
       )}
     </AnimatePresence>

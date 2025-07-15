@@ -7,7 +7,7 @@
   - Cart:      Shows total price and list of items. Users review order before payment.
   - Payment:   Blue screen with amount and payment notches. Tap to pay.
   - Tipping:   Choose preset/custom tip. Alternates between "Give a Tip" and "Earn Local Cash".
-  - Cashback:  Select cashback amount. Cash App card animation appears.
+
   - End:       Transaction complete message. Flow ends, ready for new transaction.
 
   The currentScreen prop controls which state is active.
@@ -56,8 +56,7 @@ const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAdd
         return 'Payment Screen: Users see a blue screen with the amount and payment notches. They tap their Cash Card or contactless payment method to complete the transaction.';
       case 'Tipping':
         return 'Tipping Screen: Users choose from preset tip amounts or select a custom tip. The screen alternates between "Give a Tip" and "Earn Local Cash" prompts.';
-      case 'Cashback':
-        return 'Cashback Screen: Users can select a cashback amount from preset options or choose no cashback. A Cash App card animation appears when making a selection.';
+
       case 'End':
         return 'End Screen: Users see a transaction complete message with their total amount. The payment flow is complete and they can start a new transaction.';
       default:
@@ -171,9 +170,9 @@ const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAdd
               )}
             </div>
           )}
-          {/* Cashback screen: show Scan QR button only when card is flipped (QR visible) */}
+          {/* Show QR scan simulation button when QR is visible */}
           <AnimatePresence>
-            {currentScreen === 'Cashback' && isQrVisible && (
+            {isQrVisible && (
               <motion.div
                 key="scan-qr-btn"
                 initial={{ opacity: 0 }}
@@ -196,8 +195,8 @@ const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAdd
             )}
           </AnimatePresence>
 
-          {/* Reset Session button - appears on Cashback, Cashout, or End screens */}
-          {(currentScreen === 'Cashback' || currentScreen === 'Cashout' || currentScreen === 'End') && onResetSession && (
+                  {/* Reset Session button - appears on Cashout or End screens */}
+        {(currentScreen === 'Cashout' || currentScreen === 'End') && onResetSession && (
             <div className="w-full mb-4">
               <Button
                 variant="secondary"
