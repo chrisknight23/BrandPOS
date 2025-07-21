@@ -1,8 +1,13 @@
 /// <reference types="vite/client" />
 
-import { useEffect, useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-type ScanStatus = { scanned: boolean; handoffComplete: boolean; appReady?: boolean; amount?: number };
+interface ScanStatus {
+  scanned: boolean;
+  handoffComplete: boolean;
+  appReady: boolean;
+  amount?: number;
+}
 
 export const useQRCodeScanStatus = (sessionId: string, pollInterval = 2000) => {
   const [status, setStatus] = useState<ScanStatus>({ scanned: false, handoffComplete: false, appReady: false, amount: undefined });
@@ -11,8 +16,15 @@ export const useQRCodeScanStatus = (sessionId: string, pollInterval = 2000) => {
   useEffect(() => {
     if (!sessionId) return;
 
-    let isMounted = true;
     const apiBase = import.meta.env.VITE_API_BASE_URL;
+    
+    // If no API base URL is configured, skip polling
+    if (!apiBase) {
+      console.warn('VITE_API_BASE_URL not configured - QR scanning disabled');
+      return;
+    }
+
+    let isMounted = true;
     const poll = async () => {
       try {
         const res = await fetch(`${apiBase}/status/${sessionId}`, {
@@ -37,7 +49,8 @@ export const useQRCodeScanStatus = (sessionId: string, pollInterval = 2000) => {
           }
         }
       } catch (e) {
-        // Optionally handle error
+        console.warn('QR polling error:', e);
+        // Fail gracefully if backend is not available
       }
     };
 
