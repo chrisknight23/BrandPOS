@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BaseScreen } from '../components/common/BaseScreen/index';
-import { ScreensaverCard } from '../components/common/ScreensaverCard';
-import { BRAND_COLORS } from '../constants/colors';
+import { BaseScreen } from '../../components/common/BaseScreen/index';
+import { ScreensaverCard } from '../../components/common/ScreensaverCard';
+import { BRAND_COLORS } from '../../constants/colors';
 
 export const ScreensaverExit = ({ onNext }: { onNext: () => void }) => {
   const [animationPhase, setAnimationPhase] = useState<'fullscreen' | 'shrinking' | 'landed'>('fullscreen');

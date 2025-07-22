@@ -10,7 +10,7 @@ interface HomeProps {
   goToScreen?: (screen: Screen) => void;
 }
 
-type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'Cashout' | 'End' | 'CustomTip';
+type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'End' | 'CustomTip';
 
 export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
   const [showAnimations, setShowAnimations] = useState(isIdle);
@@ -130,13 +130,18 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
 
         {/* Bottom left message that fades in when card slides up */}
         <motion.div 
-          className="absolute bottom-0 left-0 p-8"
+          className="absolute bottom-0 left-0 p-8 cursor-pointer z-20"
           initial={isIdle ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           animate={isIdle ? { opacity: 1, y: 0 } : { 
             opacity: showSecondPhase ? 1 : 0,
             y: showSecondPhase ? 0 : 20
           }}
           transition={isIdle ? {} : { duration: 0.3, ease: "easeOut", delay: 0.25 }}
+          onClick={() => {
+            console.log('Bottom text clicked!');
+            goToScreen && goToScreen('Cart');
+          }}
+          style={{ pointerEvents: 'auto' }}
         >
           <div>
             <div className="flex items-center gap-1 mb-4">

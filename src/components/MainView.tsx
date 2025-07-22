@@ -11,7 +11,7 @@ import { DropMenu } from './dev/dropMenu';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'CustomTip', 'Cashout', 'End'];
+const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'CustomTip', 'End'];
 
 // Define cart item interface
 interface CartItem {
@@ -264,13 +264,7 @@ export const MainView = () => {
       setBaseAmount(cartTotal);
     }
     
-    // Explicitly go to End after Cashout
-    if (currentScreen === 'Cashout') {
-      console.log(`MainView:handleNext: Navigating from Cashout to End`);
-      setPreviousScreen(currentScreen);
-      setCurrentScreen('End');
-      return;
-    }
+
     
     // Navigate to next screen by order
     const idx = SCREEN_ORDER.indexOf(currentScreen);
@@ -394,9 +388,9 @@ export const MainView = () => {
   
   // Simplify the effects - only keep one essential effect
   useEffect(() => {
-    // Ensure base amount is set when on Payment, Tipping, Cashout, etc.
+    // Ensure base amount is set when on Payment, Tipping, etc.
     if ((currentScreen === 'Payment' || currentScreen === 'Tipping' || 
-         currentScreen === 'Cashout' || currentScreen === 'End') && (!baseAmount || baseAmount === '0.00')) {
+         currentScreen === 'End') && (!baseAmount || baseAmount === '0.00')) {
       const cartTotal = calculateCartTotal();
       console.log(`MainView: Setting base amount for screen ${currentScreen}: ${cartTotal}`);
       setBaseAmount(cartTotal);
@@ -416,7 +410,7 @@ export const MainView = () => {
       .filter(screen => screen !== 'CustomTip')
       .filter(screen => {
         if (userType === 'cash-local') {
-          return screen !== 'Cashout';
+          return true;
         }
         return true;
       })
@@ -433,7 +427,7 @@ export const MainView = () => {
   useEffect(() => {
     // Listen for dev QR scan simulation event
     const handleDevSimulateQr = () => {
-      setCurrentScreen('Cashout');
+      setCurrentScreen('End');
     };
     window.addEventListener('dev-simulate-qr-cashout', handleDevSimulateQr);
     return () => {
@@ -473,8 +467,8 @@ export const MainView = () => {
       baseAmount: baseAmount || undefined,
       // Pass tipAmount as string or undefined (never null)
       tipAmount: tipAmount || undefined,
-      // Pass totalAmount which includes both base and tip
-      totalAmount: calculateTotalAmount() || undefined,
+      // Pass amount which includes both base and tip
+      amount: calculateTotalAmount() || undefined,
       // Pass the raw cart items
       cartItems,
       onCartUpdate: handleCartUpdate,

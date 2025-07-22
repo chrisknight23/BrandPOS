@@ -50,7 +50,7 @@ import SettingsPanel from './SettingsPanel';
 - `cartItems`: array — Cart items for the current session
 - `onAddItem`, `onClearCart`, `onRemoveCartItem`: Cart management handlers
 - `onBack`, `onNext`, `onRefresh`, `onReset`: Navigation and utility handlers
-- `simulateScan`: () => void — Triggers a scan simulation (e.g., flips the LocalPass card in Cashout)
+- `simulateScan`: () => void — Triggers a scan simulation for testing QR functionality
 
 ---
 

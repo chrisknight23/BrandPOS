@@ -184,19 +184,19 @@ const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAdd
                 <Button
                   variant="secondary"
                   className="w-full"
-                  onClick={() => { if (goToScreen) goToScreen('Cashout'); }}
-                  aria-label="Scan QR"
+                  onClick={() => { if (goToScreen) goToScreen('End'); }}
+                  aria-label="Skip to End"
                 >
                   <div className="flex items-center justify-center text-white">
-                    <div className="text-base font-medium">Scan QR</div>
+                    <div className="text-base font-medium">Skip to End</div>
                   </div>
                 </Button>
               </motion.div>
             )}
           </AnimatePresence>
 
-                  {/* Reset Session button - appears on Cashout or End screens */}
-        {(currentScreen === 'Cashout' || currentScreen === 'End') && onResetSession && (
+                  {/* Reset Session button - appears on End screen */}
+        {currentScreen === 'End' && onResetSession && (
             <div className="w-full mb-4">
               <Button
                 variant="secondary"

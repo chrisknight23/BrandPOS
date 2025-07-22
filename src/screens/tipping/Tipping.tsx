@@ -1,7 +1,7 @@
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { motion } from 'framer-motion';
 import TipButton from '../../components/common/TipButton';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Screen } from '../../types/screen';
 import { useUserType } from '../../context/UserTypeContext';
 import { useSlideTransition } from '../../hooks/useSlideTransition';
@@ -9,15 +9,17 @@ import { useSlideTransition } from '../../hooks/useSlideTransition';
 interface TippingProps {
   onNext: (amount: string) => void;
   goToScreen?: (screen: Screen) => void; // Add optional prop for direct navigation
+  baseAmount?: string; // Add baseAmount prop for total calculation
 }
 
-export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
+export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) => {
   const [selectedAmount, setSelectedAmount] = useState<string | null>(null);
+  const selectedAmountRef = useRef<string | null>(null);
   const { userType } = useUserType();
   
   // Use the slide transition hook for clean state management
   const { triggerTransition, exitAnimation, springConfig } = useSlideTransition(
-    () => onNext(selectedAmount || '0')
+    () => onNext(selectedAmountRef.current || '0')
   );
 
   // Force state reset when component mounts
@@ -25,8 +27,24 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
     setSelectedAmount(null);
   }, []);
 
+  // Calculate total with tip for display - only show selected tip, not hovered
+  const calculateTotalWithTip = (tipAmount: string | null = null) => {
+    const base = parseFloat(baseAmount);
+    const tip = tipAmount ? parseFloat(tipAmount) : 0;
+    return base + tip;
+  };
+
+  // Use only selected amount for preview
+  const totalWithTip = calculateTotalWithTip(selectedAmount);
+
+  // Log values for debugging
+  useEffect(() => {
+    console.log(`Tipping: baseAmount=${baseAmount}, selectedTip=${selectedAmount}, totalWithTip=${totalWithTip.toFixed(2)}`);
+  }, [baseAmount, selectedAmount, totalWithTip]);
+
   const handleAmountClick = (amount: string) => {
     setSelectedAmount(amount);
+    selectedAmountRef.current = amount; // Store in ref for immediate access
     triggerTransition();
   };
 
@@ -139,17 +157,20 @@ export const Tipping = ({ onNext, goToScreen }: TippingProps) => {
             ...springConfig
           }}
         >
-          {/* Header Container - Simplified without Local Cash button */}
+          {/* Header Container with Total Display */}
           <motion.div 
             className="flex items-center justify-start mb-6 px-4 mt-2 h-16"
             variants={headerVariants}
             initial="hidden"
             animate="visible"
           >
-            {/* Left side: Title */}
+            {/* Left side: Title with Total */}
             <div className="flex items-center">
-              {/* "Leave a tip" title */}
-              <h2 className="text-[24px] font-medium font-cash">Leave a tip?</h2>
+              <h2 className="text-[24px] font-medium font-cash">
+                Add a tip <span className="font-cash font-normal text-white/40">
+                  {selectedAmount && selectedAmount !== '0' ? 'with tip' : 'total'} ${totalWithTip.toFixed(2)}
+                </span>
+              </h2>
             </div>
           </motion.div>
           

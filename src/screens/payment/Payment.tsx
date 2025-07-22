@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BaseScreen } from '../components/common/BaseScreen/index';
+import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ArrowProps {
@@ -160,9 +160,10 @@ interface PaymentProps {
   onNext: (amount?: string) => void;
   amount?: string; // This is already the total with tax from the Cart screen
   baseAmount?: string; // This is also with tax from Cart
+  goToScreen?: (screen: string) => void; // For direct navigation to specific screens
 }
 
-export const Payment = ({ onNext, amount, baseAmount }: PaymentProps) => {
+export const Payment = ({ onNext, amount, baseAmount, goToScreen }: PaymentProps) => {
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
   const [notchesVisible, setNotchesVisible] = useState(false);
 
@@ -199,7 +200,10 @@ export const Payment = ({ onNext, amount, baseAmount }: PaymentProps) => {
 
   return (
     <BaseScreen onNext={handleNext}>
-              <div className="w-[800px] h-[500px] bg-[#1A1A1A] relative overflow-hidden flex items-center justify-center rounded-[16px]">
+              <div 
+        className="w-[800px] h-[500px] bg-[#1A1A1A] relative overflow-hidden flex items-center justify-center rounded-[16px] cursor-pointer" 
+        onClick={() => goToScreen && goToScreen('Tipping')}
+      >
         {/* Price Display */}
         <motion.div 
           className="text-white text-[110px] leading-none font-medium origin-center"

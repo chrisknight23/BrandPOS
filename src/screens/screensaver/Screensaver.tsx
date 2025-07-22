@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BaseScreen } from '../components/common/BaseScreen/index';
-import { ScreensaverCard } from '../components/common/ScreensaverCard';
-import { BRAND_COLORS } from '../constants/colors';
-import CashAppLogo from '../assets/images/logos/16x16logo.png';
+import { BaseScreen } from '../../components/common/BaseScreen/index';
+import { ScreensaverCard } from '../../components/common/ScreensaverCard';
+import { BRAND_COLORS } from '../../constants/colors';
+import CashAppLogo from '../../assets/images/logos/16x16logo.png';
 
 export const Screensaver = ({ onNext, goToScreen }: { onNext: () => void; goToScreen?: (screen: string) => void }) => {
   const [isExpanding, setIsExpanding] = useState(false);

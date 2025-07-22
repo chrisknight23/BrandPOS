@@ -5,15 +5,14 @@ export type Screen =
   | 'Home'
   | 'Follow'
   | 'Screensaver'
-  | 'ScreensaverExit'
   | 'ScreensaverFollow'
+  | 'ScreensaverExit'
   | 'Cart'
   | 'Payment'
   | 'Auth'
   | 'Tipping'
-  | 'Reward'
-  | 'Cashout'
   | 'CustomTip'
+  | 'Reward'
   | 'End';
 
 export interface ScreenProps {

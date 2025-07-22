@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BaseScreen } from '../components/common/BaseScreen/index';
-import { ScreensaverCard } from '../components/common/ScreensaverCard';
+import { BaseScreen } from '../../components/common/BaseScreen/index';
+import { ScreensaverCard } from '../../components/common/ScreensaverCard';
 
-import { AnimatedQRCode } from '../components/common/AnimatedQRCode';
-import { ToggleButton } from '../components/ui/ToggleButton';
-import { BRAND_COLORS } from '../constants/colors';
-import CashAppLogo from '../assets/images/logos/16x16logo.png';
-import QRIcon from '../assets/images/24/qr.svg';
-import SMSIcon from '../assets/images/24/comm-sms.svg';
-import { Screen } from '../types/screen';
+import { AnimatedQRCode } from '../../components/common/AnimatedQRCode';
+import { ToggleButton } from '../../components/ui/ToggleButton';
+import { BRAND_COLORS } from '../../constants/colors';
+import CashAppLogo from '../../assets/images/logos/16x16logo.png';
+import QRIcon from '../../assets/images/24/qr.svg';
+import SMSIcon from '../../assets/images/24/comm-sms.svg';
+import { Screen } from '../../types/screen';
 
 interface ScreensaverFollowProps {
   onNext: () => void;
@@ -199,7 +199,7 @@ export const ScreensaverFollow = ({ onNext, onClose, goToScreen }: ScreensaverFo
           {/* Unified Toggle Button */}
           <ToggleButton
             selectedIndex={backMode === 'qr' ? 0 : 1}
-            onToggle={(index) => setBackMode(index === 0 ? 'qr' : 'phone')}
+            onToggle={(index: number) => setBackMode(index === 0 ? 'qr' : 'phone')}
             icons={[
               // QR icon (index 0)
               <img src={QRIcon} alt="QR Code" className="w-6 h-6 block" />,

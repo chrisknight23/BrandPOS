@@ -127,7 +127,7 @@ export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, t
           {/* Left: Paid text and thanks */}
           <div className="flex flex-col space-y-6">
             <h2 className="text-2xl font-cash font-medium">
-              Paid ${total} {hasTip && <span className="font-normal text-white/60">with tip</span>}
+              Paid <span className="font-normal text-white/40">${total}</span> {hasTip && <span className="font-normal text-white/60">with tip</span>}
             </h2>
             <AnimatedMessage show key={showFirst ? 'first' : 'second'}>
               {showFirst ? (

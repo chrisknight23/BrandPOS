@@ -374,7 +374,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'flag-details':
         return 'Allows toggling of specific features for the selected flag. Shows detailed information including the flag ID and which screens the flag affects.';
       case 'navigation':
-        return 'Controls movement through the payment flow sequence: Home → Cart → Tap to Pay → Tipping → Reward → Cashout → End. Buttons let you move forward/backward or reset.';
+        return 'Controls movement through the payment flow sequence: Home → Cart → Tap to Pay → Tipping → Reward → End. Buttons let you move forward/backward or reset.';
       case 'cart':
         return 'Manages the shopping cart: add single or multiple items, view current items with price details, remove individual items, or clear the entire cart.';
       case 'profile':

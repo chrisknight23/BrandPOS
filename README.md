@@ -100,7 +100,7 @@ src/
 ├── screens/        # Application screens
 │   ├── Auth.tsx                    # Authentication screen
 │   ├── Cart.tsx                    # Shopping cart with items
-│   ├── Cashout.tsx                 # Cash-out process
+
 │   ├── End.tsx                     # Completion screen
 │   ├── Follow.tsx                  # Follow/connect screen
 │   ├── Home.tsx                    # Welcome/start screen
@@ -143,7 +143,7 @@ Additional flows:
 - **Session ID Generation**: Each app load generates a unique sessionId
 - **QR Code Value**: QR code encodes `https://<ngrok-url>/scan/{sessionId}`
 - **Polling**: App polls `https://<ngrok-url>/status/{sessionId}` every 2 seconds
-- **Navigation**: When scan is detected, app auto-navigates to the Cashout screen
+- **Navigation**: When scan is detected, app auto-navigates to the End screen
 - **Server**: Express backend tracks scan status (see `README_QR_SERVER_SETUP.md`)
 - **ngrok**: Used to expose the backend for QR code and polling
 

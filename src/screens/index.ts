@@ -1,17 +1,16 @@
 import { Home } from './Home';
 import { Follow } from './Follow';
 import { Cart } from './Cart';
-import { Payment } from './Payment';
-import { Auth } from './Auth';
+import { Payment } from './payment/Payment';
+import { Auth } from './payment/Auth';
 import { Tipping } from './tipping/Tipping';
 import { CustomTip } from './tipping/CustomTip';
 import { Reward } from './Reward';
 
-import { Cashout } from './Cashout';
 import { End } from './End';
-import { Screensaver } from './Screensaver';
-import { ScreensaverExit } from './ScreensaverExit';
-import { ScreensaverFollow } from './ScreensaverFollow';
+import { Screensaver } from './screensaver/Screensaver';
+import { ScreensaverExit } from './screensaver/ScreensaverExit';
+import { ScreensaverFollow } from './screensaver/ScreensaverFollow';
 
 export {
   Home,
@@ -23,7 +22,6 @@ export {
   Reward,
 
   CustomTip,
-  Cashout,
   End,
   Screensaver,
   ScreensaverExit,

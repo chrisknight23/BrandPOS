@@ -16,7 +16,7 @@ If you need to remove the QR scan polling and sessionId logic (or want to upgrad
     ```tsx
     const scanned = useQRCodeScanStatus(sessionId);
     ```
-  - The `useEffect` that listens for `scanned` and navigates to `'Cashout'`.
+  - The `useEffect` that listens for `scanned` and navigates to `'End'`.
   - The `sessionId` prop passed to `getScreenProps` (for `Cashback`).
 
 ### 2. Remove the Polling Hook File

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BaseScreen } from '../components/common/BaseScreen/index';
+import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface NotchProps {
