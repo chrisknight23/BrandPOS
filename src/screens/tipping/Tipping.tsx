@@ -146,7 +146,7 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
 
   return (
     <BaseScreen onNext={() => {}}>
-      <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[16px]">
+      <div className="w-full h-full relative overflow-hidden rounded-[16px]">
         {/* Main screen container with horizontal slide animation */}
         <motion.div 
           className="w-full h-full bg-black text-white p-6 flex flex-col"
