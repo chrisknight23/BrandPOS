@@ -15,8 +15,8 @@
     min-height: 100vh;
     min-height: -webkit-fill-available;
     
-    /* Handle safe areas for fullscreen PWA */
-    padding-top: env(safe-area-inset-top);
+    /* Handle safe areas for fullscreen PWA - but not top to hide status bar */
+    padding-top: 0; /* Deliberately no top padding to go under status bar */
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
