@@ -84,7 +84,7 @@ const PillButton: React.FC<PillButtonProps> = ({
         aria-label={ariaLabel}
         aria-expanded={hasDropdown ? isDropdownOpen : undefined}
         aria-haspopup={hasDropdown ? "menu" : undefined}
-        className={`px-3 py-1.5 rounded-full text-xs font-medium border focus:outline-none antialiased flex items-center gap-1
+        className={`pill-button px-3 py-1.5 rounded-full text-xs font-medium border focus:outline-none antialiased flex items-center gap-1
           ${active
             ? 'bg-white text-black font-semibold border-white/10 active:border-white/10'
             : 'border-white/10 bg-[#141414] hover:bg-[#232323] text-white/80 active:border-white/10'}

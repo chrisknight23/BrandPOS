@@ -475,7 +475,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
 
   return (
     <motion.div
-      className={`box-content fixed top-6 bottom-6 right-6 z-[10003] bg-[#181818]/80 backdrop-blur-md border border-white/10 ${isOpen ? 'rounded-[24px] p-6' : 'rounded-[32px]'} shadow-lg overflow-hidden flex flex-col items-center justify-center`}
+      className={`settings-panel box-content fixed top-6 bottom-6 right-6 z-[10003] bg-[#181818]/80 backdrop-blur-md border border-white/10 ${isOpen ? 'rounded-[24px] p-6' : 'rounded-[32px]'} shadow-lg overflow-hidden flex flex-col items-center justify-center`}
       style={{ maxWidth: '100vw', minHeight: '48px' }}
       animate={{
         width: isOpen ? 360 : 48,

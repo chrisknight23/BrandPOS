@@ -200,7 +200,7 @@ export const DropMenu: React.FC<DropMenuProps> = ({
       aria-label={ariaLabel}
       aria-expanded={open}
       className={
-        `${getBackgroundClasses()} flex overflow-hidden focus:outline-none relative z-[10001] shadow-lg` +
+        `drop-menu ${getBackgroundClasses()} flex overflow-hidden focus:outline-none relative z-[10001] shadow-lg` +
         (open
           ? ' flex-col items-start'
           : ' items-center justify-center')

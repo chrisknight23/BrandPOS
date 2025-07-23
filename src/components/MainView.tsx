@@ -9,6 +9,7 @@ import { useUserType } from '../context/UserTypeContext';
 import SettingsPanel from './dev/SettingsPanel';
 import { DropMenu } from './dev/dropMenu';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
+import { useKioskMode } from '../hooks/useKioskMode';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'CustomTip', 'End'];
@@ -424,6 +425,19 @@ export const MainView = () => {
   
   const { userType, setUserType } = useUserType();
   
+  // Kiosk mode for hiding development UI elements
+  const { isKioskMode, toggleKioskMode } = useKioskMode({
+    longPressDuration: 3000, // 3 second long press
+    excludeElements: [
+      '.settings-panel',
+      '.drop-menu', 
+      '.pill-button',
+      'button',
+      '[role="button"]',
+      '.screen-navigation'
+    ]
+  });
+  
   useEffect(() => {
     // Listen for dev QR scan simulation event
     const handleDevSimulateQr = () => {
@@ -513,70 +527,90 @@ export const MainView = () => {
         backgroundPosition: '0 0',
       }}
     >
-      {/* Unified Settings Panel Container (collapsed/expanded) */}
-      <SettingsPanel
-        isOpen={isPanelOpen}
-        onPanelToggle={setIsPanelOpen}
-        currentScreen={currentScreen}
-        baseAmount={baseAmount}
-        tipAmount={tipAmount}
-        cartItems={cartItems}
-        onAddItem={handleAddItem}
-        onClearCart={handleClearCart}
-        onRemoveCartItem={handleRemoveCartItem}
-        onBack={handleBack}
-        onNext={handleDevNavNext}
-        onRefresh={handleRefresh}
-        onReset={handleReset}
-        onResetSession={handleResetSession}
-        isQrVisible={isQrVisible}
-        onQrVisibleChange={setIsQrVisible}
-        goToScreen={goToScreen}
-        // Pass pause state to SettingsPanel
-        isPaused={isPaused}
-        setIsPaused={setIsPaused}
-      />
-      {/* Device and Environment DropMenus in the top left corner */}
-      <div className="fixed top-6 left-6 z-[10002] flex flex-col gap-4">
-        <DropMenu
-          title="Device"
-          rowLabels={["Register", "Stand", "Reader"]}
-          iconSrc={DesktopIcon}
-          onRowSelect={(rowIndex) => {
-            if (rowIndex === 0) setUserType('new');
-            else if (rowIndex === 1) setUserType('returning');
-            else if (rowIndex === 2) setUserType('cash-local');
-          }}
+      {/* Unified Settings Panel Container (collapsed/expanded) - Hidden in kiosk mode */}
+      {!isKioskMode && (
+        <SettingsPanel
+          isOpen={isPanelOpen}
+          onPanelToggle={setIsPanelOpen}
+          currentScreen={currentScreen}
+          baseAmount={baseAmount}
+          tipAmount={tipAmount}
+          cartItems={cartItems}
+          onAddItem={handleAddItem}
+          onClearCart={handleClearCart}
+          onRemoveCartItem={handleRemoveCartItem}
+          onBack={handleBack}
+          onNext={handleDevNavNext}
+          onRefresh={handleRefresh}
+          onReset={handleReset}
+          onResetSession={handleResetSession}
+          isQrVisible={isQrVisible}
+          onQrVisibleChange={setIsQrVisible}
+          goToScreen={goToScreen}
+          // Pass pause state to SettingsPanel
+          isPaused={isPaused}
+          setIsPaused={setIsPaused}
         />
-      </div>
-      {/* User profile DropMenu on the right side, shifts left when dev panel is open (24px gap) */}
-      <motion.div
-        className="fixed top-6 z-[10002]"
-        initial={{ right: 104 }}
-        animate={{ right: isPanelOpen ? 450 : 84 }}
-        transition={drawerMotion}
-      >
-        <DropMenu
-          title="Customer"
-          rowLabels={["New customer", "Returning customer", "Cash Local customer"]}
-          onRowSelect={(rowIndex) => {
-            if (rowIndex === 0) setUserType('new');
-            else if (rowIndex === 1) setUserType('returning');
-            else if (rowIndex === 2) setUserType('cash-local');
-          }}
-        />
-      </motion.div>
+      )}
+      {/* Device and Environment DropMenus in the top left corner - Hidden in kiosk mode */}
+      {!isKioskMode && (
+        <div className="fixed top-6 left-6 z-[10002] flex flex-col gap-4">
+          <DropMenu
+            title="Device"
+            rowLabels={["Register", "Stand", "Reader"]}
+            iconSrc={DesktopIcon}
+            onRowSelect={(rowIndex) => {
+              if (rowIndex === 0) setUserType('new');
+              else if (rowIndex === 1) setUserType('returning');
+              else if (rowIndex === 2) setUserType('cash-local');
+            }}
+          />
+        </div>
+      )}
+      {/* User profile DropMenu on the right side, shifts left when dev panel is open (24px gap) - Hidden in kiosk mode */}
+      {!isKioskMode && (
+        <motion.div
+          className="fixed top-6 z-[10002]"
+          initial={{ right: 104 }}
+          animate={{ right: isPanelOpen ? 450 : 84 }}
+          transition={drawerMotion}
+        >
+          <DropMenu
+            title="Customer"
+            rowLabels={["New customer", "Returning customer", "Cash Local customer"]}
+            onRowSelect={(rowIndex) => {
+              if (rowIndex === 0) setUserType('new');
+              else if (rowIndex === 1) setUserType('returning');
+              else if (rowIndex === 2) setUserType('cash-local');
+            }}
+          />
+        </motion.div>
+      )}
       {/* Main content area that centers all screens */}
       <motion.div
         className="flex-1 flex items-center relative overflow-hidden justify-center"
-        animate={{ x: isPanelOpen ? -180 : 0 }}
+        animate={{ x: (isPanelOpen && !isKioskMode) ? -180 : 0 }}
         transition={drawerMotion}
       >
+        {/* Kiosk mode indicator */}
+        {isKioskMode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[10003] bg-black/80 backdrop-blur-md border border-white/20 rounded-full px-4 py-2"
+          >
+            <div className="flex items-center gap-2 text-white/80 text-sm font-medium">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              Kiosk Mode • Long press to exit
+            </div>
+          </motion.div>
+        )}
         <AnimatePresence mode={isInstantTransition ? "wait" : "popLayout"} initial={false}>
           <motion.div
             key={`${currentScreen}-${refreshKey}`}
             className={`absolute flex items-center justify-center h-full ${
-              isPanelOpen ? 'w-[calc(100%-360px)]' : 'w-full'
+              (isPanelOpen && !isKioskMode) ? 'w-[calc(100%-360px)]' : 'w-full'
             }`}
             initial={{ 
               x: isInstantTransition ? 0 : 200, 
@@ -607,14 +641,16 @@ export const MainView = () => {
               key={`screen-${currentScreen}-${refreshKey}`} 
               {...getScreenProps()} 
             />
-            {/* Centered screen navigation at the bottom of the device frame */}
-            <div className="absolute bottom-12 left-0 w-full flex justify-center z-20">
-              <ScreenNavigation
-                screens={getNavScreens()}
-                currentScreen={currentScreen}
-                onScreenSelect={handleScreenNavSelect}
-              />
-            </div>
+            {/* Centered screen navigation at the bottom of the device frame - Hidden in kiosk mode */}
+            {!isKioskMode && (
+              <div className="absolute bottom-12 left-0 w-full flex justify-center z-20 screen-navigation">
+                <ScreenNavigation
+                  screens={getNavScreens()}
+                  currentScreen={currentScreen}
+                  onScreenSelect={handleScreenNavSelect}
+                />
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </motion.div>
