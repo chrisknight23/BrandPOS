@@ -1,0 +1,27 @@
+{
+  "name": "BrandPOS",
+  "short_name": "BrandPOS",
+  "description": "Square POS Buyer Display",
+  "start_url": "/BrandPOS/",
+  "scope": "/BrandPOS/",
+  "display": "fullscreen",
+  "orientation": "landscape-primary",
+  "theme_color": "#050505",
+  "background_color": "#050505",
+  "icons": [
+    {
+      "src": "/BrandPOS/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/BrandPOS/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en-US"
+} 
