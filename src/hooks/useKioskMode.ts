@@ -13,7 +13,24 @@ interface UseKioskModeReturn {
 
 // Device detection utilities
 const isIpad = () => {
-  return /iPad|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document;
+  // Modern iPadOS detection - check for multiple indicators
+  const userAgent = navigator.userAgent;
+  
+  // Traditional iPad detection
+  if (/iPad/.test(userAgent)) return true;
+  
+  // Modern iPadOS reports as Mac, so check for Mac + touch + specific characteristics
+  if (/Macintosh/.test(userAgent) && 'ontouchend' in document) {
+    // Additional checks for iPad masquerading as Mac
+    return navigator.maxTouchPoints > 1 || screen.height > screen.width;
+  }
+  
+  // Check for mobile Safari characteristics on larger screens
+  if (/Safari/.test(userAgent) && !/Chrome/.test(userAgent)) {
+    return navigator.maxTouchPoints > 1 && (screen.width >= 768 || screen.height >= 768);
+  }
+  
+  return false;
 };
 
 const isPWAMode = () => {

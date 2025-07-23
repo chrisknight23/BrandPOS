@@ -16,7 +16,24 @@ const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'Sc
 
 // Device detection utilities
 const isIpad = () => {
-  return /iPad|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document;
+  // Modern iPadOS detection - check for multiple indicators
+  const userAgent = navigator.userAgent;
+  
+  // Traditional iPad detection
+  if (/iPad/.test(userAgent)) return true;
+  
+  // Modern iPadOS reports as Mac, so check for Mac + touch + specific characteristics
+  if (/Macintosh/.test(userAgent) && 'ontouchend' in document) {
+    // Additional checks for iPad masquerading as Mac
+    return navigator.maxTouchPoints > 1 || screen.height > screen.width;
+  }
+  
+  // Check for mobile Safari characteristics on larger screens
+  if (/Safari/.test(userAgent) && !/Chrome/.test(userAgent)) {
+    return navigator.maxTouchPoints > 1 && (screen.width >= 768 || screen.height >= 768);
+  }
+  
+  return false;
 };
 
 const isPWAMode = () => {
@@ -612,6 +629,15 @@ export const MainView = () => {
         animate={{ x: (isPanelOpen && !isKioskMode) ? -180 : 0 }}
         transition={drawerMotion}
       >
+        {/* Debug info - temporary */}
+        <div className="fixed top-4 right-4 z-[10003] bg-red-500/80 backdrop-blur-md border border-white/20 rounded px-2 py-1 text-xs text-white font-mono">
+          iPad: {isIpad().toString()} | PWA: {isPWAMode().toString()} | Kiosk: {isKioskMode.toString()}
+          <br />
+          UA: {navigator.userAgent.slice(0, 50)}...
+          <br />
+          Touch: {navigator.maxTouchPoints} | Size: {screen.width}x{screen.height}
+        </div>
+
         {/* Kiosk mode indicator */}
         {isKioskMode && !isIpadPWA() && (
           <motion.div
