@@ -18,11 +18,11 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   const isPWA = isPWAMode();
   
   if (isPWA) {
-    // PWA: Stretch edge-to-edge with content scaling
+    // PWA: Full viewport stretch with no aspect ratio constraint
     return (
-      <div className="w-screen h-screen bg-black flex items-center justify-center">
+      <div className="w-screen h-screen bg-black">
         <div 
-          className="w-full h-full max-w-[800px] aspect-[8/5] relative overflow-hidden"
+          className="w-full h-full relative overflow-hidden"
           style={{
             transform: 'scale(1.3)',
             transformOrigin: 'center'
