@@ -17,11 +17,13 @@ A consistent viewport container that maintains Cash App's standard 800x500 devic
 
 ## Features
 
-- Maintains consistent 800x500 viewport dimensions
-- Centers content in the browser window
+- **Safari Mode**: Fixed 800x500 dimensions (original behavior)
+- **PWA Mode**: Responsive sizing with 8:5 aspect ratio that scales to fit screen
+- Automatic detection of PWA vs browser mode
+- Centers content in the viewport with proper padding
 - Provides standard rounded corners (rounded-2xl)
 - Handles overflow containment
-- Uses Cash App dark green background (#001707)
+- Optimized for iPad PWA display while preserving desktop/Safari experience
 - Follows Cash App device frame specifications
 
 ## Common Use Cases

@@ -7,6 +7,9 @@
 @layer base {
   html, body {
     @apply bg-[#1a1a1a] text-white antialiased;
+    /* Prevent iOS zoom on form inputs and improve PWA performance */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   
   /* PWA Safe Area Support for iOS */
