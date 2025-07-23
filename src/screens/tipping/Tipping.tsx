@@ -176,7 +176,8 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
           
           {/* Tip Amount Buttons Container with staggered entrance animation */}
           <motion.div 
-            className="grid grid-cols-3 gap-4 flex-1 mb-4 px-8"
+            className="grid grid-cols-3 gap-3 flex-1 px-6 mb-3"
+            style={{ minHeight: '0' }}
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -184,7 +185,7 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
             {tipAmounts.map((amount, index) => (
               <motion.div 
                 key={`container-${amount}`} 
-                className="opacity-100"
+                className="h-full flex"
                 variants={buttonVariants}
                 custom={index}
               >
@@ -196,6 +197,7 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
                   color={userType === 'cash-local' ? 'green' : 'blue'}
                   mainColor={userType === 'cash-local' ? '#00B843' : 'rgba(255, 255, 255, 0.2)'}
                   disableExpand={true}
+                  className="w-full h-full"
                 />
               </motion.div>
             ))}
@@ -203,7 +205,7 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
 
           {/* Bottom Buttons */}
           <motion.div 
-            className="grid grid-cols-2 gap-4 mt-auto mb-8 px-8"
+            className="grid grid-cols-2 gap-3 px-6 mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ 

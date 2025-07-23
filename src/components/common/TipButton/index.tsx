@@ -26,6 +26,7 @@ type TipButtonProps = {
   color?: 'blue' | 'green'; // New color prop
   disableExpand?: boolean; // New prop to disable expansion
   mainColor?: string; // Optional custom color
+  className?: string; // Added className prop
 };
 
 export const TipButton: React.FC<TipButtonProps> = ({ 
@@ -44,6 +45,7 @@ export const TipButton: React.FC<TipButtonProps> = ({
   color = 'blue', // Default to blue
   disableExpand = false, // Default to false
   mainColor, // Optional custom color
+  className = '', // Default to empty string
 }) => {
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -102,9 +104,8 @@ export const TipButton: React.FC<TipButtonProps> = ({
       {/* Regular button that's visible when not selected */}
       <motion.div
         ref={buttonRef}
-        className="flex flex-col items-center justify-center text-white cursor-pointer shadow-sm rounded-[24px]"
+        className={`flex flex-col items-center justify-center text-white cursor-pointer shadow-sm rounded-[24px] ${className}`}
         style={{ 
-          height: '248px',
           backgroundColor: mainColorValue,
           border: mainColor && mainColor.includes('rgba(255, 255, 255') ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
           visibility: disableExpand ? 'visible' : (isSelected ? 'hidden' : 'visible'),
