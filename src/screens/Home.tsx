@@ -87,19 +87,6 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
             $mileendbagel on Cash App
           </motion.p>
           
-          {/* TEMPORARY TEST BUTTON - Remove later */}
-          <motion.button
-            className="mt-8 px-8 py-4 bg-white/20 text-white rounded-full text-xl font-medium hover:bg-white/30 transition-colors"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1 }}
-            onClick={() => {
-              console.log('Test button clicked - navigating to Cart');
-              goToScreen && goToScreen('Cart');
-            }}
-          >
-            🧪 Test Cart Screen
-          </motion.button>
         </motion.div>
         
         <motion.div 
