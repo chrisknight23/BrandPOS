@@ -634,23 +634,6 @@ export const MainView = () => {
         animate={{ x: (isPanelOpen && !isKioskMode) ? -180 : 0 }}
         transition={drawerMotion}
       >
-        {/* Debug info - temporary */}
-        <div className="fixed top-4 right-4 z-[10003] bg-red-500/80 backdrop-blur-md border border-white/20 rounded px-2 py-1 text-xs text-white font-mono">
-          iPad: {isIpad().toString()} | PWA: {isPWAMode().toString()} | Kiosk: {isKioskMode.toString()}
-          <br />
-          UA: {navigator.userAgent.slice(0, 50)}...
-          <br />
-          Touch: {navigator.maxTouchPoints} | Size: {screen.width}x{screen.height}
-          <br />
-          Standalone: {window.matchMedia('(display-mode: standalone)').matches.toString()}
-          <br />
-          Fullscreen: {window.matchMedia('(display-mode: fullscreen)').matches.toString()}
-          <br />
-          Browser: {window.matchMedia('(display-mode: browser)').matches.toString()}
-          <br />
-          NavigatorStandalone: {(window.navigator as any).standalone?.toString() || 'undefined'}
-        </div>
-
         {/* Kiosk mode indicator */}
         {isKioskMode && !isIpadPWA() && (
           <motion.div
