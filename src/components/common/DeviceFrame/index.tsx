@@ -18,18 +18,16 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   const isPWA = isPWAMode();
   
   if (isPWA) {
-    // PWA: Scale the frame but keep internal positioning at 800x500
+    // PWA: Stretch edge-to-edge with content scaling
     return (
-      <div className="w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
-        <div 
-          className="w-[800px] h-[500px] bg-black relative overflow-hidden rounded-[16px]"
-          style={{
-            transform: 'scale(1.3)',
-            transformOrigin: 'center'
-          }}
-        >
-          {children}
-        </div>
+      <div 
+        className="w-screen h-screen bg-black relative overflow-hidden"
+        style={{
+          transform: 'scale(1.3)',
+          transformOrigin: 'center'
+        }}
+      >
+        {children}
       </div>
     );
   }
