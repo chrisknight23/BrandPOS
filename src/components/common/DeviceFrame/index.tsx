@@ -21,7 +21,7 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
     // Calculate the scale needed to fit within viewport while maintaining aspect ratio
     // Original size is 800x500, so we need to scale down from the desired size
     return (
-      <div className="w-[100vw] h-[100vh] bg-red-500 flex items-center justify-center">
+      <div className="w-[100vw] h-[100vh] bg-black overflow-hidden fixed inset-0">
         <div 
           className="relative overflow-hidden flex items-center justify-center"
           style={{
