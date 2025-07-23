@@ -20,14 +20,16 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   if (isPWA) {
     // PWA: Stretch edge-to-edge with content scaling
     return (
-      <div 
-        className="w-screen h-screen bg-black relative overflow-hidden"
-        style={{
-          transform: 'scale(1.3)',
-          transformOrigin: 'center'
-        }}
-      >
-        {children}
+      <div className="w-screen h-screen bg-black flex items-center justify-center">
+        <div 
+          className="w-full h-full max-w-[800px] aspect-[8/5] relative overflow-hidden"
+          style={{
+            transform: 'scale(1.3)',
+            transformOrigin: 'center'
+          }}
+        >
+          {children}
+        </div>
       </div>
     );
   }
