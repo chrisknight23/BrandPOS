@@ -18,12 +18,15 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   const isPWA = isPWAMode();
   
   if (isPWA) {
-    // PWA: Full viewport stretch with no aspect ratio constraint
+    // Calculate the scale needed to fit within viewport while maintaining aspect ratio
+    // Original size is 800x500, so we need to scale down from the desired size
     return (
-      <div className="w-screen h-screen bg-red-500 flex items-center justify-center">
+      <div className="w-[100vw] h-[100vh] bg-red-500 flex items-center justify-center">
         <div 
-          className="w-full h-full relative overflow-hidden flex items-center justify-center"
+          className="relative overflow-hidden flex items-center justify-center"
           style={{
+            width: 'calc(100vw / 1.3)', // Compensate for scale to prevent overflow
+            height: 'calc(100vh / 1.3)',
             transform: 'scale(1.3)',
             transformOrigin: 'center'
           }}

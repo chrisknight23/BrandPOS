@@ -94,11 +94,11 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 1 }}
             onClick={() => {
-              console.log('Test button clicked - navigating to End');
-              goToScreen && goToScreen('End');
+              console.log('Test button clicked - navigating to Cart');
+              goToScreen && goToScreen('Cart');
             }}
           >
-            🧪 Test End Screen
+            🧪 Test Cart Screen
           </motion.button>
         </motion.div>
         

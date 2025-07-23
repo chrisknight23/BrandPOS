@@ -75,7 +75,7 @@ export const Cart = ({
   return (
     <BaseScreen onNext={handleNext}>
       <div 
-        className="w-[800px] h-[500px] bg-black text-white rounded-[16px] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)] flex justify-end"
+        className="w-full h-full bg-black text-white rounded-[16px] shadow-[0_8px_32px_0_rgba(0,0,0,0.18)] flex justify-end"
       >
         {/* Left Panel - Cart Content */}
         <motion.div 
