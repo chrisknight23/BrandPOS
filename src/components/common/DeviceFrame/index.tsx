@@ -18,16 +18,14 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   const isPWA = isPWAMode();
   
   if (isPWA) {
-    // PWA: Full viewport with content scaling
+    // PWA: Scale the frame but keep internal positioning at 800x500
     return (
-      <div className="w-screen h-screen bg-black relative overflow-hidden">
+      <div className="w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
         <div 
+          className="w-[800px] h-[500px] bg-black relative overflow-hidden rounded-[16px]"
           style={{
-            fontSize: '1.3em',
-            transform: 'scale(1.1)',
-            transformOrigin: 'center',
-            width: '100%',
-            height: '100%'
+            transform: 'scale(1.3)',
+            transformOrigin: 'center'
           }}
         >
           {children}
