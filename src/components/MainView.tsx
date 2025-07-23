@@ -652,7 +652,7 @@ export const MainView = () => {
         </div>
 
         {/* Kiosk mode indicator */}
-        {isKioskMode && !isIpad() && (
+        {isKioskMode && !isIpadPWA() && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

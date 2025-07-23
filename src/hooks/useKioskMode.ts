@@ -65,8 +65,8 @@ export const useKioskMode = (options: UseKioskModeOptions = {}): UseKioskModeRet
   } = options;
 
   const [isKioskMode, setIsKioskModeState] = useState(() => {
-    // Automatically enable kiosk mode for iPad (PWA or browser)
-    return isIpad();
+    // Automatically enable kiosk mode for iPad PWA only
+    return isIpadPWA();
   });
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const isLongPressing = useRef(false);
@@ -118,10 +118,10 @@ export const useKioskMode = (options: UseKioskModeOptions = {}): UseKioskModeRet
     }
   }, []);
 
-  // Set up event listeners only if NOT on iPad
+  // Set up event listeners only if NOT on iPad PWA
   useEffect(() => {
-    // Skip long press setup for iPad - they get automatic kiosk mode
-    if (isIpad()) {
+    // Skip long press setup for iPad PWA - they get automatic kiosk mode
+    if (isIpadPWA()) {
       return;
     }
 
