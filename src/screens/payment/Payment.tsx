@@ -200,8 +200,8 @@ export const Payment = ({ onNext, amount, baseAmount, goToScreen }: PaymentProps
 
   return (
     <BaseScreen onNext={handleNext}>
-              <div 
-        className="w-[800px] h-[500px] bg-[#1A1A1A] relative overflow-hidden flex items-center justify-center rounded-[16px] cursor-pointer" 
+      <div 
+        className="w-full h-[500px] bg-[#1A1A1A] relative overflow-hidden flex items-center justify-center rounded-[16px] cursor-pointer" 
         onClick={() => goToScreen && goToScreen('Tipping')}
       >
         {/* Price Display */}
