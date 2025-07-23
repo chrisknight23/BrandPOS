@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // Local development base path
+  base: '/BrandPOS/', // GitHub Pages deployment path
   server: {
     port: 3000,
     allowedHosts: [
