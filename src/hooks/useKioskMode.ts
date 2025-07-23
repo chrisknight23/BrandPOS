@@ -11,6 +11,19 @@ interface UseKioskModeReturn {
   setKioskMode: (enabled: boolean) => void;
 }
 
+// Device detection utilities
+const isIpad = () => {
+  return /iPad|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document;
+};
+
+const isPWAMode = () => {
+  return window.matchMedia('(display-mode: standalone)').matches;
+};
+
+const isIpadPWA = () => {
+  return isIpad() && isPWAMode();
+};
+
 /**
  * Custom hook for managing kiosk mode with long press gesture
  * 
@@ -29,7 +42,10 @@ export const useKioskMode = (options: UseKioskModeOptions = {}): UseKioskModeRet
     ]
   } = options;
 
-  const [isKioskMode, setIsKioskModeState] = useState(false);
+  const [isKioskMode, setIsKioskModeState] = useState(() => {
+    // Automatically enable kiosk mode for iPad PWA
+    return isIpadPWA();
+  });
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const isLongPressing = useRef(false);
 
@@ -80,8 +96,13 @@ export const useKioskMode = (options: UseKioskModeOptions = {}): UseKioskModeRet
     }
   }, []);
 
-  // Set up event listeners
+  // Set up event listeners only if NOT on iPad PWA
   useEffect(() => {
+    // Skip long press setup for iPad PWA - they get automatic kiosk mode
+    if (isIpadPWA()) {
+      return;
+    }
+
     const handleTouchStart = (e: TouchEvent) => handleLongPressStart(e);
     const handleTouchEnd = () => handleLongPressEnd();
     const handleTouchCancel = () => handleLongPressEnd();

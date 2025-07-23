@@ -14,6 +14,19 @@ import { useKioskMode } from '../hooks/useKioskMode';
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'CustomTip', 'End'];
 
+// Device detection utilities
+const isIpad = () => {
+  return /iPad|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document;
+};
+
+const isPWAMode = () => {
+  return window.matchMedia('(display-mode: standalone)').matches;
+};
+
+const isIpadPWA = () => {
+  return isIpad() && isPWAMode();
+};
+
 // Define cart item interface
 interface CartItem {
   id: number;
@@ -564,6 +577,13 @@ export const MainView = () => {
               else if (rowIndex === 1) setUserType('returning');
               else if (rowIndex === 2) setUserType('cash-local');
             }}
+            bottomButton={{
+              label: "Display mode",
+              onClick: () => {
+                console.log("Display mode clicked");
+                // TODO: Add display mode functionality
+              }
+            }}
           />
         </div>
       )}
@@ -593,7 +613,7 @@ export const MainView = () => {
         transition={drawerMotion}
       >
         {/* Kiosk mode indicator */}
-        {isKioskMode && (
+        {isKioskMode && !isIpadPWA() && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

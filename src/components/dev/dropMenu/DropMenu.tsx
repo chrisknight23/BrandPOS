@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import avatarIcon from "../../../assets/images/avatar.svg";
+import PillButton from "../../ui/PillButton";
 
 /**
  * DropMenu
@@ -20,6 +21,11 @@ interface DropMenuProps {
   iconSrc?: string;                        // Custom icon source
   initialSelectedRow?: number;             // Initial selected row (1-based index)
   onRowSelect?: (rowIndex: number) => void;// Callback when row is selected
+  bottomButton?: {                         // Optional button at bottom of menu
+    label: string;
+    onClick: () => void;
+    className?: string;
+  };
   theme?: {                                // Theme customization
     background?: string;                   // Background color
     border?: string;                       // Border color/style
@@ -41,6 +47,7 @@ interface DropMenuProps {
 const ROW_HEIGHT = 44; // h-11
 const ICON_HEIGHT = 48; // px (p-3 + w-6 h-6)
 const TITLE_HEIGHT = 52; // px (set title height to 52)
+const BUTTON_HEIGHT = 40; // Height for bottom button with spacing
 const PADDING_VERTICAL = 28; // pt-3 (12) + pb-4 (16)
 
 export const DropMenu: React.FC<DropMenuProps> = ({
@@ -49,6 +56,7 @@ export const DropMenu: React.FC<DropMenuProps> = ({
   iconSrc,
   initialSelectedRow = 1,
   onRowSelect,
+  bottomButton,
   theme = {},
   collapsedSize = 48,
   expandedWidth = 226,
@@ -140,6 +148,9 @@ export const DropMenu: React.FC<DropMenuProps> = ({
       h += TITLE_HEIGHT;
     }
     h += rowLabels.length * ROW_HEIGHT;
+    if (bottomButton) {
+      h += BUTTON_HEIGHT;
+    }
     h += PADDING_VERTICAL;
     return h;
   };
@@ -291,6 +302,27 @@ export const DropMenu: React.FC<DropMenuProps> = ({
                 </button>
               ))}
             </div>
+            {/* Bottom Button */}
+            {bottomButton && (
+              <motion.div
+                className="w-full flex justify-start"
+                animate={{
+                  paddingLeft: open ? 12 : 0,
+                  paddingTop: 8
+                }}
+                transition={{
+                  paddingLeft: { duration: 0.22 }
+                }}
+              >
+                <PillButton
+                  onClick={bottomButton.onClick}
+                  className={bottomButton.className}
+                  ariaLabel={bottomButton.label}
+                >
+                  {bottomButton.label}
+                </PillButton>
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
