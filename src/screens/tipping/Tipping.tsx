@@ -149,7 +149,7 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
       <div className="w-full h-full relative overflow-hidden rounded-[16px]">
         {/* Main screen container with horizontal slide animation */}
         <motion.div 
-          className="w-full h-full bg-black text-white p-6 flex flex-col"
+          className="w-full h-full bg-black text-white flex flex-col"
           initial={{ x: 0, opacity: 1 }}
           animate={exitAnimation}
           transition={{ 
@@ -159,7 +159,7 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
         >
           {/* Header Container with Total Display */}
           <motion.div 
-            className="flex items-center justify-start mb-6 px-4 mt-2 h-16"
+            className="flex items-center justify-start mb-6 px-8 mt-8 h-16"
             variants={headerVariants}
             initial="hidden"
             animate="visible"
@@ -176,7 +176,7 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
           
           {/* Tip Amount Buttons Container with staggered entrance animation */}
           <motion.div 
-            className="grid grid-cols-3 gap-3 flex-1 mb-3"
+            className="grid grid-cols-3 gap-4 flex-1 mb-4 px-8"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -203,7 +203,7 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
 
           {/* Bottom Buttons */}
           <motion.div 
-            className="grid grid-cols-2 gap-3 mt-auto"
+            className="grid grid-cols-2 gap-4 mt-auto mb-8 px-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ 
