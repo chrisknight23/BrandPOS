@@ -34,7 +34,12 @@ const isIpad = () => {
 };
 
 const isPWAMode = () => {
-  return window.matchMedia('(display-mode: standalone)').matches;
+  // Check multiple ways to detect PWA mode
+  const standaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+  const fullscreenMode = window.matchMedia('(display-mode: fullscreen)').matches;
+  const navigatorStandalone = (window.navigator as any).standalone === true;
+  
+  return standaloneMode || fullscreenMode || navigatorStandalone;
 };
 
 const isIpadPWA = () => {
