@@ -20,7 +20,7 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   if (isPWA) {
     // PWA: Full viewport stretch with no aspect ratio constraint
     return (
-      <div className="w-screen h-screen bg-black">
+      <div className="w-screen h-screen bg-red-500">
         <div 
           className="w-full h-full relative overflow-hidden"
           style={{
