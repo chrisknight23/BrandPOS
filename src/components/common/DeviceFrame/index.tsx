@@ -31,22 +31,22 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   }, [isPWA]);
   
   if (isPWA) {
-    // Calculate the scale needed to fit within viewport while maintaining aspect ratio
     return (
       <div className="w-[100vw] h-[100vh] bg-black overflow-hidden flex items-center justify-center">
         <div 
           className="relative overflow-hidden flex items-center justify-center"
           style={{
-            width: '100vw',
-            height: 'calc(100vh - env(safe-area-inset-top))',
-            transform: 'scale(min(calc((100vh - env(safe-area-inset-top)) / 500), calc(100vw / 800)))',
+            width: 'calc(100vw / 1.3)',
+            height: 'calc(100vh / 1.3)',
+            transform: 'scale(1.3)',
             transformOrigin: 'center',
-            marginTop: 'env(safe-area-inset-top)'
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+            paddingLeft: 'env(safe-area-inset-left)',
+            paddingRight: 'env(safe-area-inset-right)'
           }}
         >
-          <div className="w-[800px] h-[500px] relative">
-            {children}
-          </div>
+          {children}
         </div>
       </div>
     );
