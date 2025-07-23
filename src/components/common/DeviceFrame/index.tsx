@@ -21,7 +21,7 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
     <div className="w-screen h-screen flex items-center justify-center p-4">
       <div className={`
         ${isPWA 
-          ? 'w-full max-w-[800px] aspect-[8/5] max-h-[calc(100vh-2rem)]' 
+          ? 'w-[90vw] h-[56.25vw] max-h-[calc(100vh-2rem)]' 
           : 'w-[800px] h-[500px]'
         } 
         bg-black relative overflow-hidden rounded-[16px] border border-[#222] flex items-center justify-center ${className}
