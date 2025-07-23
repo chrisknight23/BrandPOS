@@ -37,7 +37,7 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
           className="relative overflow-hidden flex items-center justify-center"
           style={{
             width: 'calc(100vw / 1.3)',
-            height: 'calc(100vh / 1.3)',
+            height: 'calc((100vh + 2px) / 1.3)',
             transform: 'scale(1.3)',
             transformOrigin: 'center',
             paddingTop: 'env(safe-area-inset-top)',
