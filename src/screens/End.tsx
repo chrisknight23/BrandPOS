@@ -115,11 +115,12 @@ export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, t
 
   return (
     <BaseScreen onNext={onNext}>
-              <div className="w-[800px] h-[500px] text-white p-10 flex flex-col justify-between rounded-[16px] relative"
+      <div 
+        className="w-full h-full text-white p-10 flex flex-col justify-between rounded-[16px] relative"
         style={{ backgroundColor: bgColor }}
       >
         <motion.div
-          className="flex flex-row items-start justify-between mb-6 px-4 mt-2 h-16"
+          className="flex flex-row items-start justify-between mb-6 px-8 mt-8 h-16"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
@@ -149,7 +150,7 @@ export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, t
         </motion.div>
         
         <motion.div
-          className="absolute bottom-[40px] right-[40px]"
+          className="absolute bottom-10 right-10"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
