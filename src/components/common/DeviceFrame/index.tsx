@@ -32,20 +32,21 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   
   if (isPWA) {
     // Calculate the scale needed to fit within viewport while maintaining aspect ratio
-    // Original size is 800x500, so we need to scale down from the desired size
     return (
       <div className="w-[100vw] h-[100vh] bg-black overflow-hidden flex items-center justify-center">
         <div 
           className="relative overflow-hidden flex items-center justify-center"
           style={{
-            width: 'calc(100vw / 1.3)', // Compensate for scale to prevent overflow
-            height: 'calc((100vh - env(safe-area-inset-top)) / 1.3)', // Account for status bar
-            transform: 'scale(1.3)',
+            width: '100vw',
+            height: 'calc(100vh - env(safe-area-inset-top))',
+            transform: 'scale(min(calc((100vh - env(safe-area-inset-top)) / 500), calc(100vw / 800)))',
             transformOrigin: 'center',
-            marginTop: 'env(safe-area-inset-top)' // Add top margin for status bar
+            marginTop: 'env(safe-area-inset-top)'
           }}
         >
-          {children}
+          <div className="w-[800px] h-[500px] relative">
+            {children}
+          </div>
         </div>
       </div>
     );
