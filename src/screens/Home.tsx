@@ -94,11 +94,11 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 1 }}
             onClick={() => {
-              console.log('Test button clicked - navigating to Payment');
-              goToScreen && goToScreen('Payment');
+              console.log('Test button clicked - navigating to Tipping');
+              goToScreen && goToScreen('Tipping');
             }}
           >
-            🧪 Test Payment Screen
+            🧪 Test Tipping Screen
           </motion.button>
         </motion.div>
         
