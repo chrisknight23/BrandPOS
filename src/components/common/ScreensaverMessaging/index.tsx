@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { Button } from '../../ui';
 import { Screen } from '../../../types/screen';
+import { useTextContent } from '../../../context/TextContentContext';
 
 // Register GSAP plugins
 gsap.registerPlugin(TextPlugin);
@@ -19,8 +20,6 @@ export interface ScreensaverMessagingProps {
   className?: string;
   /** Whether this is being used in a static fullscreen context */
   isStaticFullscreen?: boolean;
-  /** Custom messages to cycle through (optional) */
-  messages?: string[];
   /** Time in milliseconds each message displays before cycling (default: 4000ms) */
   cycleInterval?: number;
   /** Navigation function to go to a specific screen */
@@ -43,6 +42,24 @@ const createTextAnimation = (element: HTMLElement, text: string, animationType: 
   // Clear the element and build the structure manually
   element.innerHTML = '';
   
+  // Create a centered container for the text
+  const container = document.createElement('div');
+  container.style.height = '400px'; // Reduced to make room for button
+  container.style.display = 'flex';
+  container.style.alignItems = 'center';
+  container.style.justifyContent = 'center';
+  container.style.maxWidth = '700px';
+  container.style.margin = '0 auto';
+  container.style.wordBreak = 'break-word';
+  container.style.whiteSpace = 'normal';
+  element.appendChild(container);
+  
+  // Create text wrapper
+  const textWrapper = document.createElement('div');
+  textWrapper.style.width = '100%';
+  textWrapper.style.textAlign = 'center';
+  container.appendChild(textWrapper);
+  
   // Special handling for "Follow us and earn rewards" - add line break
   if (text === "Follow us and earn rewards") {
     text = "Follow us and<br/>earn rewards";
@@ -50,53 +67,80 @@ const createTextAnimation = (element: HTMLElement, text: string, animationType: 
   
   // Split text into individual characters, preserving all spaces and line breaks
   const letters: HTMLSpanElement[] = [];
+  const wordGroups: HTMLSpanElement[][] = [];
+  let currentWord: HTMLSpanElement[] = [];
   
   // Split by <br> tags first, then handle each line
   const lines = text.split(/<br\s*\/?>/i);
   
   lines.forEach((line, lineIndex) => {
     if (lineIndex > 0) {
-      // Add line break for subsequent lines
-      element.appendChild(document.createElement('br'));
+      textWrapper.appendChild(document.createElement('br'));
     }
     
-    line.split('').forEach(char => {
-      if (char === ' ') {
-        // Create a space span to maintain consistent spacing
+    // Split line into words
+    const words = line.split(' ');
+    
+    words.forEach((word, wordIndex) => {
+      // Create word container
+      const wordContainer = document.createElement('span');
+      wordContainer.style.display = 'inline-block';
+      wordContainer.style.whiteSpace = 'nowrap';
+      textWrapper.appendChild(wordContainer);
+      
+      // Add letters for this word
+      const wordLetters = word.split('').map(char => {
+        if (char.trim()) {
+          const span = document.createElement('span');
+          span.textContent = char;
+          span.style.display = 'inline-block';
+          span.style.opacity = '0';
+          wordContainer.appendChild(span);
+          letters.push(span);
+          return span;
+        }
+        return null;
+      }).filter((span): span is HTMLSpanElement => span !== null);
+      
+      wordGroups.push(wordLetters);
+      
+      // Add space after word (except for last word in line)
+      if (wordIndex < words.length - 1) {
         const spaceSpan = document.createElement('span');
         spaceSpan.innerHTML = '&nbsp;';
         spaceSpan.style.display = 'inline-block';
-        element.appendChild(spaceSpan);
-      } else if (char.trim()) {
-        const span = document.createElement('span');
-        span.textContent = char;
-        span.style.display = 'inline-block';
-        span.style.opacity = '0';
-        element.appendChild(span);
-        letters.push(span);
+        textWrapper.appendChild(spaceSpan);
       }
     });
   });
+
+  // After animation, trigger resize observation
+  const onComplete = () => {
+    element.dispatchEvent(new Event('textanimated'));
+  };
   
   switch (animationType % 5) {
     case 0: // Letters drop from above
-      letters.forEach(letter => {
+      // Set initial state for all letters
+      wordGroups.flat().forEach(letter => {
         gsap.set(letter, { y: -100, rotation: Math.random() * 40 - 20 });
       });
       timeline
         .set(element, { opacity: 1 })
-        .to(letters, {
+        .to(wordGroups.flat(), {
           duration: 0.6,
           opacity: 1,
           y: 0,
           rotation: 0,
-          stagger: 0.02,
-          ease: "bounce.out"
-        });
+          stagger: 0.015,
+          ease: "bounce.out",
+        })
+        .then(onComplete);
       break;
       
     case 1: // Letters spiral in
-      letters.forEach((letter, i) => {
+      // Set initial state for all letters
+      wordGroups.flat().forEach((letter, i) => {
         const angle = i * 30;
         const distance = 150;
         gsap.set(letter, { 
@@ -108,94 +152,96 @@ const createTextAnimation = (element: HTMLElement, text: string, animationType: 
       });
       timeline
         .set(element, { opacity: 1 })
-        .to(letters, {
+        .to(wordGroups.flat(), {
           duration: 0.5,
           opacity: 1,
           x: 0,
           y: 0,
           rotation: 0,
           scale: 1,
-          stagger: 0.03,
-          ease: "back.out(2)"
-        });
+          stagger: 0.015,
+          ease: "back.out(2)",
+        })
+        .then(onComplete);
       break;
       
     case 2: // Letters zoom and flip
-      letters.forEach(letter => {
+      // Set initial state for all letters
+      wordGroups.flat().forEach(letter => {
         gsap.set(letter, { scale: 0, rotationY: 180 });
       });
       timeline
         .set(element, { opacity: 1 })
-        .to(letters, {
+        .to(wordGroups.flat(), {
           duration: 0.4,
           opacity: 1,
           scale: 1.2,
           rotationY: 0,
-          stagger: 0.025,
-          ease: "power2.out"
+          stagger: 0.015,
+          ease: "power2.out",
         })
-        .to(letters, {
+        .to(wordGroups.flat(), {
           duration: 0.2,
           scale: 1,
-          ease: "power2.out"
-        });
+          ease: "power2.out",
+        })
+        .then(onComplete);
       break;
       
     case 3: // Letters slide from random directions
-      letters.forEach(letter => {
-        const directions = [
-          { x: -200, y: 0 },
-          { x: 200, y: 0 },
-          { x: 0, y: -200 },
-          { x: 0, y: 200 },
-          { x: -150, y: -150 },
-          { x: 150, y: 150 }
-        ];
-        const direction = directions[Math.floor(Math.random() * directions.length)];
+      // Set initial state for all letters
+      wordGroups.flat().forEach(letter => {
+        const direction = {
+          x: Math.random() > 0.5 ? 200 : -200,
+          y: Math.random() > 0.5 ? 200 : -200
+        };
         gsap.set(letter, { 
-          x: direction.x, 
-          y: direction.y, 
+          x: direction.x,
+          y: direction.y,
           rotation: Math.random() * 360,
           scale: 0.3
         });
       });
       timeline
         .set(element, { opacity: 1 })
-        .to(letters, {
+        .to(wordGroups.flat(), {
           duration: 0.5,
           opacity: 1,
           x: 0,
           y: 0,
           rotation: 0,
           scale: 1,
-          stagger: 0.02,
-          ease: "power3.out"
-        });
+          stagger: 0.015,
+          ease: "power3.out",
+        })
+        .then(onComplete);
       break;
       
     case 4: // Letters elastic bounce in sequence
-      letters.forEach(letter => {
+      // Set initial state for all letters
+      wordGroups.flat().forEach(letter => {
         gsap.set(letter, { scaleY: 0, scaleX: 2, skewX: 45 });
       });
       timeline
         .set(element, { opacity: 1 })
-        .to(letters, {
+        .to(wordGroups.flat(), {
           duration: 0.4,
           opacity: 1,
           scaleY: 1.3,
           scaleX: 0.8,
           skewX: -10,
-          stagger: 0.03,
-          ease: "power2.out"
+          stagger: 0.015,
+          ease: "power2.out",
         })
-        .to(letters, {
+        .to(wordGroups.flat(), {
           duration: 0.3,
           scaleY: 1,
           scaleX: 1,
           skewX: 0,
           stagger: 0.01,
-          ease: "elastic.out(1, 0.6)"
-        });
+          ease: "elastic.out(1, 0.6)",
+        })
+        .then(onComplete);
       break;
   }
   
@@ -208,15 +254,57 @@ export const ScreensaverMessaging: React.FC<ScreensaverMessagingProps> = ({
   brandName = '$mileendbagel',
   className = '',
   isStaticFullscreen = false,
-  messages = DEFAULT_MESSAGES,
   cycleInterval = 4000,
   goToScreen,
 }) => {
+  const { getText } = useTextContent();
   const [animationPhase, setAnimationPhase] = useState<'ready' | 'fadeIn' | 'visible'>('ready');
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const textRef = useRef<HTMLHeadingElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const currentAnimationRef = useRef<gsap.core.Timeline | null>(null);
   const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [containerOffset, setContainerOffset] = useState(0);
+
+  // Set up ResizeObserver to handle text height changes
+  useEffect(() => {
+    if (!textRef.current || !containerRef.current) return;
+
+    const handleResize = () => {
+      if (!textRef.current || !containerRef.current) return;
+      
+      const textHeight = textRef.current.offsetHeight;
+      const containerHeight = 200; // Fixed container height
+      const newOffset = (containerHeight - textHeight) / 2;
+      
+      setContainerOffset(newOffset);
+    };
+
+    // Create ResizeObserver
+    const observer = new ResizeObserver(handleResize);
+    observer.observe(textRef.current);
+
+    // Listen for animation completion
+    const handleAnimated = () => handleResize();
+    textRef.current.addEventListener('textanimated', handleAnimated);
+
+    return () => {
+      if (textRef.current) {
+        observer.unobserve(textRef.current);
+        textRef.current.removeEventListener('textanimated', handleAnimated);
+      }
+      observer.disconnect();
+    };
+  }, []);
+
+  // Get messages from Google Sheet
+  const messages = [
+    getText('message1'),
+    getText('message2'),
+    getText('message3'),
+    getText('message4'),
+    getText('message5')
+  ];
 
   useEffect(() => {
     if (!isVisible) {
@@ -305,16 +393,20 @@ export const ScreensaverMessaging: React.FC<ScreensaverMessagingProps> = ({
             animate={{ 
               opacity: 1, 
               rotate: isStaticFullscreen ? 270 : -90,
-              scale: 1 / 1.38, // Counter-scale to maintain original text size
-              scaleX: isStaticFullscreen ? -1 : 1 // Flip horizontally for static fullscreen
+              scale: 1 / 1.38,
+              scaleX: isStaticFullscreen ? -1 : 1
             }}
             exit={{ opacity: 0, rotate: isStaticFullscreen ? 270 : -90, scale: 1, scaleX: isStaticFullscreen ? -1 : 1 }}
             transition={{
               duration: isStaticFullscreen ? 0 : 0.8,
               ease: [0.32, 0.72, 0, 1]
             }}
-            className="flex flex-col items-center justify-center"
-            style={{ transformOrigin: 'center center' }}
+            className="flex flex-col items-center justify-between"
+            style={{ 
+              transformOrigin: 'center center',
+              width: '800px',
+              height: '500px'
+            }}
           >
             {/* GSAP-Powered Text Animation Container */}
             <motion.div
@@ -325,24 +417,25 @@ export const ScreensaverMessaging: React.FC<ScreensaverMessagingProps> = ({
                 duration: isStaticFullscreen ? 0 : 0.8,
                 ease: [0.32, 0.72, 0, 1]
               }}
-              className="text-center relative flex items-center justify-center"
-              style={{ width: '800px', height: '200px' }}
+              className="text-center relative flex items-center justify-center w-full h-full"
+              style={{ width: '800px', overflow: 'hidden' }}
             >
               <h1
                 ref={textRef}
-                className="text-[90px] font-cash font-medium text-center leading-[0.85] tracking-[-0.02em]"
+                className="text-[90px] font-cash font-medium text-center leading-[0.85] tracking-[-0.02em] w-full flex items-center justify-center"
                 style={{ 
                   transformOrigin: 'center center',
                   willChange: 'transform, opacity',
-                  opacity: 0, // Start hidden, GSAP will animate it in
-                  width: '100%',
-                  wordWrap: 'break-word',
+                  opacity: 0,
+                  maxWidth: '700px',
+                  margin: '0 auto',
+                  wordBreak: 'break-word',
                   whiteSpace: 'normal'
                 }}
               />
             </motion.div>
 
-            {/* Bottom center button */}
+            {/* Bottom center button - centered accounting for button width */}
             <motion.div
               initial={{ opacity: isStaticFullscreen ? 1 : 0, y: isStaticFullscreen ? 0 : 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -352,9 +445,13 @@ export const ScreensaverMessaging: React.FC<ScreensaverMessagingProps> = ({
                 delay: isStaticFullscreen ? 0 : 0.3,
                 ease: [0.32, 0.72, 0, 1]
               }}
-              className="absolute w-full flex justify-center"
-              style={{
-                bottom: '-110px',
+              className="absolute"
+              style={{ 
+                bottom: '32px',
+                left: '340px', // (800px - 120px) / 2 = 340px to account for button width
+                transform: 'rotate(90deg)',
+                transformOrigin: 'center center',
+                zIndex: 20
               }}
             >
               <Button
@@ -367,7 +464,6 @@ export const ScreensaverMessaging: React.FC<ScreensaverMessagingProps> = ({
                 Follow
               </Button>
             </motion.div>
-
           </motion.div>
         )}
       </AnimatePresence>
