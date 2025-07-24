@@ -11,6 +11,7 @@ interface ScreenNavigationProps {
   currentScreen: string;
   onScreenSelect: (screen: string) => void;
   className?: string;
+  onHomeRefresh?: () => void;
 }
 
 // Define screensaver screens that should be grouped in dropdown
@@ -36,6 +37,7 @@ const ScreenNavigation: React.FC<ScreenNavigationProps> = ({
   currentScreen,
   onScreenSelect,
   className = '',
+  onHomeRefresh
 }) => {
   // Check if current screen is any screensaver screen
   const isScreensaverActive = SCREENSAVER_SCREENS.includes(currentScreen);
@@ -77,6 +79,7 @@ const ScreenNavigation: React.FC<ScreenNavigationProps> = ({
           const isScreensaverPill = screen.value === 'Screensaver';
           const isPaymentPill = screen.value === 'Payment';
           const isTippingPill = screen.value === 'Tipping';
+          const isHomePill = screen.value === 'Home';
 
           return (
             <PillButton
@@ -100,6 +103,8 @@ const ScreenNavigation: React.FC<ScreenNavigationProps> = ({
               currentDropdownValue={
                 isScreensaverPill || isPaymentPill || isTippingPill ? currentScreen : undefined
               }
+              showRefresh={false}
+              onRefreshClick={isHomePill ? onHomeRefresh : undefined}
             >
               {screen.label}
             </PillButton>
