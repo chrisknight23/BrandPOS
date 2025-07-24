@@ -151,7 +151,7 @@ export const DropMenu: React.FC<DropMenuProps> = ({
     if (bottomButton) {
       h += BUTTON_HEIGHT;
     }
-    h += PADDING_VERTICAL;
+    h += bottomButton ? PADDING_VERTICAL : PADDING_VERTICAL - 8; // Reduce padding when no bottom button
     return h;
   };
 
