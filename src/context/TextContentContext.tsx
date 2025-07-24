@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useSheetContent } from '../hooks/useSheetContent';
 
 interface TextContentContextType {
@@ -25,13 +25,26 @@ interface TextContentProviderProps {
   sheetName?: string;
 }
 
+const STORAGE_KEY = 'textContentVersion';
+
 export const TextContentProvider: React.FC<TextContentProviderProps> = ({
   children,
   sheetId,
   sheetName
 }) => {
-  const [version, setVersion] = useState<1 | 2 | 3>(1);
+  // Initialize version from localStorage or default to 1
+  const [version, setVersionState] = useState<1 | 2 | 3>(() => {
+    const savedVersion = localStorage.getItem(STORAGE_KEY);
+    return savedVersion ? (Number(savedVersion) as 1 | 2 | 3) : 1;
+  });
+
   const { getText, loading, error } = useSheetContent({ sheetId, sheetName });
+
+  // Update localStorage when version changes
+  const setVersion = (newVersion: 1 | 2 | 3) => {
+    setVersionState(newVersion);
+    localStorage.setItem(STORAGE_KEY, newVersion.toString());
+  };
 
   const getTextForCurrentVersion = (messageKey: string): string => {
     return getText(messageKey, version);

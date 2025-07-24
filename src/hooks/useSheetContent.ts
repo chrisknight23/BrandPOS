@@ -6,6 +6,38 @@ interface UseSheetContentProps {
   sheetName?: string;
 }
 
+// Helper function to parse CSV line while preserving commas in quoted strings
+const parseCSVLine = (line: string): string[] => {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        // Handle escaped quotes
+        current += '"';
+        i++;
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // End of field
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  
+  // Add the last field
+  result.push(current.trim());
+  return result.map(field => field.replace(/^"|"$/g, ''));
+};
+
 export const useSheetContent = ({ sheetId, sheetName = 'Sheet1' }: UseSheetContentProps) => {
   const [content, setContent] = useState<TextContentMap>({});
   const [loading, setLoading] = useState(true);
@@ -23,11 +55,7 @@ export const useSheetContent = ({ sheetId, sheetName = 'Sheet1' }: UseSheetConte
         const csvData = await response.text();
         
         // Parse CSV data
-        const rows = csvData.split('\n').map(row => 
-          row.split(',').map(cell => 
-            cell.replace(/^"|"$/g, '') // Remove quotes
-          )
-        );
+        const rows = csvData.split('\n').map(row => parseCSVLine(row));
         
         // Skip header row and process data
         const contentMap: TextContentMap = {};

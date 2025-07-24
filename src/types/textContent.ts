@@ -15,8 +15,11 @@ export type MessageKey =
   // Cart
   | 'rightRail'
   // Reward
-  | 'amontEarned'
-  | 'localCashText';
+  | 'amountEarned'
+  | 'localCashText'
+  | 'scanToClaim'
+  // End screen
+  | 'walkAwayText';
 
 export interface TextContent {
   screen: Screen;
