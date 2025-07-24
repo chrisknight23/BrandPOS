@@ -1,99 +1,179 @@
 import { BaseScreen } from '../components/common/BaseScreen/index';
 import { BrandPass } from '../components/common/BrandPass';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import CashAppLogo from '../assets/images/logos/16x16logo.png';
 import { useTextContent } from '../context/TextContentContext';
+import { Screen } from '../types/screen';
 
 interface HomeProps {
   onNext: () => void;
-  isIdle?: boolean; // New prop to control starting vs idle state
+  isIdle?: boolean;
   goToScreen?: (screen: Screen) => void;
+  shouldReverseAnimate?: boolean;
+  fromEndScreen?: boolean; // Add new prop to track if we came from End screen
 }
 
-type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'End' | 'CustomTip';
+const SCREENSAVER_DELAY = 20000; // 20 seconds
 
-export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
+export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate = false, fromEndScreen = false }: HomeProps) => {
   const { getText } = useTextContent();
   const [showAnimations, setShowAnimations] = useState(isIdle);
   const [showSecondPhase, setShowSecondPhase] = useState(isIdle);
   const [startTextPushBack, setStartTextPushBack] = useState(isIdle);
+  const [isReversing, setIsReversing] = useState(false);
+  const screensaverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleFollowButtonClick = () => {
-    if (goToScreen) {
-      goToScreen('Follow');
-    } else {
-      onNext(); // Fallback to onNext if goToScreen not available
+  // Function to clear existing timer
+  const clearScreensaverTimer = useCallback(() => {
+    if (screensaverTimerRef.current) {
+      clearTimeout(screensaverTimerRef.current);
+      screensaverTimerRef.current = null;
     }
-  };
+  }, []);
 
+  // Function to start new timer
+  const startScreensaverTimer = useCallback(() => {
+    clearScreensaverTimer();
+    
+    // Don't start screensaver timer if we came from End screen
+    if (!isIdle && !isReversing && !fromEndScreen) {
+      screensaverTimerRef.current = setTimeout(() => {
+        goToScreen?.('Screensaver');
+      }, SCREENSAVER_DELAY);
+    }
+  }, [isIdle, isReversing, fromEndScreen, goToScreen, clearScreensaverTimer]);
+
+  // Handle reverse animation sequence
   useEffect(() => {
-    // Only run animations if not in idle mode
-    if (!isIdle) {
-      // Start all animations after a short delay when component mounts
+    if (shouldReverseAnimate && !isReversing) {
+      clearScreensaverTimer();
+      setIsReversing(true);
+      setShowSecondPhase(false);
+      setStartTextPushBack(false);
+    }
+  }, [shouldReverseAnimate, isReversing, clearScreensaverTimer]);
+
+  // Handle initial animation sequence
+  useEffect(() => {
+    if (!isIdle && !isReversing && !shouldReverseAnimate) {
       const initialTimer = setTimeout(() => {
         setShowAnimations(true);
         
-        // Start text push back animation slightly before card animation
         const textPushBackTimer = setTimeout(() => {
           setStartTextPushBack(true);
-        }, 2960); // Start text animation 0.5s before card
+        }, 2960);
         
-        // Start second phase animations after the first phase completes
         const secondPhaseTimer = setTimeout(() => {
           setShowSecondPhase(true);
-        }, 3000); // 3 second delay before second phase animations start
+          // Only start screensaver timer if not coming from End screen
+          if (!fromEndScreen) {
+            startScreensaverTimer();
+          }
+        }, 3000);
         
         return () => {
           clearTimeout(textPushBackTimer);
           clearTimeout(secondPhaseTimer);
         };
-      }, 500); // Delay before starting all animations
+      }, 500);
+      
+      return () => {
+        clearTimeout(initialTimer);
+        clearScreensaverTimer();
+      };
+    }
+  }, [isIdle, isReversing, shouldReverseAnimate, fromEndScreen, clearScreensaverTimer, startScreensaverTimer]);
+
+  // Reset timer on any user interaction
+  const handleUserInteraction = useCallback(() => {
+    if (!isIdle && !isReversing && !fromEndScreen) {
+      clearScreensaverTimer();
+      startScreensaverTimer();
+    }
+  }, [clearScreensaverTimer, startScreensaverTimer, isIdle, isReversing, fromEndScreen]);
+
+  const handleFollowButtonClick = () => {
+    clearScreensaverTimer();
+    if (goToScreen) {
+      goToScreen('Follow');
+    } else {
+      onNext();
+    }
+  };
+
+  // Normal forward animation sequence
+  useEffect(() => {
+    if (!isIdle && !isReversing && !shouldReverseAnimate) {
+      const initialTimer = setTimeout(() => {
+        setShowAnimations(true);
+        
+        const textPushBackTimer = setTimeout(() => {
+          setStartTextPushBack(true);
+        }, 2960);
+        
+        const secondPhaseTimer = setTimeout(() => {
+          setShowSecondPhase(true);
+          startScreensaverTimer();
+        }, 3000);
+        
+        return () => {
+          clearTimeout(textPushBackTimer);
+          clearTimeout(secondPhaseTimer);
+        };
+      }, 500);
       
       return () => clearTimeout(initialTimer);
     }
-  }, [isIdle]);
+  }, [isIdle, isReversing, shouldReverseAnimate, startScreensaverTimer]);
 
   return (
     <BaseScreen onNext={onNext}>
-      <div className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden">
+      <div 
+        className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden"
+        onClick={handleUserInteraction}
+        onTouchStart={handleUserInteraction}
+      >
         <motion.div 
-          className="flex-1 flex flex-col items-center justify-center w-full"
+          className="flex-1 flex flex-col items-center justify-center w-full px-16"
           animate={isIdle ? {} : { 
-            opacity: startTextPushBack ? 0 : 1,
-            scale: startTextPushBack ? 0.8 : 1,
-            z: startTextPushBack ? 1 : 10
+            opacity: startTextPushBack ? 0 : 1
           }}
-          transition={isIdle ? {} : { duration: 0.3, ease: "easeOut" }}
+          transition={{ 
+            duration: 0.3, 
+            ease: "easeOut" 
+          }}
           style={{
-            zIndex: isIdle ? 1 : (startTextPushBack ? 1 : 10),
-            opacity: isIdle ? 0 : undefined,
-            scale: isIdle ? 0.8 : undefined
+            zIndex: isIdle ? 1 : (isReversing ? 1 : (startTextPushBack ? 1 : 10)),
+            opacity: isIdle ? 0 : undefined
           }}
         >
-          <motion.h1 
-            className="text-[90px] font-cash font-medium text-center leading-[0.85] tracking-[-0.02em]"
-            initial={isIdle ? {} : { opacity: 0 }}
+          <motion.div 
+            className="max-w-[600px] line-clamp-2"
+            initial={false}
             animate={isIdle ? {} : { opacity: showAnimations ? 1 : 0 }}
-            transition={isIdle ? {} : { duration: 0.8, ease: "easeOut" }}
-            style={{ opacity: isIdle ? 0 : undefined }}
-            dangerouslySetInnerHTML={{ __html: getText('introText') }}
-          />
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <h1 
+              className="text-[90px] font-cash font-medium text-center leading-[0.85] tracking-[-0.02em]"
+              dangerouslySetInnerHTML={{ 
+                __html: getText('introText').replace(' earn', '<br/>earn') 
+              }}
+            />
+          </motion.div>
           <motion.p 
             className="text-[22px] text-white mt-4"
-            initial={isIdle ? {} : { opacity: 0 }}
+            initial={false}
             animate={isIdle ? {} : { opacity: showAnimations ? 0.5 : 0 }}
-            transition={isIdle ? {} : { duration: 0.8, ease: "easeOut" }}
-            style={{ opacity: isIdle ? 0 : undefined }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
             $mileendbagel on Cash App
           </motion.p>
-          
         </motion.div>
         
         <motion.div 
           className="absolute w-full h-full flex justify-center items-center"
-          initial={isIdle ? { y: 0 } : { y: 500 }}
+          initial={false}
           animate={isIdle ? { y: 0 } : { 
             y: showSecondPhase ? 
               0 : 
@@ -101,7 +181,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
                 420 : 
                 500)
           }}
-          transition={isIdle ? {} : {
+          transition={{
             type: "spring",
             stiffness: 120,
             damping: 18,
@@ -109,7 +189,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
             restDelta: 0.001
           }}
           style={{
-            zIndex: isIdle ? 10 : (showSecondPhase ? 10 : 5)
+            zIndex: isIdle ? 10 : (isReversing ? 10 : (showSecondPhase ? 10 : 5))
           }}
         >
           <BrandPass 
@@ -125,20 +205,27 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
           />
         </motion.div>
 
-        {/* Bottom left message that fades in when card slides up */}
         <motion.div 
-          className="absolute bottom-0 left-0 p-8 cursor-pointer z-20"
-          initial={isIdle ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          className="absolute bottom-0 left-0 p-8 cursor-pointer z-20 max-w-[216px]"
+          initial={false}
           animate={isIdle ? { opacity: 1, y: 0 } : { 
             opacity: showSecondPhase ? 1 : 0,
             y: showSecondPhase ? 0 : 20
           }}
-          transition={isIdle ? {} : { duration: 0.3, ease: "easeOut", delay: 0.25 }}
-          onClick={() => {
+          transition={{ 
+            duration: 0.3, 
+            ease: "easeOut",
+            delay: isReversing ? 0 : 0.25 
+          }}
+          onClick={(e) => {
+            clearScreensaverTimer();
             console.log('Bottom text clicked!');
             goToScreen && goToScreen('Cart');
           }}
-          style={{ pointerEvents: 'auto' }}
+          style={{ 
+            pointerEvents: 'auto',
+            zIndex: isReversing ? 1 : 20 
+          }}
         >
           <div>
             <div className="flex items-center gap-1 mb-4">
@@ -147,7 +234,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
                 Cash App
               </p>
             </div>
-            <p className="text-white text-[20px] leading-[24px] font-normal">
+            <p className="text-white text-[20px] leading-[24px] font-normal line-clamp-3">
               {getText('followText')}
             </p>
           </div>

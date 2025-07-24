@@ -6,6 +6,7 @@ import { useUserType } from '../context/UserTypeContext';
 import LocalCustomer from '../components/common/LocalCustomer';
 import AnimatedMessage from '../components/common/AnimatedMessage/';
 import ProgressButton from '../components/common/ProgressButton';
+import { useTextContent } from '../context/TextContentContext';
 
 interface EndProps {
   onNext: () => void;
@@ -19,13 +20,23 @@ interface EndProps {
   skipWelcome?: boolean; // Skip welcome message and go directly to thanks
 }
 
-export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, taxRate = 0.0875, isPaused, skipWelcome = false }: EndProps) => {
+export const End = ({ 
+  onNext, 
+  amount, 
+  baseAmount, 
+  tipAmount = "0", 
+  goToScreen, 
+  taxRate = 0.0875, 
+  isPaused, 
+  skipWelcome = true  // Changed default to true
+}: EndProps) => {
+  const { getText } = useTextContent();
   const [total, setTotal] = useState(amount || baseAmount || "0");
   const [progress, setProgress] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
   const [hasTip, setHasTip] = useState(false);
   const { userType } = useUserType();
-  const [showFirst, setShowFirst] = useState(!skipWelcome);
+  const [showFirst, setShowFirst] = useState(!skipWelcome);  // This will now default to false
   const [progressReady, setProgressReady] = useState(false); // Wait for fade-in
 
   // Timer constants
@@ -52,7 +63,7 @@ export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, t
       if (newProgress >= 1) {
         clearInterval(timer);
         if (goToScreen) {
-          goToScreen('Home');
+          goToScreen('Home', { fromEndScreen: true });
         } else {
           onNext();
         }
@@ -116,17 +127,17 @@ export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, t
   return (
     <BaseScreen onNext={onNext}>
       <div 
-        className="w-full h-full text-white p-10 flex flex-col justify-between rounded-[16px] relative"
+        className="w-full h-full text-white p-6 flex flex-col justify-between rounded-[16px] relative"
         style={{ backgroundColor: bgColor }}
       >
         <motion.div
-          className="flex flex-row items-start justify-between mb-6 px-8 mt-8 h-16"
+          className="flex flex-row items-start justify-between mb-6 px-4 mt-4 h-16"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           {/* Left: Paid text and thanks */}
-          <div className="flex flex-col space-y-6">
+          <div className="flex flex-col space-y-6 max-w-[400px]">
             <h2 className="text-2xl font-cash font-medium">
               Paid <span className="font-normal text-white/40">${total}</span> {hasTip && <span className="font-normal text-white/60">with tip</span>}
             </h2>
@@ -134,7 +145,7 @@ export const End = ({ onNext, amount, baseAmount, tipAmount = "0", goToScreen, t
               {showFirst ? (
                 <>Welcome to<br />Cash App Local</>
               ) : (
-                <>Thanks for<br />shopping local</>
+                <div className="line-clamp-2 leading-none pb-2" dangerouslySetInnerHTML={{ __html: getText('walkAwayText') }} />
               )}
             </AnimatedMessage>
           </div>

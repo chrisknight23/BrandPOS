@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { logNavigation } from '../utils/debug';
 import { SCREEN_ORDER } from '../constants/screens';
-import { Screen } from '../types/screen';
+import { Screen, NavigationOptions } from '../types/screen';
 import * as screens from '../screens';
 import DesktopIcon from '../assets/images/Desktop.svg';
 import { useUserType } from '../context/UserTypeContext';
@@ -10,6 +10,7 @@ import SettingsPanel from './dev/SettingsPanel';
 import { DropMenu } from './dev/dropMenu';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
 import { useKioskMode } from '../hooks/useKioskMode';
+import { CSSProperties } from 'react';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'CustomTip', 'End'];
@@ -140,6 +141,7 @@ export const MainView = () => {
   const [isFirstHomeVisit, setIsFirstHomeVisit] = useState(true);
   // Track previous screen to detect when coming from End
   const [previousScreen, setPreviousScreen] = useState<Screen | null>(null);
+  const [shouldReverseAnimate, setShouldReverseAnimate] = useState(false);
   
   // Track previous isPanelOpen to determine open/close direction
   const prevPanelOpenRef = useRef(isPanelOpen);
@@ -392,16 +394,21 @@ export const MainView = () => {
     }
   }, [sessionId]);
   
-  // Direct navigation to specific screen
-  const goToScreen = useCallback((screen: Screen) => {
-    logNavigation('MainView:goToScreen', `Navigating directly to ${screen}`, 
-      { from: currentScreen });
-    console.log(`MainView: Navigating directly from ${currentScreen} to ${screen}`);
+  // Navigation function that can be passed to child components
+  const goToScreen = useCallback((screen: Screen, options?: NavigationOptions) => {
+    logNavigation(currentScreen, screen);
+    
     // Update previous screen before changing current screen
     setPreviousScreen(currentScreen);
+    
+    // When navigating from End to Home, reset isFirstHomeVisit to true
+    if (screen === 'Home' && currentScreen === 'End') {
+      setIsFirstHomeVisit(true);
+    }
+    
     setCurrentScreen(screen);
   }, [currentScreen]);
-  
+
   // Standard navigation to next screen based on current screen
   const handleScreenNext = useCallback(() => {
     const currentIndex = SCREEN_ORDER.indexOf(currentScreen);
@@ -457,6 +464,17 @@ export const MainView = () => {
   const handleScreenNavSelect = (screen: string) => {
     goToScreen(screen as Screen);
   };
+
+  // Add handler for Home screen refresh
+  const handleHomeRefresh = useCallback(() => {
+    if (currentScreen === 'Home') {
+      setShouldReverseAnimate(true);
+      setTimeout(() => {
+        setShouldReverseAnimate(false);
+        setRefreshKey(prev => prev + 1);
+      }, 800);
+    }
+  }, [currentScreen]);
   
   const { userType, setUserType } = useUserType();
   
@@ -517,7 +535,7 @@ export const MainView = () => {
       // Pass tipAmount as string or undefined (never null)
       tipAmount: tipAmount || undefined,
       // Pass amount which includes both base and tip
-      amount: calculateTotalAmount() || undefined,
+      amount: currentScreen === 'Reward' ? "1" : (calculateTotalAmount() || undefined),
       // Pass the raw cart items
       cartItems,
       onCartUpdate: handleCartUpdate,
@@ -534,15 +552,17 @@ export const MainView = () => {
       return {
         ...baseProps,
         // Home screen should be in idle mode if it's not the first visit
-        isIdle: !isFirstHomeVisit
+        isIdle: !isFirstHomeVisit,
+        shouldReverseAnimate,
+        fromEndScreen: previousScreen === 'End'
       };
     }
     
     if (currentScreen === 'End') {
       return {
         ...baseProps,
-        // Skip welcome message when coming from Reward screen or Tipping screen (no tip)
-        skipWelcome: previousScreen === 'Reward' || previousScreen === 'Tipping',
+        // Always skip welcome message when navigating directly to End screen
+        skipWelcome: true,
         // Pass pause state to End screen
         isPaused,
         setIsPaused
@@ -553,14 +573,28 @@ export const MainView = () => {
   };
   
   // --- Removed QR scan status effect ---
+
+  // Get root div style based on PWA mode
+  const rootStyle = useMemo((): CSSProperties => {
+    const isPWA = isPWAMode();
+    return {
+      backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.5px, transparent 1.5px)',
+      backgroundSize: '32px 32px',
+      backgroundPosition: '0 0',
+      ...(isPWA && {
+        position: 'fixed',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        touchAction: 'none'
+      })
+    };
+  }, []);
+
   return (
     <div
       className="flex flex-col w-screen h-screen bg-[#050505]"
-      style={{
-        backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.5px, transparent 1.5px)',
-        backgroundSize: '32px 32px',
-        backgroundPosition: '0 0',
-      }}
+      style={rootStyle}
     >
       {/* Unified Settings Panel Container (collapsed/expanded) - Hidden in kiosk mode */}
       {!isKioskMode && (
@@ -598,13 +632,6 @@ export const MainView = () => {
               if (rowIndex === 0) setUserType('new');
               else if (rowIndex === 1) setUserType('returning');
               else if (rowIndex === 2) setUserType('cash-local');
-            }}
-            bottomButton={{
-              label: "Display mode",
-              onClick: () => {
-                console.log("Display mode clicked");
-                // TODO: Add display mode functionality
-              }
             }}
           />
         </div>
@@ -690,6 +717,7 @@ export const MainView = () => {
                   screens={getNavScreens()}
                   currentScreen={currentScreen}
                   onScreenSelect={handleScreenNavSelect}
+                  onHomeRefresh={handleHomeRefresh}
                 />
               </div>
             )}
