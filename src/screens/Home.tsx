@@ -3,6 +3,7 @@ import { BrandPass } from '../components/common/BrandPass';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import CashAppLogo from '../assets/images/logos/16x16logo.png';
+import { useTextContent } from '../context/TextContentContext';
 
 interface HomeProps {
   onNext: () => void;
@@ -13,6 +14,7 @@ interface HomeProps {
 type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'End' | 'CustomTip';
 
 export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
+  const { getText } = useTextContent();
   const [showAnimations, setShowAnimations] = useState(isIdle);
   const [showSecondPhase, setShowSecondPhase] = useState(isIdle);
   const [startTextPushBack, setStartTextPushBack] = useState(isIdle);
@@ -75,7 +77,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
             animate={isIdle ? {} : { opacity: showAnimations ? 1 : 0 }}
             transition={isIdle ? {} : { duration: 0.8, ease: "easeOut" }}
             style={{ opacity: isIdle ? 0 : undefined }}
-            dangerouslySetInnerHTML={{ __html: "Follow us and<br/>earn rewards" }}
+            dangerouslySetInnerHTML={{ __html: getText('introText') }}
           />
           <motion.p 
             className="text-[22px] text-white mt-4"
@@ -91,21 +93,15 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
         
         <motion.div 
           className="absolute w-full h-full flex justify-center items-center"
-          // Starting position (completely off-screen below the frame)
           initial={isIdle ? { y: 0 } : { y: 500 }}
           animate={isIdle ? { y: 0 } : { 
-            // Animation positions
             y: showSecondPhase ? 
-              // Center position
               0 : 
               (showAnimations ? 
-                // Peeking position at bottom of frame
                 420 : 
-                // Initial off-screen position
                 500)
           }}
           transition={isIdle ? {} : {
-            // Spring animation
             type: "spring",
             stiffness: 120,
             damping: 18,
@@ -152,9 +148,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen }: HomeProps) => {
               </p>
             </div>
             <p className="text-white text-[20px] leading-[24px] font-normal">
-              Follow us on<br/>
-              Cash App and<br/>
-              earn rewards
+              {getText('followText')}
             </p>
           </div>
         </motion.div>
