@@ -10,6 +10,10 @@
     /* Prevent iOS zoom on form inputs and improve PWA performance */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
   }
   
   /* PWA Safe Area Support for iOS */
