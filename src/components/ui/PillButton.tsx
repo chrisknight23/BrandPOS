@@ -17,6 +17,8 @@ interface PillButtonProps {
   dropdownItems?: DropdownItem[];
   onDropdownSelect?: (value: string) => void;
   currentDropdownValue?: string;
+  showRefresh?: boolean;
+  onRefreshClick?: () => void;
 }
 
 /**
@@ -38,7 +40,9 @@ const PillButton: React.FC<PillButtonProps> = ({
   hasDropdown = false,
   dropdownItems = [],
   onDropdownSelect,
-  currentDropdownValue
+  currentDropdownValue,
+  showRefresh = false,
+  onRefreshClick
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -92,6 +96,34 @@ const PillButton: React.FC<PillButtonProps> = ({
         tabIndex={0}
       >
         <span>{children}</span>
+        {showRefresh && active && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRefreshClick?.();
+            }}
+            className="-ml-0.5 p-0.5 hover:bg-black/10 rounded-full"
+            aria-label="Refresh animation"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+              <path d="M8 16H3v5" />
+            </svg>
+          </motion.button>
+        )}
         {hasDropdown && active && (
           <motion.svg
             width="8"
