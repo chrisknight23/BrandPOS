@@ -7,14 +7,15 @@ import LocalCashLogo from '../assets/images/14/Local-Cash.svg';
 import LocalCash24Icon from '../assets/images/Local-Cash-24px.svg';
 import SkippedIcon from '../assets/images/32/32/skipped.svg';
 import { Screen } from '../types/screen';
+import { useTextContent } from '../context/TextContentContext';
 
 interface RewardProps {
   onNext: () => void;
-  amount?: string;
   goToScreen?: (screen: Screen) => void;
 }
 
-export const Reward = ({ onNext, amount = "1", goToScreen }: RewardProps) => {
+export const Reward = ({ onNext, goToScreen }: RewardProps) => {
+  const { getText } = useTextContent();
   const [showAnimations, setShowAnimations] = useState(false);
   const [showSecondPhase, setShowSecondPhase] = useState(false);
   const [startTextPushBack, setStartTextPushBack] = useState(false);
@@ -115,9 +116,10 @@ export const Reward = ({ onNext, amount = "1", goToScreen }: RewardProps) => {
               backfaceVisibility: 'hidden'
             }}
           >
-            <h1 className="text-[110px] font-cash font-medium text-center leading-[0.85] tracking-[-0.02em]">
-              $1 earned
-            </h1>
+            <h1 
+              className="text-[110px] font-cash font-medium text-center leading-[0.85] tracking-[-0.02em]"
+              dangerouslySetInnerHTML={{ __html: getText('amountEarned') }}
+            />
           </motion.div>
           
           {/* BrandPass card that slides up from bottom */}
@@ -150,7 +152,6 @@ export const Reward = ({ onNext, amount = "1", goToScreen }: RewardProps) => {
           >
             <BrandPass
               layoutId="reward-card"
-              amount={amount}
               headerText="$mileendbagel"
               subheaderText="Reward"
               buttonText="Claim"
@@ -170,21 +171,20 @@ export const Reward = ({ onNext, amount = "1", goToScreen }: RewardProps) => {
 
           {/* Bottom left message that fades in when card slides up */}
           <motion.div 
-            className="absolute bottom-0 left-0 p-8"
+            className="absolute bottom-0 left-0 p-8 max-w-[216px]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isExiting ? 0 : (showSecondPhase ? 1 : 0),
               y: isExiting ? 20 : (showSecondPhase ? 0 : 20)
             }}
             transition={{ 
-              duration: isExiting ? 0.1 : 0.3, // Much faster fade out when exiting
+              duration: isExiting ? 0.1 : 0.3,
               ease: "easeOut", 
               delay: isExiting ? 0 : 0.25,
               restSpeed: 0.001,
               restDelta: 0.001
             }}
             style={{
-              // Performance optimizations
               willChange: 'transform, opacity',
               backfaceVisibility: 'hidden'
             }}
@@ -196,9 +196,12 @@ export const Reward = ({ onNext, amount = "1", goToScreen }: RewardProps) => {
                   Local Cash
                 </p>
               </div>
-              <p className="text-white text-[20px] leading-[24px] font-normal">
-                {isCardFlipped ? <>Scan to redeem<br/>your Local Cash<br/>in Cash App</> : <>You've earned<br/>Local Cash,<br/>claim it now</>}
-              </p>
+              <div className="whitespace-pre-line">
+                <p 
+                  className="text-white text-[20px] leading-[24px] font-normal line-clamp-3"
+                  dangerouslySetInnerHTML={{ __html: getText(isCardFlipped ? 'scanToClaim' : 'localCashText') }}
+                />
+              </div>
             </div>
           </motion.div>
 

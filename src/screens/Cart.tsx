@@ -5,6 +5,9 @@ import { ToggleButton } from '../components/ui/ToggleButton';
 import { BRAND_COLORS } from '../constants/colors';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useTextContent } from '../context/TextContentContext';
+import QRIcon from '../assets/images/24/qr.svg';
+import SMSIcon from '../assets/images/24/comm-sms.svg';
 
 interface CartItem {
   id: number;
@@ -43,6 +46,7 @@ export const Cart = ({
   cartItems?: CartItem[];
   onCartUpdate?: (items: CartItem[]) => void;
 }) => {
+  const { getText } = useTextContent();
   // Use provided cart items or default to initial data
   const [items, setItems] = useState<CartItem[]>(cartItems || initialCartData.items);
   const [cardCentered, setCardCentered] = useState(false);
@@ -171,9 +175,9 @@ export const Cart = ({
               }}
               icons={[
                 // QR icon (index 0)
-                <img src="/src/assets/images/24/qr.svg" alt="QR Code" className="w-6 h-6 block" />,
+                <img src={QRIcon} alt="QR Code" className="w-6 h-6 block" />,
                 // SMS icon (index 1)
-                <img src="/src/assets/images/24/comm-sms.svg" alt="SMS" className="w-6 h-6 block" />
+                <img src={SMSIcon} alt="SMS" className="w-6 h-6 block" />
               ]}
             />
 
@@ -194,9 +198,9 @@ export const Cart = ({
         )}
 
         {/* Right Panel - Brand Card (Same as ScreensaverExit) */}
-        <div className="bg-black flex flex-col items-center justify-center mt-6 mr-6 mb-6 relative">
+        <div className="bg-black h-full flex flex-col py-6 pr-6">
           {/* Content Container with Border */}
-          <div className="border border-[#333] rounded-[24px] p-5 flex flex-col items-center">
+          <div className="border border-[#333] rounded-[24px] flex flex-col h-full m-0 p-5" style={{ width: '201px' }}>
             {/* Empty space where card will land - no static card */}
             <div className="w-[161px] h-[213px] mb-6">
               {/* Empty placeholder for card landing area */}
@@ -205,12 +209,11 @@ export const Cart = ({
             {/* Brand Name */}
             <div className="text-white/70 text-[14px] font-medium mb-2 text-left w-full">$mileendbagel</div>
             
-            {/* Description Text */}
-            <div className="text-white text-left text-[20px] leading-[24px] mb-6 w-full">
-              Follow us on<br/>
-              Cash App and<br/>
-              earn rewards
-            </div>
+            {/* Description Text - now using dynamic content with HTML support */}
+            <div 
+              className="text-white text-left text-[20px] leading-[24px] mb-6 w-full line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: getText('rightRail') }}
+            />
             
             {/* Follow Button */}
             <button 
@@ -223,12 +226,12 @@ export const Cart = ({
 
           {/* ScreensaverCard positioned in the right rail (landed state) */}
           <motion.div
-            className="absolute top-[20px] left-[21px] w-[161px] h-[213px] flex items-center justify-center"
+            className="absolute top-[44px] right-[45px] w-[161px] h-[213px] flex items-center justify-center"
             style={{ 
               zIndex: 20
             }}
             animate={{
-              x: cardCentered ? -257 : 0,
+              x: cardCentered ? -281 : 0,
               y: cardCentered ? 100 : 0
             }}
             transition={{

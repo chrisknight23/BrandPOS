@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import CashAppLogo from '../assets/images/logos/16x16logo.png';
 import QRIcon from '../assets/images/24/qr.svg';
 import SMSIcon from '../assets/images/24/comm-sms.svg';
+import { useTextContent } from '../context/TextContentContext';
 
 interface FollowProps {
   onNext: () => void;
@@ -20,6 +21,7 @@ type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverExit' | 'Cart' | '
 type BackMode = 'qr' | 'phone';
 
 export const Follow = ({ onNext, onClose, isOverlay = false, goToScreen }: FollowProps) => {
+  const { getText } = useTextContent();
   const [backMode, setBackMode] = useState<BackMode>('qr');
   const [isFlipped, setIsFlipped] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -119,7 +121,7 @@ export const Follow = ({ onNext, onClose, isOverlay = false, goToScreen }: Follo
       <div className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden">
         
         {/* Bottom left message */}
-        <div className="absolute bottom-0 left-0 p-8">
+        <div className="absolute bottom-0 left-0 p-8 max-w-[216px]">
           <div>
             <div className="flex items-center gap-1 mb-4">
               <img src={CashAppLogo} alt="Cash App" className="w-4 h-4" />
@@ -127,12 +129,8 @@ export const Follow = ({ onNext, onClose, isOverlay = false, goToScreen }: Follo
                 Cash App
               </p>
             </div>
-            <p className="text-white text-[20px] leading-[24px] font-normal">
-              {showExitText ? (
-                <>Follow us on<br/>Cash App and<br/>earn rewards</>
-              ) : (
-                <>Scan or text<br/>to follow and<br/>earn rewards</>
-              )}
+            <p className="text-white text-[20px] leading-[24px] font-normal line-clamp-3">
+              {showExitText ? getText('followText') : getText('scanText')}
             </p>
           </div>
         </div>

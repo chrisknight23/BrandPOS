@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { ScreensaverCard } from '../../components/common/ScreensaverCard';
+import { useTextContent } from '../../context/TextContentContext';
 
 import { AnimatedQRCode } from '../../components/common/AnimatedQRCode';
 import { ToggleButton } from '../../components/ui/ToggleButton';
@@ -18,6 +19,7 @@ interface ScreensaverFollowProps {
 }
 
 export const ScreensaverFollow = ({ onNext, onClose, goToScreen }: ScreensaverFollowProps) => {
+  const { getText } = useTextContent();
   const [animationPhase, setAnimationPhase] = useState<'fullscreen' | 'shrinking' | 'landed'>('fullscreen');
   const [backMode, setBackMode] = useState<'qr' | 'phone'>('qr');
   const [isExiting, setIsExiting] = useState(false);
@@ -156,7 +158,7 @@ export const ScreensaverFollow = ({ onNext, onClose, goToScreen }: ScreensaverFo
 
         {/* Bottom left message - fades in when animation completes */}
         <motion.div 
-          className="absolute bottom-0 left-0 p-8"
+          className="absolute bottom-0 left-0 p-8 max-w-[216px]"
           initial={{ opacity: 0 }}
           animate={{
             opacity: animationPhase === 'landed' ? 1 : 0
@@ -174,12 +176,8 @@ export const ScreensaverFollow = ({ onNext, onClose, goToScreen }: ScreensaverFo
                 Cash App
               </p>
             </div>
-            <p className="text-white text-[20px] leading-[24px] font-normal">
-              {showExitText ? (
-                <>Follow us on<br/>Cash App and<br/>earn rewards</>
-              ) : (
-                <>Scan or text<br/>to follow and<br/>earn rewards</>
-              )}
+            <p className="text-white text-[20px] leading-[24px] font-normal line-clamp-3">
+              {showExitText ? getText('followText') : getText('scanText')}
             </p>
           </div>
         </motion.div>
