@@ -77,9 +77,11 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
 
   return (
     <BaseScreen>
-      <div className="w-[800px] h-[500px] relative overflow-hidden rounded-[16px]">
+      <div 
+        className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden"
+      >
         <motion.div 
-          className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden"
+          className="w-full h-full relative overflow-hidden"
           initial={enterAnimation.initial}
           animate={enterAnimation.animate}
           exit={enterAnimation.exit}
@@ -90,7 +92,6 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
             restDelta: 0.001
           }}
           style={{
-            // Performance optimizations
             willChange: 'transform',
             backfaceVisibility: 'hidden'
           }}
@@ -111,7 +112,6 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
             }}
             style={{
               zIndex: startTextPushBack ? 1 : 10,
-              // Performance optimizations
               willChange: 'transform, opacity',
               backfaceVisibility: 'hidden'
             }}
@@ -125,26 +125,21 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
           {/* BrandPass card that slides up from bottom */}
           <motion.div 
             className="absolute w-full h-full flex justify-center items-center"
-            // Starting position (completely off-screen below the frame)
             initial={{ y: 500 }}
             animate={{ 
-              // Animation positions - direct slide from off-screen to center, then exit
               y: isExiting ? 500 : (showSecondPhase ? 0 : 500)
             }}
             transition={{
-              // Use different spring physics for natural drop behavior
               type: "spring",
               stiffness: isExiting ? 300 : 120,
               damping: isExiting ? 25 : 18,
               mass: isExiting ? 1.5 : 1.2,
               restDelta: 0.001,
               restSpeed: 0.001,
-              // For exit, use velocity to create the natural bounce-back effect
               ...(isExiting && { velocity: -50 })
             }}
             style={{
               zIndex: showSecondPhase ? 20 : 5,
-              // Performance optimizations
               willChange: 'transform',
               backfaceVisibility: 'hidden',
               perspective: 1000
@@ -210,7 +205,6 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
           {/* Close button positioned at bottom right */}
           <motion.button
             onClick={() => {
-              // Use the same navigation path as timer completion
               handleTimerComplete();
             }}
             className="absolute bottom-8 right-8 w-16 h-16 rounded-full bg-black border border-white/20 flex items-center justify-center"
@@ -253,10 +247,9 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
               restDelta: 0.001
             }}
             style={{
-              // Performance optimizations
               willChange: 'opacity',
               backfaceVisibility: 'hidden',
-              zIndex: 10  // Below card when it slides up, but above background text
+              zIndex: 10
             }}
           >
             <img src={LocalCash24Icon} alt="Local Cash" className="w-6 h-6 opacity-70" />
@@ -264,7 +257,6 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
               Local Cash
             </span>
           </motion.div>
-
         </motion.div>
       </div>
     </BaseScreen>
