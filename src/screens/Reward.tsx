@@ -81,7 +81,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
         className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden"
       >
         <motion.div 
-          className="w-full h-full relative overflow-hidden"
+          className="flex-1 flex flex-col items-center justify-center w-full relative overflow-hidden"
           initial={enterAnimation.initial}
           animate={enterAnimation.animate}
           exit={enterAnimation.exit}
