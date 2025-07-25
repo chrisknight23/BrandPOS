@@ -239,8 +239,8 @@ export const Cart = ({
             initial={false} // Prevent initial animation
             style={{ 
               zIndex: 20,
-              // Adjust initial position in PWA mode - move it down more
-              top: isPWAMode() ? '58px' : '44px'
+              // Move down by ~9.2px (12px in scaled space) in PWA mode
+              top: isPWAMode() ? '67px' : '44px'
             }}
             animate={{
               // Only animate when card is centered/uncentered
