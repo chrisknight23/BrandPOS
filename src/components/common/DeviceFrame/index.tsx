@@ -37,8 +37,8 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
           className="relative overflow-hidden flex items-center justify-center"
           style={{
             width: 'calc(100vw / 1.3)',
-            // Subtract additional space for the home indicator
-            height: 'calc((100vh - 34px) / 1.3)',
+            // Reduce the space we're subtracting to account for existing padding
+            height: 'calc((100vh - 20px) / 1.3)',
             transform: 'scale(1.3)',
             transformOrigin: 'center',
             paddingTop: 'env(safe-area-inset-top)',
