@@ -37,11 +37,11 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
           className="relative overflow-hidden flex items-center justify-center"
           style={{
             width: 'calc(100vw / 1.3)',
-            // Reduced height subtraction to minimize bottom space
             height: 'calc((100vh - 16px) / 1.3)',
             transform: 'scale(1.3)',
             transformOrigin: 'center',
-            paddingTop: 'env(safe-area-inset-top)',
+            // Add 8px to top padding to compensate for the upward shift
+            paddingTop: 'calc(env(safe-area-inset-top) + 8px)',
             paddingBottom: 'env(safe-area-inset-bottom)',
             paddingLeft: 'env(safe-area-inset-left)',
             paddingRight: 'env(safe-area-inset-right)'
