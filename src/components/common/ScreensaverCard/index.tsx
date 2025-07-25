@@ -152,7 +152,12 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
       >
         <motion.div
           className="w-full h-full relative"
-          style={{ transformStyle: 'preserve-3d' }}
+          style={{ 
+            transformStyle: 'preserve-3d',
+            WebkitTransformStyle: 'preserve-3d',
+            perspective: '1000px',
+            WebkitPerspective: '1000px'
+          }}
           animate={{ 
             rotateY: flipToFront ? 0 : (
               flipToQR ? 180 : (
@@ -177,31 +182,25 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
         >
           {/* Front Face */}
           <motion.div
-            className="absolute inset-0 w-full h-full backface-hidden"
+            className="absolute inset-0 w-full h-full"
             style={{
               backfaceVisibility: 'hidden',
-              transform: 'rotateY(0deg)'
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'rotateY(0deg) translateZ(0.1px)', // Small translateZ to help with Safari z-index
+              WebkitTransform: 'rotateY(0deg) translateZ(0.1px)',
+              zIndex: flipToFront || !flipToQR ? 2 : 1
             }}
             animate={{
-              backgroundColor: isExpanded ? BRAND_COLORS.primaryExpanded : backgroundColor,
-              borderTop: isExpanded ? `1px solid ${BRAND_COLORS.borderTransparent}` : `1px solid ${BRAND_COLORS.borderLight}`,
+              backgroundColor,
               borderRadius: isExpanded ? '16px' : '32px'
             }}
             initial={{
-              backgroundColor: isFullscreen ? BRAND_COLORS.primaryExpanded : backgroundColor,
-              borderTop: isFullscreen ? `1px solid ${BRAND_COLORS.borderTransparent}` : `1px solid ${BRAND_COLORS.borderLight}`,
+              backgroundColor,
               borderRadius: isFullscreen ? '16px' : '32px'
             }}
             transition={{
               duration: screensaverPhase === 'fullscreen' ? 0 : 0.6,
-              ease: "easeOut",
-              borderRadius: {
-                type: "spring",
-                stiffness: 120,
-                damping: 20,
-                mass: 1.2,
-                duration: screensaverPhase === 'fullscreen' ? 0 : undefined
-              }
+              ease: "easeOut"
             }}
           >
             {/* Logo - always visible on front */}
@@ -291,10 +290,13 @@ export const ScreensaverCard: React.FC<ScreensaverCardProps> = ({
 
           {/* Back Face */}
           <motion.div
-            className="absolute inset-0 w-full h-full backface-hidden"
+            className="absolute inset-0 w-full h-full"
             style={{
               backfaceVisibility: 'hidden',
-              transform: 'rotateY(180deg)'
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg) translateZ(0.1px)', // Small translateZ to help with Safari z-index
+              WebkitTransform: 'rotateY(180deg) translateZ(0.1px)',
+              zIndex: flipToQR ? 2 : 1
             }}
             animate={{
               backgroundColor: isExpanded ? BRAND_COLORS.primaryExpanded : backfaceColor,
