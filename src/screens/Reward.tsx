@@ -186,10 +186,12 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
             }}
             style={{
               willChange: 'transform, opacity',
-              backfaceVisibility: 'hidden'
+              backfaceVisibility: 'hidden',
+              zIndex: 20,
+              pointerEvents: 'auto'
             }}
           >
-            <div>
+            <div className="w-full">
               <div className="flex items-center gap-1 mb-4">
                 <img src={LocalCashLogo} alt="Local Cash" className="w-3.5 h-3.5" />
                 <p className="text-white/70 text-[14px] font-normal">
@@ -211,14 +213,14 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
               // Use the same navigation path as timer completion
               handleTimerComplete();
             }}
-            className="w-16 h-16 rounded-full bg-black border border-white/20 flex items-center justify-center absolute bottom-8 right-8"
+            className="absolute bottom-8 right-8 w-16 h-16 rounded-full bg-black border border-white/20 flex items-center justify-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isExiting ? 0 : (showSecondPhase ? 1 : 0),
               y: isExiting ? 20 : (showSecondPhase ? 0 : 20)
             }}
             transition={{ 
-              duration: isExiting ? 0.1 : 0.3, // Much faster fade out when exiting
+              duration: isExiting ? 0.1 : 0.3,
               ease: "easeOut", 
               delay: isExiting ? 0 : 0.25,
               restSpeed: 0.001,
@@ -228,8 +230,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
             tabIndex={0}
             aria-label="Close and return to home"
             style={{
-              zIndex: 20, // Ensure button is above all other elements
-              // Performance optimizations
+              zIndex: 20,
               willChange: 'transform, opacity',
               backfaceVisibility: 'hidden'
             }}
