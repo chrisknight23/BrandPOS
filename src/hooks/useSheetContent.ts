@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TextContent, TextContentMap } from '../types/textContent';
+import { TextContent, TextContentMap, TextContentVersion } from '../types/textContent';
 
 interface UseSheetContentProps {
   sheetId: string;
@@ -40,6 +40,7 @@ const parseCSVLine = (line: string): string[] => {
 
 export const useSheetContent = ({ sheetId, sheetName = 'Sheet1' }: UseSheetContentProps) => {
   const [content, setContent] = useState<TextContentMap>({});
+  const [versionNames, setVersionNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,15 +58,28 @@ export const useSheetContent = ({ sheetId, sheetName = 'Sheet1' }: UseSheetConte
         // Parse CSV data
         const rows = csvData.split('\n').map(row => parseCSVLine(row));
         
-        // Skip header row and process data
+        // First row contains version names (after screen and messageKey columns)
+        const versionNames = rows[0].slice(2);
+        setVersionNames(versionNames);
+        
+        // Process content rows
         const contentMap: TextContentMap = {};
         rows.slice(1).forEach(row => {
           if (row[1]) { // If messageKey exists
-            contentMap[row[1]] = {
-              version1: row[2] || '',
-              version2: row[3] || '',
-              version3: row[4] || ''
-            };
+            const versions: TextContentVersion[] = [];
+            
+            // Start from index 2 (after screen and messageKey)
+            for (let i = 2; i < row.length; i++) {
+              if (row[i]) {
+                versions.push({
+                  id: i - 1,
+                  name: versionNames[i - 2] || `Version ${i - 1}`,
+                  content: row[i]
+                });
+              }
+            }
+            
+            contentMap[row[1]] = { versions };
           }
         });
         
@@ -80,13 +94,22 @@ export const useSheetContent = ({ sheetId, sheetName = 'Sheet1' }: UseSheetConte
     fetchContent();
   }, [sheetId, sheetName]);
 
-  const getText = (messageKey: string, version: 1 | 2 | 3 = 1): string => {
-    const versionKey = `version${version}` as keyof Pick<TextContentMap[string], 'version1' | 'version2' | 'version3'>;
-    return content[messageKey]?.[versionKey] || '';
+  const getText = (messageKey: string, versionId: number = 1): string => {
+    const versions = content[messageKey]?.versions || [];
+    const version = versions.find(v => v.id === versionId);
+    return version?.content || '';
+  };
+
+  const getVersions = () => {
+    return Object.values(content)
+      .flatMap(item => item.versions)
+      .filter((v, i, arr) => arr.findIndex(x => x.id === v.id) === i)
+      .sort((a, b) => a.id - b.id);
   };
 
   return {
     getText,
+    getVersions,
     loading,
     error,
     refresh: () => {

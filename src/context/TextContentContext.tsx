@@ -1,27 +1,19 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useSheetContent } from '../hooks/useSheetContent';
+import { TextContentVersion } from '../types/textContent';
 
 interface TextContentContextType {
+  version: number;
+  setVersion: (version: number) => void;
   getText: (messageKey: string) => string;
-  version: 1 | 2 | 3;
-  setVersion: (version: 1 | 2 | 3) => void;
-  loading: boolean;
-  error: string | null;
+  versions: TextContentVersion[];
 }
 
-const TextContentContext = createContext<TextContentContextType>({
-  getText: () => '',
-  version: 1,
-  setVersion: () => {},
-  loading: true,
-  error: null
-});
-
-export const useTextContent = () => useContext(TextContentContext);
+const TextContentContext = createContext<TextContentContextType | undefined>(undefined);
 
 interface TextContentProviderProps {
   children: ReactNode;
-  sheetId: string;
+  sheetId?: string;
   sheetName?: string;
 }
 
@@ -29,19 +21,20 @@ const STORAGE_KEY = 'textContentVersion';
 
 export const TextContentProvider: React.FC<TextContentProviderProps> = ({
   children,
-  sheetId,
+  sheetId = '1kiAX73XSDmlACPPlwFsYnEUuSLC2g9B9VlBDBmTRGKE', // Default sheet ID
   sheetName
 }) => {
   // Initialize version from localStorage or default to 1
-  const [version, setVersionState] = useState<1 | 2 | 3>(() => {
+  const [version, setVersionState] = useState<number>(() => {
     const savedVersion = localStorage.getItem(STORAGE_KEY);
-    return savedVersion ? (Number(savedVersion) as 1 | 2 | 3) : 1;
+    return savedVersion ? Number(savedVersion) : 1;
   });
 
-  const { getText, loading, error } = useSheetContent({ sheetId, sheetName });
+  const { getText, getVersions, loading, error } = useSheetContent({ sheetId, sheetName });
+  const versions = getVersions();
 
   // Update localStorage when version changes
-  const setVersion = (newVersion: 1 | 2 | 3) => {
+  const setVersion = (newVersion: number) => {
     setVersionState(newVersion);
     localStorage.setItem(STORAGE_KEY, newVersion.toString());
   };
@@ -50,17 +43,24 @@ export const TextContentProvider: React.FC<TextContentProviderProps> = ({
     return getText(messageKey, version);
   };
 
+  const value = {
+    version,
+    setVersion,
+    getText: getTextForCurrentVersion,
+    versions
+  };
+
   return (
-    <TextContentContext.Provider
-      value={{
-        getText: getTextForCurrentVersion,
-        version,
-        setVersion,
-        loading,
-        error
-      }}
-    >
+    <TextContentContext.Provider value={value}>
       {children}
     </TextContentContext.Provider>
   );
+};
+
+export const useTextContent = () => {
+  const context = useContext(TextContentContext);
+  if (context === undefined) {
+    throw new Error('useTextContent must be used within a TextContentProvider');
+  }
+  return context;
 }; 

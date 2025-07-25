@@ -1,11 +1,6 @@
 export type Screen = 'Home' | 'Follow' | 'Screensaver' | 'Cart' | 'Reward';
 
-export type MessageKey = 
-  // Home screen
-  | 'introText'
-  | 'followText'
-  // Follow screen
-  | 'scanText'
+export type MessageKey =
   // Screensaver
   | 'message1'
   | 'message2'
@@ -24,15 +19,17 @@ export type MessageKey =
 export interface TextContent {
   screen: Screen;
   messageKey: MessageKey;
-  version1: string;
-  version2: string;
-  version3: string;
+  content: string;
+}
+
+export interface TextContentVersion {
+  id: number;
+  name: string;
+  content: string;
 }
 
 export interface TextContentMap {
   [key: string]: {
-    version1: string;
-    version2: string;
-    version3: string;
+    versions: TextContentVersion[];
   };
 } 

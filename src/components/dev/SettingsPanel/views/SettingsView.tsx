@@ -3,7 +3,7 @@ import { useTextContent } from '../../../../context/TextContentContext';
 import { Button } from '../../../ui/Button';
 
 const SettingsView: React.FC = () => {
-  const { version, setVersion } = useTextContent();
+  const { version, setVersion, versions } = useTextContent();
 
   return (
     <div className="w-full h-full text-white flex flex-col">
@@ -48,16 +48,16 @@ const SettingsView: React.FC = () => {
                 </svg>
               }
             >
-              Version {version}
+              {versions.find(v => v.id === version)?.name || `Version ${version}`}
             </Button>
             <select
               value={version}
-              onChange={(e) => setVersion(Number(e.target.value) as 1 | 2 | 3)}
+              onChange={(e) => setVersion(Number(e.target.value))}
               className="absolute inset-0 opacity-0 cursor-pointer w-full"
             >
-              <option value={1}>Version 1</option>
-              <option value={2}>Version 2</option>
-              <option value={3}>Version 3</option>
+              {versions.map(v => (
+                <option key={v.id} value={v.id}>{v.name}</option>
+              ))}
             </select>
           </div>
           <p className="text-white/40 text-xs">
