@@ -882,10 +882,18 @@ export const BrandPass: React.FC<BrandPassProps> = ({
           >
             {backContent ? backContent : (
               <div className="w-full h-full flex flex-col items-center justify-center p-8">
-                {/* QR code container */}
-                <div 
+                {/* QR code container with opacity transition */}
+                <motion.div 
                   className="relative overflow-hidden"
                   style={{ maxHeight: '300px' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ 
+                    opacity: isFlipped ? 1 : 0
+                  }}
+                  transition={{
+                    duration: 0.3,
+                    ease: [0.32, 0.72, 0, 1]
+                  }}
                 >
                   <AnimatedQRCode
                     value={`https://chrisk.ngrok.app/landing/follow-session`}
@@ -902,10 +910,10 @@ export const BrandPass: React.FC<BrandPassProps> = ({
                       console.log("QR animation complete");
                     }}
                   />
-                </div>
+                </motion.div>
               </div>
             )}
-                      </CardFace>
+          </CardFace>
           </motion.div>
       </motion.div>
     </div>
