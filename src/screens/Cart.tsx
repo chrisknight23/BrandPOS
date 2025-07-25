@@ -236,17 +236,16 @@ export const Cart = ({
           {/* ScreensaverCard positioned in the right rail (landed state) */}
           <motion.div
             className="absolute top-[44px] right-[45px] w-[161px] h-[213px] flex items-center justify-center"
+            initial={false} // Prevent initial animation
             style={{ 
               zIndex: 20,
-              // Adjust initial position in PWA mode - bring it up from 64px to 52px
-              top: isPWAMode() ? '52px' : '44px'
+              // Adjust initial position in PWA mode - move it down more
+              top: isPWAMode() ? '58px' : '44px'
             }}
             animate={{
-              // Center the card horizontally in PWA mode when flipped
+              // Only animate when card is centered/uncentered
               x: cardCentered ? (isPWAMode() ? '-50vw' : -281) : 0,
-              // Center vertically in viewport when flipped in PWA mode
               y: cardCentered ? (isPWAMode() ? '50vh' : 100) : 0,
-              // Center the card relative to viewport in PWA mode
               left: cardCentered && isPWAMode() ? '50%' : 'auto',
               top: cardCentered && isPWAMode() ? '50%' : 'auto',
               transform: cardCentered && isPWAMode() ? 'translate(-50%, -50%)' : 'none'
