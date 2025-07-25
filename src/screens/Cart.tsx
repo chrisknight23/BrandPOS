@@ -9,6 +9,15 @@ import { useTextContent } from '../context/TextContentContext';
 import QRIcon from '../assets/images/24/qr.svg';
 import SMSIcon from '../assets/images/24/comm-sms.svg';
 
+// PWA detection utility
+const isPWAMode = () => {
+  const standaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+  const fullscreenMode = window.matchMedia('(display-mode: fullscreen)').matches;
+  const navigatorStandalone = (window.navigator as any).standalone === true;
+  
+  return standaloneMode || fullscreenMode || navigatorStandalone;
+};
+
 interface CartItem {
   id: number;
   name: string;
@@ -228,11 +237,18 @@ export const Cart = ({
           <motion.div
             className="absolute top-[44px] right-[45px] w-[161px] h-[213px] flex items-center justify-center"
             style={{ 
-              zIndex: 20
+              zIndex: 20,
+              // Adjust top position in PWA mode
+              top: isPWAMode() ? '64px' : '44px'
             }}
             animate={{
-              x: cardCentered ? -281 : 0,
-              y: cardCentered ? 100 : 0
+              // Center the card horizontally in PWA mode when flipped
+              x: cardCentered ? (isPWAMode() ? '-50vw' : -281) : 0,
+              // Adjust vertical position when flipped in PWA mode
+              y: cardCentered ? (isPWAMode() ? '20vh' : 100) : 0,
+              // Center the card relative to viewport in PWA mode
+              left: cardCentered && isPWAMode() ? '50%' : 'auto',
+              transform: cardCentered && isPWAMode() ? 'translateX(-50%)' : 'none'
             }}
             transition={{
               duration: 0.8,
