@@ -135,7 +135,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
         onTouchStart={handleUserInteraction}
       >
         <motion.div 
-          className="flex-1 flex flex-col items-center justify-center w-full px-16"
+          className="flex-1 flex flex-col items-center justify-center w-full px-8"
           animate={isIdle ? {} : { 
             opacity: startTextPushBack ? 0 : 1
           }}
@@ -149,7 +149,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
           }}
         >
           <motion.div 
-            className="max-w-[600px] line-clamp-2"
+            className="w-full"
             initial={false}
             animate={isIdle ? {} : { opacity: showAnimations ? 1 : 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
@@ -157,7 +157,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
             <h1 
               className="text-[90px] font-cash font-medium text-center leading-[0.85] tracking-[-0.02em]"
               dangerouslySetInnerHTML={{ 
-                __html: getText('introText').replace(' earn', '<br/>earn') 
+                __html: getText('introText')
               }}
             />
           </motion.div>

@@ -1,6 +1,9 @@
 export type Screen = 'Home' | 'Follow' | 'Screensaver' | 'Cart' | 'Reward';
 
 export type MessageKey =
+  // Home screen
+  | 'introText'
+  | 'followText'
   // Screensaver
   | 'message1'
   | 'message2'

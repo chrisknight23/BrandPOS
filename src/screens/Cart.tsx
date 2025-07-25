@@ -201,7 +201,7 @@ export const Cart = ({
         <div className="bg-black h-full flex flex-col py-6 pr-6">
           {/* Content Container with Border */}
           <div className="border border-[#333] rounded-[24px] flex flex-col h-full m-0 p-5" style={{ width: '201px' }}>
-            {/* Empty space where card will land - no static card */}
+            {/* Empty space where card will land */}
             <div className="w-[161px] h-[213px] mb-6">
               {/* Empty placeholder for card landing area */}
             </div>
@@ -209,16 +209,16 @@ export const Cart = ({
             {/* Brand Name */}
             <div className="text-white/70 text-[14px] font-medium mb-2 text-left w-full">$mileendbagel</div>
             
-            {/* Description Text - now using dynamic content with HTML support */}
+            {/* Description Text - now with flex-1 to fill available space */}
             <div 
-              className="text-white text-left text-[20px] leading-[24px] mb-6 w-full line-clamp-3"
+              className="flex-1 text-white text-left text-[20px] leading-[24px] w-full line-clamp-3"
               dangerouslySetInnerHTML={{ __html: getText('rightRail') }}
             />
             
-            {/* Follow Button */}
+            {/* Follow Button - removed mb-6 from text above since button will be pushed to bottom */}
             <button 
               onClick={() => setCardCentered(true)}
-              className="bg-white/15 text-white px-8 py-3 rounded-full text-[18px] font-medium hover:bg-white/20 transition-colors w-full"
+              className="mt-6 bg-white/15 text-white px-8 py-3 rounded-full text-[18px] font-medium hover:bg-white/20 transition-colors w-full"
             >
               Follow
             </button>
