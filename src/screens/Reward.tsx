@@ -21,7 +21,6 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
   const [startTextPushBack, setStartTextPushBack] = useState(false);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
-  const [startTimer, setStartTimer] = useState(false);
   
   // Use the slide transition hook for consistent animation patterns
   const { enterAnimation, springConfig } = useSlideTransition(onNext);
@@ -35,17 +34,6 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
       const cardTimer = setTimeout(() => {
         setShowSecondPhase(true);
         setStartTextPushBack(true);
-        
-        // Start the timer after the card animation completes
-        // Card animation uses spring physics (stiffness: 120, damping: 18, mass: 1.2)
-        // so we need to wait for it to settle before starting the progress timer
-        const timerStartTimer = setTimeout(() => {
-          setStartTimer(true);
-        }, 1000); // 1 second after card starts moving to let it settle
-        
-        return () => {
-          clearTimeout(timerStartTimer);
-        };
       }, 1500); // 1.5 second pause after text appears, then card slides in
       
       return () => {
@@ -154,7 +142,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
               onFlip={setIsCardFlipped}
               backgroundColor="bg-[#5D5D3F]"
               backfaceColor="bg-[#5D5D3F]"
-              showProgressTimer={startTimer}
+              showProgressTimer={showSecondPhase}
               disableAnimation={true}
               noAnimation={true}
               showAnimatedNumber={true}
