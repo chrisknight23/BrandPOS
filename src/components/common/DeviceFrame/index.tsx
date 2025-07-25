@@ -32,15 +32,14 @@ export const DeviceFrame = ({ children, className = '' }: DeviceFrameProps) => {
   
   if (isPWA) {
     return (
-      <div className="w-[100vw] h-[100vh] bg-black overflow-hidden flex items-center justify-center">
+      <div className="w-[100vw] h-[100vh] bg-black overflow-hidden flex items-end justify-center">
         <div 
-          className="relative overflow-hidden flex items-center justify-center"
+          className="relative overflow-hidden flex items-center justify-center mb-4"
           style={{
             width: 'calc(100vw / 1.3)',
-            // Adjusted to subtract 32px for better bottom spacing
             height: 'calc((100vh - 32px) / 1.3)',
             transform: 'scale(1.3)',
-            transformOrigin: 'center',
+            transformOrigin: 'center bottom',
             paddingTop: 'env(safe-area-inset-top)',
             paddingBottom: 'env(safe-area-inset-bottom)',
             paddingLeft: 'env(safe-area-inset-left)',
