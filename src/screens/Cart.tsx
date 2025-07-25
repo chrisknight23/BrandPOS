@@ -239,15 +239,16 @@ export const Cart = ({
             initial={false} // Prevent initial animation
             style={{ 
               zIndex: 20,
-              // Move down by ~9.2px (12px in scaled space) in PWA mode
-              top: isPWAMode() ? '67px' : '44px'
+              // Move down more significantly in PWA mode
+              top: isPWAMode() ? '82px' : '44px'
             }}
             animate={{
               // Only animate when card is centered/uncentered
               x: cardCentered ? (isPWAMode() ? '-50vw' : -281) : 0,
-              y: cardCentered ? (isPWAMode() ? '50vh' : 100) : 0,
+              // Adjust vertical centering to be slightly higher (45vh instead of 50vh)
+              y: cardCentered ? (isPWAMode() ? '45vh' : 100) : 0,
               left: cardCentered && isPWAMode() ? '50%' : 'auto',
-              top: cardCentered && isPWAMode() ? '50%' : 'auto',
+              top: cardCentered && isPWAMode() ? '45%' : 'auto',
               transform: cardCentered && isPWAMode() ? 'translate(-50%, -50%)' : 'none'
             }}
             transition={{
