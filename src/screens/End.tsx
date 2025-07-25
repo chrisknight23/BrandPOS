@@ -1,7 +1,7 @@
 import { BaseScreen } from '../components/common/BaseScreen';
 import { motion } from 'framer-motion';
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { Screen } from '../types/screen';
+import { Screen, NavigationOptions } from '../types/screen';
 import { useUserType } from '../context/UserTypeContext';
 import LocalCustomer from '../components/common/LocalCustomer';
 import AnimatedMessage from '../components/common/AnimatedMessage/';
@@ -13,7 +13,7 @@ interface EndProps {
   amount?: string;       // Total amount (may be pre-calculated)
   baseAmount?: string;   // Base amount from Cart/Payment
   tipAmount?: string;    // Tip amount from Tipping screen
-  goToScreen?: (screen: Screen) => void; // Add prop for direct navigation
+  goToScreen?: (screen: Screen, options?: NavigationOptions) => void; // Updated type definition
   taxRate?: number;
   isPaused?: boolean;
   setIsPaused?: (paused: boolean) => void;
