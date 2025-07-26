@@ -93,7 +93,7 @@ export const Cart = ({
     
     if (isPWA) {
       // For PWA mode, use the original -340 value plus an adjustable offset
-      return -300 + PWA_HORIZONTAL_OFFSET;
+      return -280 + PWA_HORIZONTAL_OFFSET;
     }
     
     // For browser mode, keep the original value
