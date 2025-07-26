@@ -42,6 +42,7 @@ const initialCartData = {
 const DEVICE_FRAME_WIDTH = 800;
 const CARD_WIDTH = 161; // From the className="w-[161px]"
 const CARD_RIGHT_MARGIN = 45; // From the className="right-[45px]"
+const PWA_HORIZONTAL_OFFSET = -40; // Adjustment for PWA mode
 
 export const Cart = ({ 
   onNext,
@@ -90,14 +91,13 @@ export const Cart = ({
   const getCenteredXPosition = () => {
     if (!cardCentered) return 0;
     
-    // Calculate distance from right edge to card center
-    const distanceFromRight = CARD_RIGHT_MARGIN + (CARD_WIDTH / 2);
+    if (isPWA) {
+      // For PWA mode, use the original -340 value plus an adjustable offset
+      return -300 + PWA_HORIZONTAL_OFFSET;
+    }
     
-    // Calculate distance from frame center to card center
-    const distanceToFrameCenter = (DEVICE_FRAME_WIDTH / 2) - distanceFromRight;
-    
-    // Return negative distance to move card left
-    return -distanceToFrameCenter;
+    // For browser mode, keep the original value
+    return -281;
   };
 
   return (
