@@ -6,17 +6,9 @@ import { BRAND_COLORS } from '../constants/colors';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useTextContent } from '../context/TextContentContext';
+import { useIsPWA } from '../hooks/useIsPWA';
 import QRIcon from '../assets/images/24/qr.svg';
 import SMSIcon from '../assets/images/24/comm-sms.svg';
-
-// PWA detection utility
-const isPWAMode = () => {
-  const standaloneMode = window.matchMedia('(display-mode: standalone)').matches;
-  const fullscreenMode = window.matchMedia('(display-mode: fullscreen)').matches;
-  const navigatorStandalone = (window.navigator as any).standalone === true;
-  
-  return standaloneMode || fullscreenMode || navigatorStandalone;
-};
 
 interface CartItem {
   id: number;
@@ -46,6 +38,11 @@ const initialCartData = {
 //   return { id, name, price, quantity: 1 };
 // };
 
+// Constants for layout calculations
+const DEVICE_FRAME_WIDTH = 800;
+const CARD_WIDTH = 161; // From the className="w-[161px]"
+const CARD_RIGHT_MARGIN = 45; // From the className="right-[45px]"
+
 export const Cart = ({ 
   onNext,
   cartItems,
@@ -56,6 +53,7 @@ export const Cart = ({
   onCartUpdate?: (items: CartItem[]) => void;
 }) => {
   const { getText } = useTextContent();
+  const isPWA = useIsPWA();
   // Use provided cart items or default to initial data
   const [items, setItems] = useState<CartItem[]>(cartItems || initialCartData.items);
   const [cardCentered, setCardCentered] = useState(false);
@@ -83,6 +81,23 @@ export const Cart = ({
 
   const handleNext = () => {
     onNext(finalTotal.toFixed(2));
+  };
+
+  // Calculate the top position based on PWA mode
+  const cardTopPosition = isPWA ? '54px' : '44px';
+  
+  // Calculate the x-translation for centered position
+  const getCenteredXPosition = () => {
+    if (!cardCentered) return 0;
+    
+    // Calculate distance from right edge to card center
+    const distanceFromRight = CARD_RIGHT_MARGIN + (CARD_WIDTH / 2);
+    
+    // Calculate distance from frame center to card center
+    const distanceToFrameCenter = (DEVICE_FRAME_WIDTH / 2) - distanceFromRight;
+    
+    // Return negative distance to move card left
+    return -distanceToFrameCenter;
   };
 
   return (
@@ -235,21 +250,14 @@ export const Cart = ({
 
           {/* ScreensaverCard positioned in the right rail (landed state) */}
           <motion.div
-            className="absolute top-[44px] right-[45px] w-[161px] h-[213px] flex items-center justify-center"
-            initial={false} // Prevent initial animation
+            className="absolute right-[45px] w-[161px] h-[213px] flex items-center justify-center"
             style={{ 
               zIndex: 20,
-              // Move down more significantly in PWA mode
-              top: isPWAMode() ? '82px' : '44px'
+              top: cardTopPosition
             }}
             animate={{
-              // Only animate when card is centered/uncentered
-              x: cardCentered ? (isPWAMode() ? '-50vw' : -281) : 0,
-              // Adjust vertical centering to be slightly higher (45vh instead of 50vh)
-              y: cardCentered ? (isPWAMode() ? '45vh' : 100) : 0,
-              left: cardCentered && isPWAMode() ? '50%' : 'auto',
-              top: cardCentered && isPWAMode() ? '45%' : 'auto',
-              transform: cardCentered && isPWAMode() ? 'translate(-50%, -50%)' : 'none'
+              x: getCenteredXPosition(),
+              y: cardCentered ? 100 : 0
             }}
             transition={{
               duration: 0.8,
