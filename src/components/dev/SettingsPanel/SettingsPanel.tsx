@@ -47,7 +47,6 @@ interface ExpandableDevPanelProps {
   onNext?: () => void;
   onRefresh?: () => void;
   onReset?: () => void;
-  onResetSession?: () => void;
   onAddItem?: () => void;
   onClearCart?: () => void;
   onRemoveCartItem?: (itemId: number) => void;
@@ -129,7 +128,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   onNext,
   onRefresh,
   onReset,
-  onResetSession,
   onAddItem,
   onClearCart,
   onRemoveCartItem,
@@ -457,7 +455,18 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   const renderTabContent = () => {
     switch (activeTab) {
       case 'interaction':
-        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} simulateScan={simulateScan} isQrVisible={effectiveQrVisible} goToScreen={goToScreen} isPaused={isPaused} setIsPaused={setIsPaused} onResetSession={onResetSession} />;
+        return <InteractionView 
+          cartItems={parentCartItems} 
+          onAddItem={onAddItem} 
+          onClearCart={onClearCart} 
+          onRemoveCartItem={onRemoveCartItem} 
+          currentScreen={currentScreen} 
+          simulateScan={simulateScan} 
+          isQrVisible={effectiveQrVisible} 
+          goToScreen={goToScreen} 
+          isPaused={isPaused} 
+          setIsPaused={setIsPaused} 
+        />;
       case 'analytics':
         return <AnalyticsView currentScreen={currentScreen} baseAmount={baseAmount} tipAmount={tipAmount} onBack={onBack} onNext={onNext} onRefresh={onRefresh} onReset={onReset} />;
       case 'settings':
@@ -467,7 +476,18 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
       case 'apis':
         return <APIsView />;
       default:
-        return <InteractionView cartItems={parentCartItems} onAddItem={onAddItem} onClearCart={onClearCart} onRemoveCartItem={onRemoveCartItem} currentScreen={currentScreen} simulateScan={simulateScan} isQrVisible={effectiveQrVisible} goToScreen={goToScreen} isPaused={isPaused} setIsPaused={setIsPaused} onResetSession={onResetSession} />;
+        return <InteractionView 
+          cartItems={parentCartItems} 
+          onAddItem={onAddItem} 
+          onClearCart={onClearCart} 
+          onRemoveCartItem={onRemoveCartItem} 
+          currentScreen={currentScreen} 
+          simulateScan={simulateScan} 
+          isQrVisible={effectiveQrVisible} 
+          goToScreen={goToScreen} 
+          isPaused={isPaused} 
+          setIsPaused={setIsPaused} 
+        />;
     }
   };
 
