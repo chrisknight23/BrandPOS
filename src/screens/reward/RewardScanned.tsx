@@ -1,7 +1,6 @@
 import { BaseScreen } from '../../components/common/BaseScreen';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { useSlideTransition } from '../../hooks/useSlideTransition';
 import { BrandPass } from '../../components/common/BrandPass';
 import { Screen } from '../../types/screen';
 import { useTextContent } from '../../context/TextContentContext';
@@ -15,7 +14,6 @@ interface RewardScannedProps {
 
 export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
   const { getText } = useTextContent();
-  const { enterAnimation, springConfig } = useSlideTransition(onNext);
   const [isExiting, setIsExiting] = useState(false);
 
   const handleTimerComplete = () => {
@@ -36,15 +34,10 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
       >
         <motion.div 
           className="flex-1 flex flex-col items-center justify-center w-full relative overflow-hidden"
-          initial={enterAnimation.initial}
-          animate={enterAnimation.animate}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
           exit={isExiting ? { opacity: 0 } : { opacity: 1 }}
-          transition={{ 
-            type: 'spring',
-            ...springConfig,
-            restSpeed: 0.001,
-            restDelta: 0.001
-          }}
+          transition={{ duration: 0 }}
           style={{
             willChange: 'transform',
             backfaceVisibility: 'hidden'
@@ -53,6 +46,7 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
           {/* BrandPass card that's already flipped showing QR code */}
           <motion.div 
             className="absolute w-full h-full flex justify-center items-center"
+            initial={{ opacity: 1 }}
             style={{
               zIndex: 20,
               willChange: 'transform',
@@ -78,7 +72,7 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
           {/* Bottom left message */}
           <motion.div 
             className="absolute bottom-0 left-0 p-8 max-w-[216px]"
-            initial={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 1 }}
             style={{
               willChange: 'transform, opacity',
               backfaceVisibility: 'hidden',
@@ -106,7 +100,7 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
           <motion.button
             onClick={handleTimerComplete}
             className="absolute bottom-8 right-8 w-16 h-16 rounded-full bg-black border border-white/20 flex items-center justify-center"
-            initial={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 1 }}
             whileTap={{ scale: 0.95 }}
             tabIndex={0}
             aria-label="Skip and return to home"
