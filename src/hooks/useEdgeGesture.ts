@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useIsPWA } from './useIsPWA';
 
 interface UseEdgeGestureOptions {
@@ -22,6 +22,7 @@ export const useEdgeGesture = (options: UseEdgeGestureOptions = {}): UseEdgeGest
 
   const isPWA = useIsPWA();
   const [isGestureActive, setIsGestureActive] = useState(false);
+  const touchStartXRef = useRef<number | null>(null);
   
   const handleTouchStart = useCallback((e: TouchEvent) => {
     if (!isPWA) return;
@@ -32,22 +33,30 @@ export const useEdgeGesture = (options: UseEdgeGestureOptions = {}): UseEdgeGest
     
     // Only activate if touch starts from right edge
     if (startX >= windowWidth - 20) {
+      e.preventDefault(); // Prevent default to ensure we can handle the gesture
+      touchStartXRef.current = startX;
       setIsGestureActive(true);
+      console.log('Edge gesture started:', { startX, windowWidth });
     }
   }, [isPWA]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (!isPWA || !isGestureActive) return;
+    if (!isPWA || !isGestureActive || touchStartXRef.current === null) return;
     
     const touch = e.touches[0];
     const currentX = touch.clientX;
-    const windowWidth = window.innerWidth;
-    const swipeDistance = windowWidth - currentX;
+    const startX = touchStartXRef.current;
+    const swipeDistance = startX - currentX; // Distance swiped left from start point
     
-    // If swiped far enough, trigger the gesture
+    console.log('Edge gesture move:', { currentX, startX, swipeDistance, threshold });
+    
+    // If swiped far enough left, trigger the gesture
     if (swipeDistance > threshold) {
+      e.preventDefault(); // Prevent default when triggering
       setIsGestureActive(false);
+      touchStartXRef.current = null;
       if (onGestureComplete) {
+        console.log('Edge gesture complete');
         onGestureComplete();
         // Provide haptic feedback
         if ('vibrate' in navigator) {
@@ -60,14 +69,16 @@ export const useEdgeGesture = (options: UseEdgeGestureOptions = {}): UseEdgeGest
   const handleTouchEnd = useCallback(() => {
     if (!isPWA) return;
     setIsGestureActive(false);
+    touchStartXRef.current = null;
+    console.log('Edge gesture ended');
   }, [isPWA]);
 
   useEffect(() => {
     // Only set up listeners in PWA mode
     if (!isPWA) return;
 
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchstart', handleTouchStart, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleTouchEnd);
     document.addEventListener('touchcancel', handleTouchEnd);
 
