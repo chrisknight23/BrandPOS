@@ -14,6 +14,7 @@ interface SettingsPanelProps {
   onNext?: () => void;
   onRefresh?: () => void;
   onReset?: () => void;
+  onResetSession?: () => void;
   onAddItem?: () => void;
   onClearCart?: () => void;
   onRemoveCartItem?: (itemId: number) => void;

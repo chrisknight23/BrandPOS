@@ -48,6 +48,7 @@ interface ExpandableDevPanelProps {
   onNext?: () => void;
   onRefresh?: () => void;
   onReset?: () => void;
+  onResetSession?: () => void;
   onAddItem?: () => void;
   onClearCart?: () => void;
   onRemoveCartItem?: (itemId: number) => void;
@@ -129,6 +130,7 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   onNext,
   onRefresh,
   onReset,
+  onResetSession,
   onAddItem,
   onClearCart,
   onRemoveCartItem,
