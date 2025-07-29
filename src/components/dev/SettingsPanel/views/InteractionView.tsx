@@ -27,6 +27,7 @@ interface InteractionViewProps {
   goToScreen?: (screen: string) => void;
   isPaused?: boolean;
   setIsPaused?: (paused: boolean) => void;
+  onResetSession?: () => void;  // Added missing prop
 }
 
 const InteractionView: React.FC<InteractionViewProps> = ({ cartItems = [], onAddItem, onClearCart, onRemoveCartItem, currentScreen, simulateScan, isQrVisible, goToScreen, isPaused, setIsPaused, onResetSession }) => {
