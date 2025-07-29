@@ -1,4 +1,4 @@
-import { useState, Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { ExpandableDevPanel } from './SettingsPanel';
 import { useEdgeGesture } from '../../../hooks/useEdgeGesture';
 import { useIsPWA } from '../../../hooks/useIsPWA';
@@ -29,24 +29,20 @@ interface SettingsPanelProps {
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = (props) => {
-  const [isOpen, setIsOpen] = useState(false);
   const isPWA = useIsPWA();
 
   // Set up edge gesture in PWA mode
   useEdgeGesture({
     onGestureComplete: () => {
-      setIsOpen(true);
+      console.log('Edge gesture completed, opening panel');
+      props.onPanelToggle(true);
     },
     threshold: 80 // Slightly lower threshold for easier activation
   });
 
   return (
     <TabProvider>
-      <ExpandableDevPanel
-        {...props}
-        isOpen={isOpen}
-        onPanelToggle={(open) => setIsOpen(open)}
-      />
+      <ExpandableDevPanel {...props} />
     </TabProvider>
   );
 };
