@@ -15,17 +15,16 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../../ui/Button';
-import { Screen, NavigationOptions } from '../../../../types/screen';
 
 interface InteractionViewProps {
   cartItems?: { id: number; name: string; price: number; quantity: number }[];
   onAddItem?: () => void;
   onClearCart?: () => void;
   onRemoveCartItem?: (itemId: number) => void;
-  currentScreen: Screen;
+  currentScreen: string;
   simulateScan?: () => void;
   isQrVisible?: boolean;
-  goToScreen?: (screen: Screen, options?: NavigationOptions) => void;
+  goToScreen?: (screen: string) => void;
   isPaused?: boolean;
   setIsPaused?: (paused: boolean) => void;
   onResetSession?: () => void;  // Added missing prop

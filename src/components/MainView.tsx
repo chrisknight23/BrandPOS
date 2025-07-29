@@ -11,7 +11,6 @@ import { DropMenu } from './dev/dropMenu';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
 import { useKioskMode } from '../hooks/useKioskMode';
 import { CSSProperties } from 'react';
-import { PWASettingsDrawer } from './common/PWASettingsDrawer';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'CustomTip', 'End'];
@@ -601,8 +600,7 @@ export const MainView = () => {
         width: '100%',
         height: '100%',
         overflow: 'hidden',
-        // Allow pan-x for horizontal swipes
-        touchAction: 'pan-y'
+        touchAction: 'none'
       })
     };
   }, []);
@@ -612,63 +610,73 @@ export const MainView = () => {
       className="flex flex-col w-screen h-screen bg-[#050505]"
       style={rootStyle}
     >
-      {/* Show dev settings panel and navigation in non-PWA mode only */}
-      {!isKioskMode && !isPWAMode() && (
-        <>
-          <SettingsPanel
-            isOpen={isPanelOpen}
-            onPanelToggle={setIsPanelOpen}
-            currentScreen={currentScreen}
-            baseAmount={baseAmount}
-            tipAmount={tipAmount}
-            cartItems={cartItems}
-            onAddItem={handleAddItem}
-            onClearCart={handleClearCart}
-            onRemoveCartItem={handleRemoveCartItem}
-            onBack={handleBack}
-            onNext={handleDevNavNext}
-            onRefresh={handleRefresh}
-            onReset={handleReset}
-            onResetSession={handleResetSession}
-            isQrVisible={isQrVisible}
-            onQrVisibleChange={setIsQrVisible}
-            goToScreen={goToScreen}
-            isPaused={isPaused}
-            setIsPaused={setIsPaused}
-          />
-
-          {/* Device and Environment DropMenus in the top left corner */}
-          <div className="fixed top-6 left-6 z-[10003] flex gap-2">
-            <DropMenu
-              title="Device"
-              rowLabels={["New", "Returning", "Cash Local"]}
-              iconSrc={DesktopIcon}
-              onRowSelect={(rowIndex) => {
-                if (rowIndex === 0) setUserType('new');
-                else if (rowIndex === 1) setUserType('returning');
-                else if (rowIndex === 2) setUserType('cash-local');
-              }}
-            />
-          </div>
-        </>
-      )}
-
-      {/* Show PWA settings drawer in PWA mode */}
-      {isPWAMode() && (
-        <PWASettingsDrawer
+      {/* Unified Settings Panel Container (collapsed/expanded) - Hidden in kiosk mode */}
+      {!isKioskMode && (
+        <SettingsPanel
           isOpen={isPanelOpen}
-          onClose={() => setIsPanelOpen(false)}
+          onPanelToggle={setIsPanelOpen}
+          currentScreen={currentScreen}
+          baseAmount={baseAmount}
+          tipAmount={tipAmount}
+          cartItems={cartItems}
+          onAddItem={handleAddItem}
+          onClearCart={handleClearCart}
+          onRemoveCartItem={handleRemoveCartItem}
+          onBack={handleBack}
+          onNext={handleDevNavNext}
+          onRefresh={handleRefresh}
+          onReset={handleReset}
+          onResetSession={handleResetSession}
+          isQrVisible={isQrVisible}
+          onQrVisibleChange={setIsQrVisible}
+          goToScreen={goToScreen}
+          // Pass pause state to SettingsPanel
+          isPaused={isPaused}
+          setIsPaused={setIsPaused}
         />
       )}
-
+      {/* Device and Environment DropMenus in the top left corner - Hidden in kiosk mode */}
+      {!isKioskMode && (
+        <div className="fixed top-6 left-6 z-[10002] flex flex-col gap-4">
+          <DropMenu
+            title="Device"
+            rowLabels={["Register", "Stand", "Reader"]}
+            iconSrc={DesktopIcon}
+            onRowSelect={(rowIndex) => {
+              if (rowIndex === 0) setUserType('new');
+              else if (rowIndex === 1) setUserType('returning');
+              else if (rowIndex === 2) setUserType('cash-local');
+            }}
+          />
+        </div>
+      )}
+      {/* User profile DropMenu on the right side, shifts left when dev panel is open (24px gap) - Hidden in kiosk mode */}
+      {!isKioskMode && (
+        <motion.div
+          className="fixed top-6 z-[10002]"
+          initial={{ right: 104 }}
+          animate={{ right: isPanelOpen ? 450 : 84 }}
+          transition={drawerMotion}
+        >
+          <DropMenu
+            title="Customer"
+            rowLabels={["New customer", "Returning customer", "Cash Local customer"]}
+            onRowSelect={(rowIndex) => {
+              if (rowIndex === 0) setUserType('new');
+              else if (rowIndex === 1) setUserType('returning');
+              else if (rowIndex === 2) setUserType('cash-local');
+            }}
+          />
+        </motion.div>
+      )}
       {/* Main content area that centers all screens */}
       <motion.div
         className="flex-1 flex items-center relative overflow-hidden justify-center"
-        animate={{ x: (isPanelOpen && !isPWAMode()) ? -180 : 0 }}
+        animate={{ x: (isPanelOpen && !isKioskMode) ? -180 : 0 }}
         transition={drawerMotion}
       >
-        {/* Kiosk mode indicator - only show in non-PWA kiosk mode */}
-        {isKioskMode && !isPWAMode() && (
+        {/* Kiosk mode indicator */}
+        {isKioskMode && !isIpadPWA() && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -681,11 +689,12 @@ export const MainView = () => {
             </div>
           </motion.div>
         )}
-
         <AnimatePresence mode={isInstantTransition ? "wait" : "popLayout"} initial={false}>
           <motion.div
             key={`${currentScreen}-${refreshKey}`}
-            className="absolute flex items-center justify-center h-full w-full"
+            className={`absolute flex items-center justify-center h-full ${
+              (isPanelOpen && !isKioskMode) ? 'w-[calc(100%-360px)]' : 'w-full'
+            }`}
             initial={{ 
               x: isInstantTransition ? 0 : 200, 
               opacity: isInstantTransition ? 1 : 0.8
@@ -705,17 +714,18 @@ export const MainView = () => {
               restDelta: 0.001
             }}
             style={{
+              // Performance optimizations
               willChange: isInstantTransition ? 'auto' : 'transform, opacity',
               backfaceVisibility: 'hidden'
             }}
           >
+            {/* Apply key directly to component, not through spread */}
             <CurrentScreenComponent 
               key={`screen-${currentScreen}-${refreshKey}`} 
               {...getScreenProps()} 
             />
-
-            {/* Screen navigation - only show in non-PWA mode */}
-            {!isKioskMode && !isPWAMode() && (
+            {/* Centered screen navigation at the bottom of the device frame - Hidden in kiosk mode */}
+            {!isKioskMode && (
               <div className="absolute bottom-12 left-0 w-full flex justify-center z-20 screen-navigation">
                 <ScreenNavigation
                   screens={getNavScreens()}

@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // Globals for browser and Node.js
 /* global console, setTimeout, process, window */
-import React, { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Screen, NavigationOptions } from '../../../types/screen';
+import { Screen } from '../../../types/screen';
 import { 
   getFeatureFlags, 
   toggleFeatureFlag, 
@@ -35,11 +35,10 @@ import UtilitiesIcon from '../../../assets/images/16/utilities.svg';
 import APIsView from './views/APIsView';
 import PlugIcon from '../../../assets/images/16/plug.svg';
 import TechnologyIcon from '../../../assets/images/16/technology.svg';
-import { useIsPWA } from '../../../hooks/useIsPWA';
 
 interface ExpandableDevPanelProps {
   isOpen: boolean;
-  onPanelToggle: Dispatch<SetStateAction<boolean>>;
+  onPanelToggle: (open: boolean) => void;
   currentScreen: Screen;
   baseAmount: string | null;
   tipAmount: string | null;
@@ -48,16 +47,15 @@ interface ExpandableDevPanelProps {
   onNext?: () => void;
   onRefresh?: () => void;
   onReset?: () => void;
-  onResetSession?: () => void;
   onAddItem?: () => void;
   onClearCart?: () => void;
   onRemoveCartItem?: (itemId: number) => void;
   simulateScan?: () => void;
   isQrVisible?: boolean;
   onQrVisibleChange?: (visible: boolean) => void;
-  goToScreen?: (screen: Screen, options?: NavigationOptions) => void;
+  goToScreen?: (screen: string) => void;
   isPaused?: boolean;
-  setIsPaused?: Dispatch<SetStateAction<boolean>>;
+  setIsPaused?: (paused: boolean) => void;
 }
 
 // Define the navigation screens that can be shown in the panel
@@ -130,7 +128,6 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   onNext,
   onRefresh,
   onReset,
-  onResetSession,
   onAddItem,
   onClearCart,
   onRemoveCartItem,
@@ -141,17 +138,12 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   isPaused,
   setIsPaused
 }) => {
+  // Tab context
   const { activeTab, setActiveTab } = useTab();
-  const isPWA = useIsPWA();
-
-  // Ensure settings tab is active when opened in PWA mode
+  // Ensure 'interaction' is the default view when the drawer opens
   useEffect(() => {
-    if (isPWA && isOpen) {
-      setActiveTab('settings');
-    } else {
-      setActiveTab('interaction');
-    }
-  }, [isPWA, isOpen, setActiveTab]);
+    setActiveTab('interaction');
+  }, [setActiveTab]);
   
   // Flags state
   const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>({});
@@ -525,8 +517,8 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             }
       }
     >
-      {/* Only show control button in non-PWA mode */}
-      {!isOpen && !isPWA && (
+      {/* Collapsed: show icon only */}
+      {!isOpen && (
         <div
           className="w-12 h-12 flex items-center justify-center rounded-full p-3 cursor-pointer select-none"
           aria-label="Open Settings Panel"
