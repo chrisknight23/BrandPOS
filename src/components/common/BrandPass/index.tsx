@@ -5,6 +5,7 @@ import { AnimatedNumber } from '../AnimatedNumber';
 import { AnimatedQRCode } from '../AnimatedQRCode';
 import LocalCashIcon from '../../../assets/images/Local-Cash-24px.svg';
 import MileendbagelLogo from '../../../assets/images/logos/mileendbagel.png';
+import { BRAND_COLORS, toTailwindClass } from '../../../constants/colors';
 
 /**
  * A card component that can expand to show additional content with animations.
@@ -225,8 +226,8 @@ const CardFace: React.FC<CardFaceProps> = ({
 export const BrandPass: React.FC<BrandPassProps> = ({
   // Handle both new and legacy props
   initialState,
-  backgroundColor = 'bg-[#5D5D3F]',
-  backfaceColor = 'bg-[#6A0F15]',
+  backgroundColor = toTailwindClass(BRAND_COLORS.primary),
+  backfaceColor = toTailwindClass(BRAND_COLORS.primaryDark),
   lottieAnimation,
   initialValue,
   useRandomValues = true,

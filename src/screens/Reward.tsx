@@ -72,7 +72,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
           className="flex-1 flex flex-col items-center justify-center w-full relative overflow-hidden"
           initial={enterAnimation.initial}
           animate={enterAnimation.animate}
-          exit={enterAnimation.exit}
+          exit={isExiting ? { opacity: 0 } : { opacity: 1 }}  // Only fade out if we're using the skip button
           transition={{ 
             type: 'spring',
             ...springConfig,
@@ -140,8 +140,6 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
               buttonText="Claim"
               onClick={handleCardClick}
               onFlip={setIsCardFlipped}
-              backgroundColor="bg-[#5D5D3F]"
-              backfaceColor="bg-[#5D5D3F]"
               showProgressTimer={showSecondPhase}
               disableAnimation={true}
               noAnimation={true}
