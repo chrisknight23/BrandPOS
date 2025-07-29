@@ -164,12 +164,11 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
               }}
               transition={{
                 type: "spring",
-                stiffness: isExiting ? 400 : 120,
-                damping: isExiting ? 35 : 18,
-                mass: isExiting ? 1 : 1.2,
-                restDelta: 0.001,
-                restSpeed: 0.001,
-                ...(isExiting && { velocity: -100 })
+                stiffness: 75,     // Slightly lower than Home's 100 to account for longer distance
+                damping: 19,       // Keep same as Home for consistent bounce
+                mass: 1.7,         // Keep same as Home for consistent weight
+                restDelta: 0.001,  // Keep for precision
+                restSpeed: 0.001   // Keep for exit animation
               }}
               style={{
                 zIndex: showSecondPhase ? 20 : 5,
