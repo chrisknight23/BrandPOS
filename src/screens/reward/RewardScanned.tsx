@@ -58,8 +58,8 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
                     animateIn={false}
                     disableAnimation={true}
                     speed={0}
-                    darkColor="#000000"
-                    lightColor="#FFFFFF"
+                    darkColor="#FFFFFF"
+                    lightColor="transparent"
                     placeholderOpacity={1.0}
                     logo="cash-icon"
                     className="max-h-[260px] overflow-hidden"

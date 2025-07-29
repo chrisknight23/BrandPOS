@@ -201,7 +201,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
           position: 'relative',
           width: size,
           height: size,
-          backgroundColor: lightColor,
+          backgroundColor: 'transparent', // Ensure transparent background
           overflow: 'hidden' // Prevent any content from spilling outside
         }}
       >
@@ -217,7 +217,9 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
               key={`marker-${idx}`}
               style={{
                 ...getDotStyle(dot, true, darkColor, 1),
-                opacity: 1
+                opacity: 1,
+                backgroundColor: darkColor, // Ensure marker color is applied
+                borderColor: darkColor // For hollow markers
               }}
             />
           ))}
@@ -234,7 +236,8 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
               key={`dot-${idx}`}
               style={{
                 ...getDotStyle(dot, true, darkColor, 1),
-                opacity: 1
+                opacity: 1,
+                backgroundColor: darkColor // Ensure dot color is applied
               }}
             />
           ))}
