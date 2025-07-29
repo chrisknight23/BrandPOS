@@ -899,9 +899,9 @@ export const BrandPass: React.FC<BrandPassProps> = ({
                   <AnimatedQRCode
                     value={`https://chrisk.ngrok.app/landing/follow-session`}
                     size={260}
-                    animateIn="sequential"
-                    disableAnimation={false}
-                    speed={100.0}
+                    animateIn={disableAnimation ? false : "sequential"}
+                    disableAnimation={disableAnimation}
+                    speed={disableAnimation ? 0 : 100.0}
                     darkColor="#FFFFFF"
                     lightColor="transparent"
                     placeholderOpacity={1.0}
