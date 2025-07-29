@@ -4,7 +4,7 @@
 /* global console, setTimeout, process, window */
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Screen } from '../../../types/screen';
+import { Screen, NavigationOptions } from '../../../types/screen';
 import { 
   getFeatureFlags, 
   toggleFeatureFlag, 
@@ -54,7 +54,7 @@ interface ExpandableDevPanelProps {
   simulateScan?: () => void;
   isQrVisible?: boolean;
   onQrVisibleChange?: (visible: boolean) => void;
-  goToScreen?: (screen: string) => void;
+  goToScreen?: (screen: Screen, options?: NavigationOptions) => void;
   isPaused?: boolean;
   setIsPaused?: (paused: boolean) => void;
 }

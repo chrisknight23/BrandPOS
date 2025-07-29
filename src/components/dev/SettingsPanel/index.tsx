@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ExpandableDevPanel } from './SettingsPanel';
 import { useEdgeGesture } from '../../../hooks/useEdgeGesture';
 import { useIsPWA } from '../../../hooks/useIsPWA';
-import { Screen } from '../../../types/screen';
+import { Screen, NavigationOptions } from '../../../types/screen';
 import { TabProvider } from './TabContext';
 
 interface SettingsPanelProps {
@@ -20,7 +20,7 @@ interface SettingsPanelProps {
   simulateScan?: () => void;
   isQrVisible?: boolean;
   onQrVisibleChange?: (visible: boolean) => void;
-  goToScreen?: (screen: string) => void;
+  goToScreen?: (screen: Screen, options?: NavigationOptions) => void;
   isPaused?: boolean;
   setIsPaused?: (paused: boolean) => void;
 }
