@@ -5,7 +5,8 @@ import { Payment } from './payment/Payment';
 import { Auth } from './payment/Auth';
 import { Tipping } from './tipping/Tipping';
 import { CustomTip } from './tipping/CustomTip';
-import { Reward, RewardScanned } from './reward';
+import { Reward } from './reward/Reward';
+import { RewardScanned } from './reward/RewardScanned';
 
 import { End } from './End';
 import { Screensaver } from './screensaver/Screensaver';
