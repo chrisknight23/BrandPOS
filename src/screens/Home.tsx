@@ -11,7 +11,7 @@ interface HomeProps {
   isIdle?: boolean;
   goToScreen?: (screen: Screen) => void;
   shouldReverseAnimate?: boolean;
-  fromEndScreen?: boolean; // Add new prop to track if we came from End screen
+  fromEndScreen?: boolean;
 }
 
 const SCREENSAVER_DELAY = 20000; // 20 seconds
@@ -23,36 +23,70 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
   const [startTextPushBack, setStartTextPushBack] = useState(isIdle);
   const [isReversing, setIsReversing] = useState(false);
   const screensaverTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true); // Track if component is mounted
 
-  // Function to clear existing timer
-  const clearScreensaverTimer = useCallback(() => {
+  // Clear timer and mounted state on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    console.log('Home: Mounted');
+    
+    return () => {
+      console.log('Home: Unmounting, clearing timer');
+      isMountedRef.current = false;
+      if (screensaverTimerRef.current) {
+        clearTimeout(screensaverTimerRef.current);
+        screensaverTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Modified timer start function
+  const startScreensaverTimer = useCallback(() => {
+    console.log('Home: Starting screensaver timer');
+    // Clear any existing timer first
     if (screensaverTimerRef.current) {
       clearTimeout(screensaverTimerRef.current);
       screensaverTimerRef.current = null;
     }
-  }, []);
-
-  // Function to start new timer
-  const startScreensaverTimer = useCallback(() => {
-    clearScreensaverTimer();
     
-    // Don't start screensaver timer if we came from End screen
-    if (!isIdle && !isReversing && !fromEndScreen) {
-      screensaverTimerRef.current = setTimeout(() => {
-        goToScreen?.('Screensaver');
-      }, SCREENSAVER_DELAY);
+    // Start timer regardless of state - we want it to work on navigation back
+    screensaverTimerRef.current = setTimeout(() => {
+      // Only navigate to screensaver if we're still mounted
+      if (isMountedRef.current && goToScreen) {
+        console.log('Home: Timeout reached, activating screensaver');
+        goToScreen('Screensaver');
+      }
+    }, SCREENSAVER_DELAY);
+  }, [goToScreen]);
+
+  // Start timer on mount and when returning to Home
+  useEffect(() => {
+    if (isMountedRef.current) {
+      console.log('Home: Component mounted or updated, starting timer');
+      startScreensaverTimer();
     }
-  }, [isIdle, isReversing, fromEndScreen, goToScreen, clearScreensaverTimer]);
+  }, [startScreensaverTimer]);
+
+  // Handle user interactions
+  const handleUserInteraction = useCallback(() => {
+    console.log('Home: User interaction detected, restarting timer');
+    startScreensaverTimer();
+  }, [startScreensaverTimer]);
 
   // Handle reverse animation sequence
   useEffect(() => {
     if (shouldReverseAnimate && !isReversing) {
-      clearScreensaverTimer();
+      if (screensaverTimerRef.current) {
+        clearTimeout(screensaverTimerRef.current);
+        screensaverTimerRef.current = null;
+      }
       setIsReversing(true);
       setShowSecondPhase(false);
       setStartTextPushBack(false);
+      // Start timer after reverse animation
+      startScreensaverTimer();
     }
-  }, [shouldReverseAnimate, isReversing, clearScreensaverTimer]);
+  }, [shouldReverseAnimate, isReversing, startScreensaverTimer]);
 
   // Handle initial animation sequence
   useEffect(() => {
@@ -66,10 +100,8 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
         
         const secondPhaseTimer = setTimeout(() => {
           setShowSecondPhase(true);
-          // Only start screensaver timer if not coming from End screen
-          if (!fromEndScreen) {
-            startScreensaverTimer();
-          }
+          // Start timer after initial animation
+          startScreensaverTimer();
         }, 3000);
         
         return () => {
@@ -80,21 +112,15 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
       
       return () => {
         clearTimeout(initialTimer);
-        clearScreensaverTimer();
       };
     }
-  }, [isIdle, isReversing, shouldReverseAnimate, fromEndScreen, clearScreensaverTimer, startScreensaverTimer]);
-
-  // Reset timer on any user interaction
-  const handleUserInteraction = useCallback(() => {
-    if (!isIdle && !isReversing && !fromEndScreen) {
-      clearScreensaverTimer();
-      startScreensaverTimer();
-    }
-  }, [clearScreensaverTimer, startScreensaverTimer, isIdle, isReversing, fromEndScreen]);
+  }, [isIdle, isReversing, shouldReverseAnimate, startScreensaverTimer]);
 
   const handleFollowButtonClick = () => {
-    clearScreensaverTimer();
+    if (screensaverTimerRef.current) {
+      clearTimeout(screensaverTimerRef.current);
+      screensaverTimerRef.current = null;
+    }
     if (goToScreen) {
       goToScreen('Follow');
     } else {
@@ -102,37 +128,13 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
     }
   };
 
-  // Normal forward animation sequence
-  useEffect(() => {
-    if (!isIdle && !isReversing && !shouldReverseAnimate) {
-      const initialTimer = setTimeout(() => {
-        setShowAnimations(true);
-        
-        const textPushBackTimer = setTimeout(() => {
-          setStartTextPushBack(true);
-        }, 2960);
-        
-        const secondPhaseTimer = setTimeout(() => {
-          setShowSecondPhase(true);
-          startScreensaverTimer();
-        }, 3000);
-        
-        return () => {
-          clearTimeout(textPushBackTimer);
-          clearTimeout(secondPhaseTimer);
-        };
-      }, 500);
-      
-      return () => clearTimeout(initialTimer);
-    }
-  }, [isIdle, isReversing, shouldReverseAnimate, startScreensaverTimer]);
-
   return (
     <BaseScreen onNext={onNext}>
       <div 
         className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden"
         onClick={handleUserInteraction}
         onTouchStart={handleUserInteraction}
+        role="presentation"
       >
         <motion.div 
           className="flex-1 flex flex-col items-center justify-center w-full px-8"
@@ -218,7 +220,10 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
             delay: isReversing ? 0 : 0.25 
           }}
           onClick={(e) => {
-            clearScreensaverTimer();
+            if (screensaverTimerRef.current) {
+              clearTimeout(screensaverTimerRef.current);
+              screensaverTimerRef.current = null;
+            }
             console.log('Bottom text clicked!');
             goToScreen && goToScreen('Cart');
           }}

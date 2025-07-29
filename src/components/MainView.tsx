@@ -394,6 +394,31 @@ export const MainView = () => {
     }
   }, [sessionId]);
   
+  // Type guard for Screen type
+  const isHomeScreen = (screen: string): screen is Screen => {
+    return screen === 'Home';
+  };
+
+  // Handler for navigation pill selection
+  const handleScreenNavSelect = (screen: string) => {
+    console.log('MainView: Navigation selected:', screen);
+    
+    // Always update previous screen
+    setPreviousScreen(currentScreen);
+    
+    // Special handling for Home navigation
+    if (screen === 'Home') {
+      console.log('MainView: Navigating to Home, resetting state');
+      // Only set first visit to true when coming from End screen
+      if (currentScreen === 'End') {
+        setIsFirstHomeVisit(true);
+      }
+    }
+    
+    // Update current screen
+    setCurrentScreen(screen as Screen);
+  };
+
   // Navigation function that can be passed to child components
   const goToScreen = useCallback((screen: Screen, options?: NavigationOptions) => {
     logNavigation(currentScreen, screen);
@@ -401,8 +426,9 @@ export const MainView = () => {
     // Update previous screen before changing current screen
     setPreviousScreen(currentScreen);
     
-    // When navigating from End to Home, reset isFirstHomeVisit to true
+    // When navigating to Home, only reset first visit state if coming from End
     if (screen === 'Home' && currentScreen === 'End') {
+      console.log('MainView: Navigating to Home from End, resetting first visit state');
       setIsFirstHomeVisit(true);
     }
     
@@ -460,11 +486,6 @@ export const MainView = () => {
       .map(screen => ({ label: screen, value: screen }));
   };
   
-  // Handler for navigation pill selection
-  const handleScreenNavSelect = (screen: string) => {
-    goToScreen(screen as Screen);
-  };
-
   // Add handler for Home screen refresh
   const handleHomeRefresh = useCallback(() => {
     if (currentScreen === 'Home') {
@@ -522,7 +543,9 @@ export const MainView = () => {
     console.log(`MainView:getScreenProps: Preparing props for ${currentScreen}`, {
       baseAmount,
       tipAmount,
-      totalAmount: calculateTotalAmount()
+      totalAmount: calculateTotalAmount(),
+      isFirstHomeVisit,
+      previousScreen
     });
     
     // Generate props with proper null/undefined handling
@@ -530,20 +553,13 @@ export const MainView = () => {
       onNext: handleNext,
       onBack: handleBack,
       onComplete: handleNext,
-      // Pass baseAmount as string or undefined (never null)
       baseAmount: baseAmount || undefined,
-      // Pass tipAmount as string or undefined (never null)
       tipAmount: tipAmount || undefined,
-      // Pass amount which includes both base and tip
       amount: currentScreen === 'Reward' ? "1" : (calculateTotalAmount() || undefined),
-      // Pass the raw cart items
       cartItems,
       onCartUpdate: handleCartUpdate,
-      // QR code visibility
       isQrVisible,
-      // Session ID for tracking
       sessionId,
-      // Direct navigation function
       goToScreen: (screen: string) => goToScreen(screen as Screen)
     };
 
@@ -551,7 +567,7 @@ export const MainView = () => {
     if (currentScreen === 'Home') {
       return {
         ...baseProps,
-        // Home screen should be in idle mode if it's not the first visit
+        // isIdle controls whether to show intro animation
         isIdle: !isFirstHomeVisit,
         shouldReverseAnimate,
         fromEndScreen: previousScreen === 'End'
@@ -561,9 +577,7 @@ export const MainView = () => {
     if (currentScreen === 'End') {
       return {
         ...baseProps,
-        // Always skip welcome message when navigating directly to End screen
         skipWelcome: true,
-        // Pass pause state to End screen
         isPaused,
         setIsPaused
       };
