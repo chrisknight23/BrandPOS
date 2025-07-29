@@ -11,6 +11,7 @@ import { DropMenu } from './dev/dropMenu';
 import ScreenNavigation, { ScreenNavItem } from './common/ScreenNavigation/ScreenNavigation';
 import { useKioskMode } from '../hooks/useKioskMode';
 import { CSSProperties } from 'react';
+import { PWASettingsDrawer } from './common/PWASettingsDrawer';
 
 // Configuration for which screens should use instant transitions
 const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'CustomTip', 'End'];
@@ -611,8 +612,8 @@ export const MainView = () => {
       className="flex flex-col w-screen h-screen bg-[#050505]"
       style={rootStyle}
     >
-      {/* Unified Settings Panel Container - Show in PWA mode but hide in non-PWA kiosk mode */}
-      {(!isKioskMode || isPWAMode()) && (
+      {/* Show dev settings panel in non-PWA mode */}
+      {!isKioskMode && !isPWAMode() && (
         <SettingsPanel
           isOpen={isPanelOpen}
           onPanelToggle={setIsPanelOpen}
@@ -635,6 +636,15 @@ export const MainView = () => {
           setIsPaused={setIsPaused}
         />
       )}
+
+      {/* Show PWA settings drawer in PWA mode */}
+      {isPWAMode() && (
+        <PWASettingsDrawer
+          isOpen={isPanelOpen}
+          onClose={() => setIsPanelOpen(false)}
+        />
+      )}
+
       {/* Device and Environment DropMenus in the top left corner - Hidden in kiosk mode */}
       {!isKioskMode && (
         <div className="fixed top-6 left-6 z-[10002] flex flex-col gap-4">
@@ -672,7 +682,7 @@ export const MainView = () => {
       {/* Main content area that centers all screens */}
       <motion.div
         className="flex-1 flex items-center relative overflow-hidden justify-center"
-        animate={{ x: (isPanelOpen && (!isKioskMode || isPWAMode())) ? -180 : 0 }}
+        animate={{ x: (isPanelOpen && !isKioskMode) ? -180 : 0 }}
         transition={drawerMotion}
       >
         {/* Kiosk mode indicator - only show in non-PWA kiosk mode */}
