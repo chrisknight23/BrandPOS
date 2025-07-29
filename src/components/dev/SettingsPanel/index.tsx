@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Dispatch, SetStateAction } from 'react';
 import { ExpandableDevPanel } from './SettingsPanel';
 import { useEdgeGesture } from '../../../hooks/useEdgeGesture';
 import { useIsPWA } from '../../../hooks/useIsPWA';
@@ -23,7 +23,9 @@ interface SettingsPanelProps {
   onQrVisibleChange?: (visible: boolean) => void;
   goToScreen?: (screen: Screen, options?: NavigationOptions) => void;
   isPaused?: boolean;
-  setIsPaused?: (paused: boolean) => void;
+  setIsPaused?: Dispatch<SetStateAction<boolean>>;
+  isOpen: boolean;
+  onPanelToggle: Dispatch<SetStateAction<boolean>>;
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = (props) => {

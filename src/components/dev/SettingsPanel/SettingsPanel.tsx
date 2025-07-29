@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // Globals for browser and Node.js
 /* global console, setTimeout, process, window */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Screen, NavigationOptions } from '../../../types/screen';
 import { 
@@ -39,7 +39,7 @@ import { useIsPWA } from '../../../hooks/useIsPWA';
 
 interface ExpandableDevPanelProps {
   isOpen: boolean;
-  onPanelToggle: (open: boolean) => void;
+  onPanelToggle: Dispatch<SetStateAction<boolean>>;
   currentScreen: Screen;
   baseAmount: string | null;
   tipAmount: string | null;
@@ -57,7 +57,7 @@ interface ExpandableDevPanelProps {
   onQrVisibleChange?: (visible: boolean) => void;
   goToScreen?: (screen: Screen, options?: NavigationOptions) => void;
   isPaused?: boolean;
-  setIsPaused?: (paused: boolean) => void;
+  setIsPaused?: Dispatch<SetStateAction<boolean>>;
 }
 
 // Define the navigation screens that can be shown in the panel
