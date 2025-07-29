@@ -901,6 +901,7 @@ export const BrandPass: React.FC<BrandPassProps> = ({
                     size={260}
                     animateIn={disableAnimation ? false : "sequential"}
                     disableAnimation={disableAnimation}
+                    instantVisible={disableAnimation}
                     speed={disableAnimation ? 0 : 100.0}
                     darkColor="#FFFFFF"
                     lightColor="transparent"
