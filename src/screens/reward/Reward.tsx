@@ -8,6 +8,7 @@ import LocalCash24Icon from '../../assets/images/Local-Cash-24px.svg';
 import SkippedIcon from '../../assets/images/32/32/skipped.svg';
 import { Screen } from '../../types/screen';
 import { useTextContent } from '../../context/TextContentContext';
+import { AnimatedQRCode } from '../../components/common/AnimatedQRCode';
 
 interface RewardProps {
   onNext: () => void;
@@ -61,6 +62,28 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
         onNext(); // Fallback to onNext if goToScreen not available
       }
     }, 220); // Adjusted to allow spring animation to complete smoothly
+  };
+
+  // Add custom back content function to match Follow screen pattern
+  const getBackContent = () => {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center p-8">
+        <div className="relative overflow-hidden" style={{ maxHeight: '300px' }}>
+          <AnimatedQRCode
+            value={`https://chrisk.ngrok.app/landing/reward-session`}
+            size={260}
+            animateIn="sequential"
+            disableAnimation={false}
+            speed={100.0}
+            darkColor="#FFFFFF"
+            lightColor="transparent"
+            placeholderOpacity={1.0}
+            logo="cash-icon"
+            className="max-h-[260px] overflow-hidden"
+          />
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -168,6 +191,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
               initialValue={1}
               flipped={isCardFlipped}
               onTimerComplete={handleTimerComplete}
+              backContent={getBackContent()}  // Add this line to match Follow screen
             />
           </motion.div>
 
