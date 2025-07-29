@@ -32,28 +32,9 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
       <div 
         className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden"
       >
-        <motion.div 
-          className="flex-1 flex flex-col items-center justify-center w-full relative overflow-hidden"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={isExiting ? { opacity: 0 } : { opacity: 1 }}
-          transition={{ duration: 0 }}
-          style={{
-            willChange: 'transform',
-            backfaceVisibility: 'hidden'
-          }}
-        >
+        <div className="flex-1 flex flex-col items-center justify-center w-full relative overflow-hidden">
           {/* BrandPass card that's already flipped showing QR code */}
-          <motion.div 
-            className="absolute w-full h-full flex justify-center items-center"
-            initial={{ opacity: 1 }}
-            style={{
-              zIndex: 20,
-              willChange: 'transform',
-              backfaceVisibility: 'hidden',
-              perspective: 1000
-            }}
-          >
+          <div className="absolute w-full h-full flex justify-center items-center">
             <BrandPass
               layoutId="reward-card"
               headerText="$mileendbagel"
@@ -70,15 +51,12 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
               initialState="initial"
               autoPlay={false}
             />
-          </motion.div>
+          </div>
 
           {/* Bottom left message */}
-          <motion.div 
+          <div 
             className="absolute bottom-0 left-0 p-8 max-w-[216px]"
-            initial={{ opacity: 1 }}
             style={{
-              willChange: 'transform, opacity',
-              backfaceVisibility: 'hidden',
               zIndex: 20,
               pointerEvents: 'auto'
             }}
@@ -97,25 +75,21 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Skip button positioned at bottom right */}
-          <motion.button
+          <button
             onClick={handleTimerComplete}
             className="absolute bottom-8 right-8 w-16 h-16 rounded-full bg-black border border-white/20 flex items-center justify-center"
-            initial={{ opacity: 1 }}
-            whileTap={{ scale: 0.95 }}
             tabIndex={0}
             aria-label="Skip and return to home"
             style={{
-              zIndex: 20,
-              willChange: 'transform, opacity',
-              backfaceVisibility: 'hidden'
+              zIndex: 20
             }}
           >
             <img src={SkippedIcon} alt="Skip" className="w-8 h-8" />
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
       </div>
     </BaseScreen>
   );
