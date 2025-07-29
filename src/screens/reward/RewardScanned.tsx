@@ -36,7 +36,6 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
           {/* BrandPass card that's already flipped showing QR code */}
           <div className="absolute w-full h-full flex justify-center items-center">
             <BrandPass
-              layoutId="reward-card"
               headerText="$mileendbagel"
               subheaderText="Reward"
               buttonText="Claim"
