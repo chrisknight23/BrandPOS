@@ -92,23 +92,23 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
   useEffect(() => {
     if (!isIdle && !isReversing && !shouldReverseAnimate) {
       const initialTimer = setTimeout(() => {
-        setShowAnimations(true);
+        setShowAnimations(true);  // PHASE 1: Triggers card to peek up from bottom
         
         const textPushBackTimer = setTimeout(() => {
-          setStartTextPushBack(true);
-        }, 2960);
+          setStartTextPushBack(true);  // PHASE 2: Starts fading out the text
+        }, 2960);  // PEEK DURATION: How long card stays in peek position (in milliseconds)
         
         const secondPhaseTimer = setTimeout(() => {
-          setShowSecondPhase(true);
+          setShowSecondPhase(true);  // PHASE 3: Moves card from peek to center
           // Start timer after initial animation
           startScreensaverTimer();
-        }, 3000);
+        }, 3000);  // TOTAL ANIMATION TIME: Should be slightly longer than peek duration
         
         return () => {
           clearTimeout(textPushBackTimer);
           clearTimeout(secondPhaseTimer);
         };
-      }, 500);
+      }, 0);  // INITIAL DELAY: How long to wait before starting the peek
       
       return () => {
         clearTimeout(initialTimer);
@@ -138,23 +138,28 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
       >
         <motion.div 
           className="flex-1 flex flex-col items-center justify-center w-full px-8"
+          initial={{ opacity: 0 }}  // Start fully transparent
           animate={isIdle ? {} : { 
             opacity: startTextPushBack ? 0 : 1
           }}
           transition={{ 
-            duration: 0.3, 
-            ease: "easeOut" 
+            duration: startTextPushBack ? 0.2 : 1,  // Quick fade-out (0.2s) when card moves to center, normal fade-in (1s)
+            ease: "linear"  // Simple linear fade
           }}
           style={{
             zIndex: isIdle ? 1 : (isReversing ? 1 : (startTextPushBack ? 1 : 10)),
             opacity: isIdle ? 0 : undefined
           }}
         >
+          {/* INTRO TEXT ANIMATION: Main heading fade-in */}
           <motion.div 
             className="w-full"
-            initial={false}
-            animate={isIdle ? {} : { opacity: showAnimations ? 1 : 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            initial={{ opacity: 0 }}  // Start invisible
+            animate={{ opacity: showAnimations ? 1 : 0 }}  // Fade in when showAnimations is true
+            transition={{ 
+              duration: 1,  // FADE DURATION: 1 second fade
+              ease: "linear"  // EASING: Simple linear fade for more natural opacity change
+            }}
           >
             <h1 
               className="text-[90px] font-cash font-medium text-center leading-[0.85] tracking-[-0.02em]"
@@ -163,11 +168,16 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
               }}
             />
           </motion.div>
+
+          {/* INTRO TEXT ANIMATION: Subtitle fade-in */}
           <motion.p 
             className="text-[22px] text-white mt-4"
-            initial={false}
-            animate={isIdle ? {} : { opacity: showAnimations ? 0.5 : 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            initial={{ opacity: 0 }}  // Start invisible
+            animate={{ opacity: showAnimations ? 0.5 : 0 }}  // Fade in to 50% opacity
+            transition={{ 
+              duration: 1,  // FADE DURATION: Match main text
+              ease: "linear"  // EASING: Match main text fade
+            }}
           >
             $mileendbagel on Cash App
           </motion.p>
@@ -179,17 +189,17 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
             initial={false}
             animate={isIdle ? { y: 0 } : { 
               y: showSecondPhase ? 
-                0 : 
+                0 : // FINAL POSITION: Card centered in frame
                 (showAnimations ? 
-                  420 :  // Restore the peek position
-                  '120vh')  // Keep the initial hidden position using vh
+                  420 :  // PEEK HEIGHT: Higher number = lower peek (try 380-460)
+                  '120vh')  // HIDDEN POSITION: Keeps card below frame initially
             }}
             transition={{
               type: "spring",
-              stiffness: 120,
-              damping: 18,
-              mass: 1.2,
-              restDelta: 0.001
+              stiffness: 100,     // SPEED: Lower = slower movement (40-220 range, peek-to-center speed)
+              damping: 18,       // BOUNCE: Higher = less bounce when card settles
+              mass: 1.2,         // WEIGHT: Higher = more gradual, weighty movement
+              restDelta: 0.001   // Precision of final position
             }}
             style={{
               zIndex: isIdle ? 10 : (isReversing ? 10 : (showSecondPhase ? 10 : 5))
