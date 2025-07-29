@@ -26,7 +26,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
   const { enterAnimation, springConfig } = useSlideTransition(onNext);
 
   useEffect(() => {
-    // Start all animations after a short delay when component mounts
+    // Start all animations immediately when component mounts
     const initialTimer = setTimeout(() => {
       setShowAnimations(true);
       
@@ -39,7 +39,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
       return () => {
         clearTimeout(cardTimer);
       };
-    }, 500); // Delay before starting all animations
+    }, 0); // Changed from 500 to 0 to start immediately
     
     return () => clearTimeout(initialTimer);
   }, []);
@@ -60,7 +60,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
       } else {
         onNext(); // Fallback to onNext if goToScreen not available
       }
-    }, 400); // Wait for exit animations to complete
+    }, 220); // Adjusted to allow spring animation to complete smoothly
   };
 
   return (
@@ -68,11 +68,34 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
       <div 
         className="w-full h-full bg-black text-white flex flex-col items-center justify-between relative overflow-hidden"
       >
+        {/* Bottom text with Local Cash that stays fixed */}
+        <motion.div 
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-2"
+          initial={{ opacity: 0 }}
+          animate={{ 
+            opacity: isExiting || showSecondPhase ? 0 : 1  // Fade out when card slides up
+          }}
+          transition={{ 
+            duration: isExiting ? 0.1 : 0.2,  // Faster fade-out to match card slide
+            ease: "easeOut", 
+            delay: isExiting ? 0 : 0.1
+          }}
+          style={{
+            willChange: 'opacity',
+            backfaceVisibility: 'hidden'
+          }}
+        >
+          <img src={LocalCash24Icon} alt="Local Cash" className="w-6 h-6 opacity-70" />
+          <span className="text-white text-[24px] font-cash font-normal opacity-70">
+            Local Cash
+          </span>
+        </motion.div>
+
         <motion.div 
           className="flex-1 flex flex-col items-center justify-center w-full relative overflow-hidden"
           initial={enterAnimation.initial}
           animate={enterAnimation.animate}
-          exit={isExiting ? { opacity: 0 } : { opacity: 1 }}  // Only fade out if we're using the skip button
+          exit={isExiting ? { opacity: 0 } : { opacity: 1 }}
           transition={{ 
             type: 'spring',
             ...springConfig,
@@ -88,9 +111,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
           <motion.div 
             className="flex-1 flex flex-col items-center justify-center w-full"
             animate={{ 
-              opacity: startTextPushBack ? 0 : 1,
-              scale: startTextPushBack ? 0.8 : 1,
-              z: startTextPushBack ? 1 : 10
+              opacity: isExiting ? 0 : (!startTextPushBack ? 1 : 0)  // Removed showAnimations check
             }}
             transition={{ 
               duration: 0.3, 
@@ -119,12 +140,12 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
             }}
             transition={{
               type: "spring",
-              stiffness: isExiting ? 300 : 120,
-              damping: isExiting ? 25 : 18,
-              mass: isExiting ? 1.5 : 1.2,
+              stiffness: isExiting ? 400 : 120,  // Increased stiffness for faster exit
+              damping: isExiting ? 35 : 18,      // Increased damping for smoother motion
+              mass: isExiting ? 1 : 1.2,         // Reduced mass for faster movement
               restDelta: 0.001,
               restSpeed: 0.001,
-              ...(isExiting && { velocity: -50 })
+              ...(isExiting && { velocity: -100 })  // Increased initial velocity for faster start
             }}
             style={{
               zIndex: showSecondPhase ? 20 : 5,
@@ -217,32 +238,6 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
           >
             <img src={SkippedIcon} alt="Skip" className="w-8 h-8" />
           </motion.button>
-
-          {/* Bottom text that fades in during first phase with "$1 earned" */}
-          <motion.div 
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-2"
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: isExiting ? 0 : (showAnimations && !startTextPushBack ? 1 : 0)
-            }}
-            transition={{ 
-              duration: isExiting ? 0.1 : 0.3,
-              ease: "easeOut", 
-              delay: isExiting ? 0 : 0,
-              restSpeed: 0.001,
-              restDelta: 0.001
-            }}
-            style={{
-              willChange: 'opacity',
-              backfaceVisibility: 'hidden',
-              zIndex: 10
-            }}
-          >
-            <img src={LocalCash24Icon} alt="Local Cash" className="w-6 h-6 opacity-70" />
-            <span className="text-white text-[24px] font-cash font-normal opacity-70">
-              Local Cash
-            </span>
-          </motion.div>
         </motion.div>
       </div>
     </BaseScreen>
