@@ -244,6 +244,35 @@ The project is deployment-ready for platforms like Vercel:
 4. Test across different screen flows
 5. Submit a pull request
 
+## Critical Development Rules
+
+### Screen Transitions
+
+⚠️ **IMPORTANT**: All new screens MUST be added to the `INSTANT_SCREENS` array in `MainView.tsx`:
+
+```typescript
+const INSTANT_SCREENS = [
+  'Home',
+  'Follow',
+  // ... other screens ...
+  'YourNewScreen'  // Add your screen here
+];
+```
+
+Failure to do this will cause:
+- Undesired full interface animations
+- Duplicated navigation bars
+- Multiple screen instances
+- Broken grouped screen navigation
+
+When adding new screens, always:
+1. Add to `types/screen.ts`
+2. Add to `INSTANT_SCREENS` in `MainView.tsx`
+3. Add to `SCREEN_ORDER` in `constants/screens.ts`
+4. If part of a group, add to the appropriate group constant
+
+See `PROJECT_NOTES.md` for detailed screen transition guidelines.
+
 ---
 
 ## Recent Updates

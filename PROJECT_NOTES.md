@@ -1,5 +1,45 @@
 # Project Notes
 
+## Screen Transitions and Animations
+
+### Important: All New Screens Must Be Added to INSTANT_SCREENS
+
+When creating new screens, ALWAYS add them to the `INSTANT_SCREENS` array in `MainView.tsx`:
+
+```typescript
+// In src/components/MainView.tsx
+const INSTANT_SCREENS = [
+  'Home',
+  'Follow',
+  'Screensaver',
+  // ... other screens ...
+  'YourNewScreen'  // <-- Add your new screen here
+];
+```
+
+**Why This Is Critical:**
+- Screens NOT in this array will trigger a full interface animation
+- This causes undesired effects like duplicated navigation and UI elements
+- All screens should default to instant transitions unless explicitly needed otherwise
+
+### Screen Transition Rules:
+1. **Default Behavior**: All screens should use instant transitions by default
+2. **Grouped Screens**: Screens that are part of a group (like Payment/Auth, Tipping/CustomTip) must ALWAYS be instant
+3. **Navigation Groups**: When adding screens to navigation groups (dropdowns), ensure all screens in the group are in INSTANT_SCREENS
+4. **Custom Transitions**: If a screen needs custom transitions, this should be handled within the screen component itself, not through the main navigation system
+
+### Common Issues This Prevents:
+- Duplicated navigation bars
+- Full interface sliding animations
+- Multiple instances of the same screen
+- Broken navigation between grouped screens
+
+### When Adding New Screens:
+1. Add the screen to `types/screen.ts`
+2. Add it to `INSTANT_SCREENS` in `MainView.tsx`
+3. Add it to `SCREEN_ORDER` in `constants/screens.ts`
+4. If it's part of a group, add it to the appropriate group constant (e.g., `PAYMENT_SCREENS`, `TIPPING_SCREENS`)
+
 ## Removing QR Scan Polling & Session ID Changes (for future reference)
 
 If you need to remove the QR scan polling and sessionId logic (or want to upgrade to WebSockets later), follow this plan:
