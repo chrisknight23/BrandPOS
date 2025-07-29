@@ -65,7 +65,10 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
               showAnimatedNumber={true}
               initialValue={1}
               flipped={true}
+              initialFlipped={true}
               onTimerComplete={handleTimerComplete}
+              initialState="initial"
+              autoPlay={false}
             />
           </motion.div>
 
