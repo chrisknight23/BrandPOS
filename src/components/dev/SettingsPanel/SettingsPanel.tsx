@@ -35,6 +35,7 @@ import UtilitiesIcon from '../../../assets/images/16/utilities.svg';
 import APIsView from './views/APIsView';
 import PlugIcon from '../../../assets/images/16/plug.svg';
 import TechnologyIcon from '../../../assets/images/16/technology.svg';
+import { useIsPWA } from '../../../hooks/useIsPWA';
 
 interface ExpandableDevPanelProps {
   isOpen: boolean;
@@ -138,12 +139,17 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
   isPaused,
   setIsPaused
 }) => {
-  // Tab context
   const { activeTab, setActiveTab } = useTab();
-  // Ensure 'interaction' is the default view when the drawer opens
+  const isPWA = useIsPWA();
+
+  // Ensure settings tab is active when opened in PWA mode
   useEffect(() => {
-    setActiveTab('interaction');
-  }, [setActiveTab]);
+    if (isPWA && isOpen) {
+      setActiveTab('settings');
+    } else {
+      setActiveTab('interaction');
+    }
+  }, [isPWA, isOpen, setActiveTab]);
   
   // Flags state
   const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>({});
@@ -517,8 +523,8 @@ export const ExpandableDevPanel: React.FC<ExpandableDevPanelProps> = ({
             }
       }
     >
-      {/* Collapsed: show icon only */}
-      {!isOpen && (
+      {/* Only show control button in non-PWA mode */}
+      {!isOpen && !isPWA && (
         <div
           className="w-12 h-12 flex items-center justify-center rounded-full p-3 cursor-pointer select-none"
           aria-label="Open Settings Panel"
