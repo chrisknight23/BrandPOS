@@ -134,6 +134,9 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
   
   // Styling for QR dots based on whether they are position markers
   const getDotStyle = (dot: QRDot, isAnimating: boolean, color: string, placeholderOpacity: number) => {
+    // If animation is disabled, always use full opacity
+    const finalOpacity = disableAnimation ? 1 : (isAnimating ? 1 : placeholderOpacity);
+
     if (dot.isHollow) {
       // For hollow squares (position markers outer square)
       return {
@@ -145,7 +148,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
         backgroundColor: 'transparent',
         border: `${Math.max(dot.size * 0.12, 2)}px solid ${color}`,
         borderRadius: dot.cornerRadius ? `${dot.cornerRadius}px` : (dot.isRound ? '50%' : '15%'),
-        opacity: isAnimating ? 1 : placeholderOpacity,
+        opacity: finalOpacity,
         boxSizing: 'border-box' as const
       };
     }
@@ -159,7 +162,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
       height: dot.size,
       backgroundColor: color,
       borderRadius: dot.cornerRadius ? `${dot.cornerRadius}px` : (dot.isRound ? '50%' : '15%'),
-      opacity: isAnimating ? 1 : placeholderOpacity
+      opacity: finalOpacity
     };
   };
   
@@ -201,8 +204,8 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
           position: 'relative',
           width: size,
           height: size,
-          backgroundColor: 'transparent', // Ensure transparent background
-          overflow: 'hidden' // Prevent any content from spilling outside
+          backgroundColor: lightColor,
+          overflow: 'hidden'
         }}
       >
         {/* Position markers */}
@@ -210,17 +213,12 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
           position: 'relative',
           width: '100%',
           height: '100%',
-          zIndex: 2  // Ensure markers are above placeholder dots
+          zIndex: 2
         }}>
           {positionMarkers.map((dot, idx) => (
             <div
               key={`marker-${idx}`}
-              style={{
-                ...getDotStyle(dot, true, darkColor, 1),
-                opacity: 1,
-                backgroundColor: darkColor, // Ensure marker color is applied
-                borderColor: darkColor // For hollow markers
-              }}
+              style={getDotStyle(dot, true, darkColor, 1)}
             />
           ))}
         </div>
@@ -234,11 +232,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
           {regularDots.map((dot, idx) => (
             <div
               key={`dot-${idx}`}
-              style={{
-                ...getDotStyle(dot, true, darkColor, 1),
-                opacity: 1,
-                backgroundColor: darkColor // Ensure dot color is applied
-              }}
+              style={getDotStyle(dot, true, darkColor, 1)}
             />
           ))}
         </div>
