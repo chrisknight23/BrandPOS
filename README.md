@@ -81,8 +81,7 @@ src/
 │   │   ├── ScreenNavigation/        # Bottom navigation bar
 │   │   ├── ScreensaverCard/         # Screensaver card component
 │   │   ├── ScreensaverMessaging/    # Screensaver messaging system
-│   │   ├── TipButton/               # Customizable tip buttons
-│   │   └── CreditCardCursor.tsx     # Animated cursor component
+│   │   └── TipButton/               # Customizable tip buttons
 │   ├── ui/         # UI primitives (PillButton, ToggleButton, etc.)
 │   ├── dev/        # Developer tools
 │   │   ├── SettingsPanel/           # Configuration and testing panel

@@ -18,7 +18,7 @@ interface ScreenNavigationProps {
 const SCREENSAVER_SCREENS = ['Screensaver', 'ScreensaverFollow', 'ScreensaverExit'];
 const PAYMENT_SCREENS = ['Payment', 'Auth'];
 const TIPPING_SCREENS = ['Tipping', 'CustomTip'];
-const REWARD_SCREENS = ['Reward', 'RewardScanned'];
+const REWARD_SCREENS = ['Reward', 'Claim'];
 
 /**
  * ScreenNavigation
@@ -81,7 +81,7 @@ const ScreenNavigation: React.FC<ScreenNavigationProps> = ({
   // Create reward dropdown items
   const rewardDropdownItems = [
     { label: 'Reward', value: 'Reward' },
-    { label: 'Reward Scanned', value: 'RewardScanned' }
+    { label: 'Claim', value: 'Claim' }
   ];
 
   return (

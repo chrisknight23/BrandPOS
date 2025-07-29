@@ -12,6 +12,6 @@ export const SCREEN_ORDER: Screen[] = [
   'Tipping',
   'CustomTip',
   'Reward',
-  'RewardScanned',
+  'Claim',
   'End'
 ]; 

@@ -42,9 +42,6 @@ interface AnimatedQRCodeProps {
   
   // Add a new prop to control visibility
   visible?: boolean;
-  
-  // Add new prop for instant visibility
-  instantVisible?: boolean;
 }
 
 export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean }> = ({
@@ -53,7 +50,6 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
   animateIn = 'outside-in',
   animateOut = false,
   disableAnimation = false,
-  instantVisible = false, // New prop
   speed = 1,
   darkColor = '#00B843',
   lightColor = 'transparent',
@@ -138,9 +134,6 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
   
   // Styling for QR dots based on whether they are position markers
   const getDotStyle = (dot: QRDot, isAnimating: boolean, color: string, placeholderOpacity: number) => {
-    // If animation is disabled, always use full opacity
-    const finalOpacity = disableAnimation ? 1 : (isAnimating ? 1 : placeholderOpacity);
-
     if (dot.isHollow) {
       // For hollow squares (position markers outer square)
       return {
@@ -152,7 +145,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
         backgroundColor: 'transparent',
         border: `${Math.max(dot.size * 0.12, 2)}px solid ${color}`,
         borderRadius: dot.cornerRadius ? `${dot.cornerRadius}px` : (dot.isRound ? '50%' : '15%'),
-        opacity: finalOpacity,
+        opacity: isAnimating ? 1 : placeholderOpacity,
         boxSizing: 'border-box' as const
       };
     }
@@ -166,22 +159,58 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
       height: dot.size,
       backgroundColor: color,
       borderRadius: dot.cornerRadius ? `${dot.cornerRadius}px` : (dot.isRound ? '50%' : '15%'),
-      opacity: finalOpacity
+      opacity: isAnimating ? 1 : placeholderOpacity
     };
   };
   
-  // Update the rendering logic to handle instant visibility
-  const renderDots = () => {
-    if (!dots.length) return null;
-
+  // If disableAnimation, show QR code instantly
+  if (disableAnimation && !isLoading) {
+    if (dots.length === 0) {
+      // Show loading spinner or fallback if dots are not ready
+      return (
+        <div
+          className={`animated-qr-code ${className}`}
+          style={{
+            position: 'relative',
+            width: size,
+            height: size,
+            backgroundColor: lightColor,
+            overflow: 'hidden'
+          }}
+        >
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: darkColor
+          }}>
+            <span>Loading...</span>
+          </div>
+        </div>
+      );
+    }
     return (
-      <>
+      <div 
+        className={`animated-qr-code ${className}`}
+        style={{
+          position: 'relative',
+          width: size,
+          height: size,
+          backgroundColor: lightColor,
+          overflow: 'hidden' // Prevent any content from spilling outside
+        }}
+      >
         {/* Position markers */}
         <div className="qr-position-markers" style={{
           position: 'relative',
           width: '100%',
           height: '100%',
-          zIndex: 2
+          zIndex: 2  // Ensure markers are above placeholder dots
         }}>
           {positionMarkers.map((dot, idx) => (
             <div
@@ -191,7 +220,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
           ))}
         </div>
         
-        {/* QR dots */}
+        {/* All dots visible instantly */}
         <div className="qr-dots" style={{
           position: 'relative',
           width: '100%',
@@ -200,17 +229,50 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
           {regularDots.map((dot, idx) => (
             <div
               key={`dot-${idx}`}
-              style={{
-                ...getDotStyle(dot, true, darkColor, 1),
-                opacity: instantVisible || disableAnimation ? 1 : (isAnimating ? 1 : placeholderOpacity)
-              }}
+              style={{ ...getDotStyle(dot, true, darkColor, 1), opacity: 1 }}
             />
           ))}
         </div>
-      </>
+        
+        {/* Logo overlay if provided */}
+        {logo && (
+          <div
+            className="qr-logo"
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '62px',
+              height: '62px',
+              zIndex: 10
+            }}
+          >
+            {typeof logo === 'string' ? (
+              logo === 'cash-icon' ? (
+                <img
+                  src={QRLogo}
+                  alt="Cash App Logo"
+                  width={62}
+                  height={62}
+                />
+              ) : (
+                <img
+                  src={logo}
+                  alt="QR Logo"
+                  width={62}
+                  height={62}
+                />
+              )
+            ) : (
+              logo
+            )}
+          </div>
+        )}
+      </div>
     );
-  };
-
+  }
+  
   return (
     <div 
       className={`animated-qr-code ${className}`}
@@ -218,27 +280,101 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
         position: 'relative',
         width: size,
         height: size,
-        backgroundColor: lightColor,
-        overflow: 'hidden'
+        backgroundColor: 'transparent',
+        overflow: 'hidden' // Prevent any content from spilling outside
       }}
     >
+
+      
+      {/* AnimatePresence for animate out */}
       <AnimatePresence>
         {!isLoading && visible && (
           <React.Fragment key="qr-anim-in">
-            {renderDots()}
+            {/* Position markers - fade in with animation */}
+            <div className="qr-position-markers" style={{
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              zIndex: 2  // Ensure markers are above placeholder dots
+            }}>
+              {positionMarkers.map((dot, idx) => (
+                <motion.div
+                  key={`marker-${idx}`}
+                  style={getDotStyle(dot, true, darkColor, 1)}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={isAnimating ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
+                  transition={{
+                    delay: 0, // Start immediately with animation
+                    duration: 0.3,
+                    ease: 'easeOut'
+                  }}
+                />
+              ))}
+            </div>
             
-            {/* Logo overlay */}
+            {/* Base layer - placeholder QR (darker version) */}
+            <div className="qr-placeholder" style={{
+              position: 'relative',
+              width: '100%',
+              height: '100%'
+            }}>
+              {regularDots.map((dot, idx) => (
+                <div
+                  key={`base-${idx}`}
+                  style={getDotStyle(dot, false, darkColor, placeholderOpacity)}
+                />
+              ))}
+            </div>
+            
+            {/* Animation layer - only for regular dots, not position markers */}
+            {isAnimating && (
+              <>
+                {animationOrder.map((dot, idx) => (
+                  <motion.div
+                    key={`anim-${idx}`}
+                    style={getDotStyle(dot, true, darkColor, 1)}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={
+                      animateOut
+                        ? (animateOut === 'fade'
+                            ? { opacity: 0, scale: 0.5 }
+                            : { opacity: 0 })
+                        : { opacity: 0 }
+                    }
+                    transition={{
+                      delay: idx * (0.0015 / speed),
+                      duration: 0.3,
+                      ease: 'easeOut'
+                    }}
+                    onAnimationComplete={() => {
+                      if (idx === animationOrder.length - 1 && onAnimationComplete) {
+                        onAnimationComplete();
+                      }
+                    }}
+                  />
+                ))}
+              </>
+            )}
+            
+            {/* Center logo - fade in with animation */}
             {logo && (
-              <div
-                className="qr-logo"
+              <motion.div
                 style={{
                   position: 'absolute',
-                  left: '50%',
-                  top: '50%',
+                  top: '38%',
+                  left: '38%',
                   transform: 'translate(-50%, -50%)',
                   width: '62px',
                   height: '62px',
-                  zIndex: 10
+                  zIndex: 3  // Ensure logo is on top
+                }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={isAnimating ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1 }}
+                transition={{
+                  delay: 0, // Same timing as position markers
+                  duration: 0.3,
+                  ease: 'easeOut'
                 }}
               >
                 {typeof logo === 'string' ? (
@@ -260,7 +396,7 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
                 ) : (
                   logo
                 )}
-              </div>
+              </motion.div>
             )}
           </React.Fragment>
         )}

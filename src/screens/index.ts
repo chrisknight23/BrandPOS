@@ -6,7 +6,7 @@ import { Auth } from './payment/Auth';
 import { Tipping } from './tipping/Tipping';
 import { CustomTip } from './tipping/CustomTip';
 import { Reward } from './reward/Reward';
-import { RewardScanned } from './reward/RewardScanned';
+import { Claim } from './reward/Claim';
 
 import { End } from './End';
 import { Screensaver } from './screensaver/Screensaver';
@@ -21,7 +21,7 @@ export {
   Auth,
   Tipping,
   Reward,
-  RewardScanned,
+  Claim,
 
   CustomTip,
   End,

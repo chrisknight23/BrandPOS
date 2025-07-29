@@ -1,7 +1,7 @@
 /**
  * Available screen names in the application
  */
-export type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverFollow' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'CustomTip' | 'Reward' | 'RewardScanned' | 'End';
+export type Screen = 'Home' | 'Follow' | 'Screensaver' | 'ScreensaverFollow' | 'ScreensaverExit' | 'Cart' | 'Payment' | 'Auth' | 'Tipping' | 'CustomTip' | 'Reward' | 'Claim' | 'End';
 
 export interface NavigationOptions {
   fromEndScreen?: boolean;

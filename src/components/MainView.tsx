@@ -13,7 +13,7 @@ import { useKioskMode } from '../hooks/useKioskMode';
 import { CSSProperties } from 'react';
 
 // Configuration for which screens should use instant transitions
-const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'RewardScanned', 'CustomTip', 'End'];
+const INSTANT_SCREENS = ['Home', 'Follow', 'Screensaver', 'ScreensaverExit', 'ScreensaverFollow', 'Cart', 'Payment', 'Auth', 'Tipping', 'Reward', 'Claim', 'CustomTip', 'End'];
 
 // Device detection utilities
 const isIpad = () => {

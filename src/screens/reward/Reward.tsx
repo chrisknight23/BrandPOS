@@ -109,7 +109,7 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
               dangerouslySetInnerHTML={{ __html: getText('amountEarned') }}
             />
           </motion.div>
-          
+
           {/* BrandPass card that slides up from bottom */}
           <motion.div 
             className="absolute w-full h-full flex justify-center items-center"

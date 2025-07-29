@@ -15,6 +15,8 @@ interface CustomTipProps {
 export const CustomTip = ({ onNext, onBack, baseAmount = '0', goToScreen }: CustomTipProps) => {
   const [cents, setCents] = useState<number>(0);
   const [shake, setShake] = useState<boolean>(false);
+  const [isAfterDecimal, setIsAfterDecimal] = useState<boolean>(false);
+  const [decimalCount, setDecimalCount] = useState<number>(0);
   const tipAmount = cents / 100;
   
   // baseAmount already includes tax from Cart, so we just add the tip
@@ -30,21 +32,41 @@ export const CustomTip = ({ onNext, onBack, baseAmount = '0', goToScreen }: Cust
   }, [baseAmount, amount, totalWithTip]);
   
   const handleNumberPress = (num: string) => {
-    // Only digits; ignore decimal input
-    if (num === '.') return;
+    if (num === '.') {
+      if (isAfterDecimal) return; // Ignore multiple decimal points
+      setIsAfterDecimal(true);
+      setDecimalCount(0);
+      // Convert current value to dollars
+      setCents(prev => prev * 100);
+      return;
+    }
+
     const digit = parseInt(num, 10);
     if (isNaN(digit)) return;
-    setCents(prev => prev * 10 + digit);
+
+    if (isAfterDecimal) {
+      if (decimalCount >= 2) return; // Only allow 2 decimal places
+      
+      // Handle cents from left to right
+      if (decimalCount === 0) {
+        // First decimal digit (tens place)
+        setCents(prev => prev + (digit * 10));
+      } else {
+        // Second decimal digit (ones place)
+        setCents(prev => prev + digit);
+      }
+      setDecimalCount(prev => prev + 1);
+    } else {
+      // Before decimal, accumulate normally
+      setCents(prev => prev * 10 + digit);
+    }
   };
   
   const handleBackspace = () => {
-    // Shake if at zero
-    if (cents === 0) {
-      setShake(true);
-      return;
-    }
-    // Remove last digit
-    setCents(prev => Math.floor(prev / 10));
+    // Reset everything
+    setCents(0);
+    setIsAfterDecimal(false);
+    setDecimalCount(0);
   };
   
   const handleAddTip = () => {

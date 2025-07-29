@@ -6,14 +6,13 @@ import { Screen } from '../../types/screen';
 import { useTextContent } from '../../context/TextContentContext';
 import LocalCashLogo from '../../assets/images/14/Local-Cash.svg';
 import SkippedIcon from '../../assets/images/32/32/skipped.svg';
-import { AnimatedQRCode } from '../../components/common/AnimatedQRCode';
 
-interface RewardScannedProps {
+interface ClaimProps {
   onNext: () => void;
   goToScreen?: (screen: Screen) => void;
 }
 
-export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
+export const Claim = ({ onNext, goToScreen }: ClaimProps) => {
   const { getText } = useTextContent();
   const [isExiting, setIsExiting] = useState(false);
 

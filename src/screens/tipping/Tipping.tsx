@@ -37,6 +37,9 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
   // Use only selected amount for preview
   const totalWithTip = calculateTotalWithTip(selectedAmount);
 
+  // Show only base amount in UI
+  const displayAmount = parseFloat(baseAmount);
+
   // Log values for debugging
   useEffect(() => {
     console.log(`Tipping: baseAmount=${baseAmount}, selectedTip=${selectedAmount}, totalWithTip=${totalWithTip.toFixed(2)}`);
@@ -45,7 +48,17 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
   const handleAmountClick = (amount: string) => {
     setSelectedAmount(amount);
     selectedAmountRef.current = amount; // Store in ref for immediate access
-    triggerTransition();
+    
+    // Add a small delay to allow button press animation to complete
+    setTimeout(() => {
+      if (goToScreen) {
+        // Navigate directly to Reward screen
+        goToScreen('Reward');
+      } else {
+        // Fallback to using onNext if goToScreen isn't available
+        triggerTransition();
+      }
+    }, 150); // 150ms delay for button press animation
   };
 
   const handleCustomOrNoTip = () => {
@@ -168,7 +181,7 @@ export const Tipping = ({ onNext, goToScreen, baseAmount = '0' }: TippingProps) 
             <div className="flex items-center">
               <h2 className="text-[24px] font-medium font-cash">
                 Add a tip <span className="font-cash font-normal text-white/40">
-                  {selectedAmount && selectedAmount !== '0' ? 'with tip' : 'total'} ${totalWithTip.toFixed(2)}
+                  total ${displayAmount.toFixed(2)}
                 </span>
               </h2>
             </div>
