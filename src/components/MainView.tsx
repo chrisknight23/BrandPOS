@@ -611,8 +611,8 @@ export const MainView = () => {
       className="flex flex-col w-screen h-screen bg-[#050505]"
       style={rootStyle}
     >
-      {/* Unified Settings Panel Container (collapsed/expanded) - Hidden in kiosk mode */}
-      {!isKioskMode && (
+      {/* Unified Settings Panel Container - Show in PWA mode but hide in non-PWA kiosk mode */}
+      {(!isKioskMode || isPWAMode()) && (
         <SettingsPanel
           isOpen={isPanelOpen}
           onPanelToggle={setIsPanelOpen}
@@ -631,7 +631,6 @@ export const MainView = () => {
           isQrVisible={isQrVisible}
           onQrVisibleChange={setIsQrVisible}
           goToScreen={goToScreen}
-          // Pass pause state to SettingsPanel
           isPaused={isPaused}
           setIsPaused={setIsPaused}
         />
@@ -673,11 +672,11 @@ export const MainView = () => {
       {/* Main content area that centers all screens */}
       <motion.div
         className="flex-1 flex items-center relative overflow-hidden justify-center"
-        animate={{ x: (isPanelOpen && !isKioskMode) ? -180 : 0 }}
+        animate={{ x: (isPanelOpen && (!isKioskMode || isPWAMode())) ? -180 : 0 }}
         transition={drawerMotion}
       >
-        {/* Kiosk mode indicator */}
-        {isKioskMode && !isIpadPWA() && (
+        {/* Kiosk mode indicator - only show in non-PWA kiosk mode */}
+        {isKioskMode && !isPWAMode() && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
