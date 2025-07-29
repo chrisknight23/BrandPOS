@@ -50,23 +50,6 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
               onTimerComplete={handleTimerComplete}
               initialState="initial"
               autoPlay={false}
-              backContent={
-                <div className="w-full h-full flex flex-col items-center justify-center p-8">
-                  <AnimatedQRCode
-                    value={`https://chrisk.ngrok.app/landing/follow-session`}
-                    size={260}
-                    animateIn={false}
-                    disableAnimation={true}
-                    speed={0}
-                    darkColor="#FFFFFF"
-                    lightColor="transparent"
-                    placeholderOpacity={1.0}
-                    logo="cash-icon"
-                    className="max-h-[260px] overflow-hidden"
-                    visible={true}
-                  />
-                </div>
-              }
             />
           </div>
 
