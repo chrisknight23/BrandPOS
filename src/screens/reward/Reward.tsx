@@ -1,13 +1,13 @@
-import { BaseScreen } from '../components/common/BaseScreen/index';
+import { BaseScreen } from '../../components/common/BaseScreen';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { useSlideTransition } from '../hooks/useSlideTransition';
-import { BrandPass } from '../components/common/BrandPass';
-import LocalCashLogo from '../assets/images/14/Local-Cash.svg';
-import LocalCash24Icon from '../assets/images/Local-Cash-24px.svg';
-import SkippedIcon from '../assets/images/32/32/skipped.svg';
-import { Screen } from '../types/screen';
-import { useTextContent } from '../context/TextContentContext';
+import { useSlideTransition } from '../../hooks/useSlideTransition';
+import { BrandPass } from '../../components/common/BrandPass';
+import LocalCashLogo from '../../assets/images/14/Local-Cash.svg';
+import LocalCash24Icon from '../../assets/images/Local-Cash-24px.svg';
+import SkippedIcon from '../../assets/images/32/32/skipped.svg';
+import { Screen } from '../../types/screen';
+import { useTextContent } from '../../context/TextContentContext';
 
 interface RewardProps {
   onNext: () => void;
