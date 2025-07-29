@@ -181,8 +181,8 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
               y: showSecondPhase ? 
                 0 : 
                 (showAnimations ? 
-                  '100vh' : 
-                  '120vh')
+                  420 :  // Restore the peek position
+                  '120vh')  // Keep the initial hidden position using vh
             }}
             transition={{
               type: "spring",
