@@ -173,39 +173,41 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
           </motion.p>
         </motion.div>
         
-        <motion.div 
-          className="absolute w-full h-full flex justify-center items-center"
-          initial={false}
-          animate={isIdle ? { y: 0 } : { 
-            y: showSecondPhase ? 
-              0 : 
-              (showAnimations ? 
-                420 : 
-                500)
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 120,
-            damping: 18,
-            mass: 1.2,
-            restDelta: 0.001
-          }}
-          style={{
-            zIndex: isIdle ? 10 : (isReversing ? 10 : (showSecondPhase ? 10 : 5))
-          }}
-        >
-          <BrandPass 
-            buttonText="Follow"
-            showButton={true}
-            showProgressTimer={false}
-            subheaderText=""
-            headerText="$mileendbagel"
-            backgroundColor="bg-[#5D5D3F]"
-            backfaceColor="bg-[#4A4A32]"
-            onButtonClick={handleFollowButtonClick}
-            onClick={handleFollowButtonClick}
-          />
-        </motion.div>
+        <div className="absolute w-full h-full overflow-hidden">
+          <motion.div 
+            className="absolute w-full h-full flex justify-center items-center"
+            initial={false}
+            animate={isIdle ? { y: 0 } : { 
+              y: showSecondPhase ? 
+                0 : 
+                (showAnimations ? 
+                  '100vh' : 
+                  '120vh')
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 120,
+              damping: 18,
+              mass: 1.2,
+              restDelta: 0.001
+            }}
+            style={{
+              zIndex: isIdle ? 10 : (isReversing ? 10 : (showSecondPhase ? 10 : 5))
+            }}
+          >
+            <BrandPass 
+              buttonText="Follow"
+              showButton={true}
+              showProgressTimer={false}
+              subheaderText=""
+              headerText="$mileendbagel"
+              backgroundColor="bg-[#5D5D3F]"
+              backfaceColor="bg-[#4A4A32]"
+              onButtonClick={handleFollowButtonClick}
+              onClick={handleFollowButtonClick}
+            />
+          </motion.div>
+        </div>
 
         <motion.div 
           className="absolute bottom-0 left-0 p-8 cursor-pointer z-20 max-w-[216px]"

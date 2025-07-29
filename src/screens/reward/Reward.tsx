@@ -155,45 +155,47 @@ export const Reward = ({ onNext, goToScreen }: RewardProps) => {
           </motion.div>
 
           {/* BrandPass card that slides up from bottom */}
-          <motion.div 
-            className="absolute w-full h-full flex justify-center items-center"
-            initial={{ y: 500 }}
-            animate={{ 
-              y: isExiting ? 500 : (showSecondPhase ? 0 : 500)
-            }}
-            transition={{
-              type: "spring",
-              stiffness: isExiting ? 400 : 120,  // Increased stiffness for faster exit
-              damping: isExiting ? 35 : 18,      // Increased damping for smoother motion
-              mass: isExiting ? 1 : 1.2,         // Reduced mass for faster movement
-              restDelta: 0.001,
-              restSpeed: 0.001,
-              ...(isExiting && { velocity: -100 })  // Increased initial velocity for faster start
-            }}
-            style={{
-              zIndex: showSecondPhase ? 20 : 5,
-              willChange: 'transform',
-              backfaceVisibility: 'hidden',
-              perspective: 1000
-            }}
-          >
-            <BrandPass
-              layoutId="reward-card"
-              headerText="$mileendbagel"
-              subheaderText="Reward"
-              buttonText="Claim"
-              onClick={handleCardClick}
-              onFlip={setIsCardFlipped}
-              showProgressTimer={showSecondPhase}
-              disableAnimation={true}
-              noAnimation={true}
-              showAnimatedNumber={true}
-              initialValue={1}
-              flipped={isCardFlipped}
-              onTimerComplete={handleTimerComplete}
-              backContent={getBackContent()}  // Add this line to match Follow screen
-            />
-          </motion.div>
+          <div className="absolute w-full h-full overflow-hidden">
+            <motion.div 
+              className="absolute w-full h-full flex justify-center items-center"
+              initial={{ y: '120vh' }}
+              animate={{ 
+                y: isExiting ? '120vh' : (showSecondPhase ? 0 : '120vh')
+              }}
+              transition={{
+                type: "spring",
+                stiffness: isExiting ? 400 : 120,
+                damping: isExiting ? 35 : 18,
+                mass: isExiting ? 1 : 1.2,
+                restDelta: 0.001,
+                restSpeed: 0.001,
+                ...(isExiting && { velocity: -100 })
+              }}
+              style={{
+                zIndex: showSecondPhase ? 20 : 5,
+                willChange: 'transform',
+                backfaceVisibility: 'hidden',
+                perspective: 1000
+              }}
+            >
+              <BrandPass
+                layoutId="reward-card"
+                headerText="$mileendbagel"
+                subheaderText="Reward"
+                buttonText="Claim"
+                onClick={handleCardClick}
+                onFlip={setIsCardFlipped}
+                showProgressTimer={showSecondPhase}
+                disableAnimation={true}
+                noAnimation={true}
+                showAnimatedNumber={true}
+                initialValue={1}
+                flipped={isCardFlipped}
+                onTimerComplete={handleTimerComplete}
+                backContent={getBackContent()}  // Add this line to match Follow screen
+              />
+            </motion.div>
+          </div>
 
           {/* Bottom left message that fades in when card slides up */}
           <motion.div 
