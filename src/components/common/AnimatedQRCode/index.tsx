@@ -215,7 +215,10 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
           {positionMarkers.map((dot, idx) => (
             <div
               key={`marker-${idx}`}
-              style={getDotStyle(dot, true, darkColor, 1)}
+              style={{
+                ...getDotStyle(dot, true, darkColor, 1),
+                opacity: 1
+              }}
             />
           ))}
         </div>
@@ -229,7 +232,10 @@ export const AnimatedQRCode: React.FC<AnimatedQRCodeProps & { visible?: boolean 
           {regularDots.map((dot, idx) => (
             <div
               key={`dot-${idx}`}
-              style={{ ...getDotStyle(dot, true, darkColor, 1), opacity: 1 }}
+              style={{
+                ...getDotStyle(dot, true, darkColor, 1),
+                opacity: 1
+              }}
             />
           ))}
         </div>

@@ -50,7 +50,6 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
               onTimerComplete={handleTimerComplete}
               initialState="initial"
               autoPlay={false}
-              animateIn={false}
               backContent={
                 <div className="w-full h-full flex flex-col items-center justify-center p-8">
                   <AnimatedQRCode
@@ -64,6 +63,7 @@ export const RewardScanned = ({ onNext, goToScreen }: RewardScannedProps) => {
                     placeholderOpacity={1.0}
                     logo="cash-icon"
                     className="max-h-[260px] overflow-hidden"
+                    visible={true}
                   />
                 </div>
               }
