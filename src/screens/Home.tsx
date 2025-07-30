@@ -179,7 +179,7 @@ export const Home = ({ onNext, isIdle = false, goToScreen, shouldReverseAnimate 
               ease: "linear"  // EASING: Match main text fade
             }}
           >
-            $mileendbagel on Cash App
+            {getText('introSubtitle')}
           </motion.p>
         </motion.div>
         

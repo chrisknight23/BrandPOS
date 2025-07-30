@@ -1,4 +1,5 @@
 import { MainView } from './components/MainView';
+import { PwaSettingsDrawer } from './components/pwa/PwaSettingsDrawer';
 import { UserTypeProvider } from './context/UserTypeContext';
 import { EnvironmentProvider } from './environment/EnvironmentContext';
 import { TextContentProvider } from './context/TextContentContext';
@@ -12,6 +13,7 @@ export function App() {
       <UserTypeProvider>
         <TextContentProvider sheetId={SHEET_ID}>
           <MainView />
+          <PwaSettingsDrawer />
         </TextContentProvider>
       </UserTypeProvider>
     </EnvironmentProvider>

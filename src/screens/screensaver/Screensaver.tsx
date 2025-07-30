@@ -4,10 +4,12 @@ import { BaseScreen } from '../../components/common/BaseScreen/index';
 import { ScreensaverCard } from '../../components/common/ScreensaverCard';
 import { BRAND_COLORS } from '../../constants/colors';
 import CashAppLogo from '../../assets/images/logos/16x16logo.png';
+import { useTextContent } from '../../context/TextContentContext';
 
 export const Screensaver = ({ onNext, goToScreen }: { onNext: () => void; goToScreen?: (screen: string) => void }) => {
   const [isExpanding, setIsExpanding] = useState(false);
   const [animationPhase, setAnimationPhase] = useState<'normal' | 'drop' | 'expand'>('normal');
+  const { getText } = useTextContent();
 
   // Start the animation sequence
   useEffect(() => {
@@ -98,13 +100,13 @@ export const Screensaver = ({ onNext, goToScreen }: { onNext: () => void; goToSc
 
         {/* Bottom left message - fades out during card drop */}
         <motion.div 
-          className="absolute bottom-0 left-0 p-8"
+          className="absolute bottom-0 left-0 p-8 max-w-[216px]"
           animate={{
             opacity: 0
           }}
           transition={{
             duration: 0.3,
-            delay: 0, // Start fading when card drop begins
+            delay: 0,
             ease: "easeOut"
           }}
         >
@@ -115,10 +117,8 @@ export const Screensaver = ({ onNext, goToScreen }: { onNext: () => void; goToSc
                 Cash App
               </p>
             </div>
-            <p className="text-white text-[20px] leading-[24px] font-normal">
-              Follow us on<br/>
-              Cash App and<br/>
-              earn rewards
+            <p className="text-white text-[20px] leading-[24px] font-normal line-clamp-3">
+              {getText('followText')}
             </p>
           </div>
         </motion.div>
