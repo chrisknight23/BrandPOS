@@ -1,5 +1,5 @@
 import { MainView } from './components/MainView';
-import { PwaSettingsDrawer } from './components/pwa/PwaSettingsDrawer';
+import { PwaSettingsDrawer } from './components/dev/PwaSettingsDrawer';
 import { UserTypeProvider } from './context/UserTypeContext';
 import { EnvironmentProvider } from './environment/EnvironmentContext';
 import { TextContentProvider } from './context/TextContentContext';
