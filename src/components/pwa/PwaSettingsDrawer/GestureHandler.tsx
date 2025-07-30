@@ -51,9 +51,11 @@ export const GestureHandler: React.FC<GestureHandlerProps> = ({ children, onDraw
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className="h-full w-full"
+      className="fixed inset-0 z-[10000] pointer-events-none"
     >
-      {children}
+      <div className="pointer-events-auto">
+        {children}
+      </div>
     </div>
   );
 };

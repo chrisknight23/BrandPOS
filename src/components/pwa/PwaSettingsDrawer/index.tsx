@@ -3,7 +3,11 @@ import { useIsPWA } from '../../../hooks/useIsPWA';
 import { DrawerContent } from './DrawerContent';
 import { GestureHandler } from './GestureHandler';
 
-export const PwaSettingsDrawer = () => {
+interface PwaSettingsDrawerProps {
+  children: React.ReactNode;
+}
+
+export const PwaSettingsDrawer: React.FC<PwaSettingsDrawerProps> = ({ children }) => {
   const isPWA = useIsPWA();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -32,10 +36,11 @@ export const PwaSettingsDrawer = () => {
     };
   }, [isVisible, handleDrawerClose]);
 
-  if (!isPWA) return null;
+  if (!isPWA) return <>{children}</>;
 
   return (
     <GestureHandler onDrawerOpen={handleDrawerOpen}>
+      {children}
       <DrawerContent 
         isVisible={isVisible}
         onClose={handleDrawerClose}
