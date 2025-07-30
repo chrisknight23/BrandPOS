@@ -640,12 +640,13 @@ export const MainView = () => {
         <div className="fixed top-6 left-6 z-[10002] flex flex-col gap-4">
           <DropMenu
             title="Device"
-            rowLabels={["Register", "Stand", "Reader"]}
+            rowLabels={["Register", "Stand", "Terminal", "Handheld"]}
             iconSrc={DesktopIcon}
             onRowSelect={(rowIndex) => {
               if (rowIndex === 0) setUserType('new');
               else if (rowIndex === 1) setUserType('returning');
               else if (rowIndex === 2) setUserType('cash-local');
+              else if (rowIndex === 3) setUserType('cash-local');  // Handheld - using cash-local for now
             }}
           />
         </div>
